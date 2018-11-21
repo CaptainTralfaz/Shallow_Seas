@@ -29,7 +29,7 @@ def main():
     
     message_log = MessageLog(constants['log_size'])
     
-    size_component = Size(4)
+    size_component = Size(2)
     view_component = View(size_component.size + 3)
     mast_component = Masts(masts=2, size=size_component.size)
     mobile_component = Mobile(direction=0, max_momentum=size_component.size * 2 + 2)
@@ -230,7 +230,7 @@ def main():
                 if exit_screen:
                     game_quit = True
                 
-                change_wind(game_map)
+                change_wind(game_map, message_log, constants['colors']['yellow'])
             
             render_display(display=display_surface,
                            game_map=game_map,

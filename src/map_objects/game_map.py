@@ -45,7 +45,7 @@ def make_map(width: int, height: int, entities: list, max_entities: int, icons: 
     return game_map
 
 
-def change_wind(game_map: GameMap):
+def change_wind(game_map: GameMap, message_log, color):
     """
     wind bucket fills up, one per turn.
     chance to change = wind_turn_count/game_map.max_wind_count
@@ -74,10 +74,11 @@ def change_wind(game_map: GameMap):
             if change == 0:
                 # print("{}: wind dies down".format(change))
                 # wind dies down
+                message_log.add_message('Wind dies down.', color)
                 game_map.wind_direction = None
             elif change in [1, 2]:
-                # print("{}: wind rotates right".format(change))
                 # wind rotates right
+                message_log.add_message('Wind rotates starboard.', color)
                 game_map.wind_direction -= 1
                 if game_map.wind_direction < 0:
                     game_map.wind_direction += len(hex_directions)
@@ -85,6 +86,7 @@ def change_wind(game_map: GameMap):
             elif change in [3, 4]:
                 # print("{}: wind rotates left".format(change))
                 # wind rotates left
+                message_log.add_message('Wind rotates portward.', color)
                 game_map.wind_direction += 1
                 if game_map.wind_direction >= len(hex_directions):
                     game_map.wind_direction -= len(hex_directions)
@@ -117,7 +119,7 @@ def decorate(game_map: GameMap):
 
 def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: dict):
     # Get a random number of entities
-    number_of_monsters = 10  # randint(0, max_entities + 1)
+    number_of_monsters = randint(max_entities // 2, max_entities + 1)
     
     # This should be
     # 1 choose monster
