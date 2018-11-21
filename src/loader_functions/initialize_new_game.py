@@ -31,7 +31,7 @@ def get_constants():
     
     font = pygame.font.Font('freesansbold.ttf', 15)
     
-    max_entities = 5
+    max_entities = 10
     log_size = 10
     
     tile_size = 32

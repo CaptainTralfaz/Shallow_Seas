@@ -179,10 +179,7 @@ def cube_neighbor(cube, direction):
 
 
 def cube_add(cube1, cube2):
-    x = cube1.x + cube2.x
-    y = cube1.y + cube2.y
-    z = cube1.z + cube2.z
-    return Cube(x, y, z)
+    return Cube(cube1.x + cube2.x, cube1.y + cube2.y, cube1.z + cube2.z)
 
 
 def cube_rotate_cc(cube):
@@ -265,7 +262,7 @@ def get_spatial_relation(tx, ty, td, ex, ey, ed):
         rotated_direction -= 1
     if rotated_direction < 0:
         rotated_direction += 6
-    
+    print("relative direction: ", rotated_direction)
     target_rotated = cube_add(target_rotated, entity_cube)
     
     # find relationship
@@ -311,3 +308,5 @@ def get_spatial_relation(tx, ty, td, ex, ey, ed):
             and ((entity_cube.x - target_rotated.x) == 0):
         print("target was directly Forward, relative direction: {}".format(rotated_direction))
         return "FA", rotated_direction
+    else:  # expected position of target is on entity's expected location
+        return "OO", rotated_direction

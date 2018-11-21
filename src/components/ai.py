@@ -32,26 +32,21 @@ class MeleeMonster:
             message_log.add_message('The {} at {}:{} has spotted you!!'.format(entity.name, entity.x, entity.y),
                                     colors['light_red'])
             # in melee range
-            if (target.x, target.y) in get_hex_neighbors(entity.x, entity.y) \
-                    or (target.x, target.y) == (entity.x, entity.y):
-    
+            if (target.x, target.y) in neighbors or (target.x, target.y) == (entity.x, entity.y):
+                
                 message_log.add_message('The {} attacked your ship!'.format(entity.name), colors['light_red'])
             # chase target
             else:
-                expected_tile = Hex(target.x, target.y)
-                expected_dir = target.mobile.direction
+                expected_target_tile = Hex(target.x, target.y)
+                target_dir = target.mobile.direction
                 
-                for step in range(target.mobile.current_speed):
-                    expected_tile = cube_to_hex(cube_add(hex_to_cube(expected_tile),
-                                                         cube_direction(expected_dir)))
-                # print(target.x, target.y, expected_tile.col, expected_tile.row)
+                for step in range(0, target.mobile.current_speed):
+                    expected_target_tile = cube_to_hex(
+                        cube_add(hex_to_cube(expected_target_tile), cube_direction(target_dir)))
                 
-                relative_location, relative_dir = get_spatial_relation(expected_tile.col,
-                                                                       expected_tile.row,
-                                                                       target.mobile.direction,
-                                                                       entity.x,
-                                                                       entity.y,
-                                                                       entity.mobile.direction)
+                (relative_location, relative_dir) = get_spatial_relation(expected_target_tile.col,
+                                                                         expected_target_tile.row, target_dir, entity.x,
+                                                                         entity.y, entity.mobile.direction)
                 rl = 1  # rotate left / port
                 rr = -1  # rotate right
                 # action rules:
@@ -83,10 +78,11 @@ class MeleeMonster:
                         or relative_location in ["FA"] and relative_dir in [0, 3]:
                     entity.mobile.rowing = 2
                     message_log.add_message('{} has a burst of speed'.format(entity.name), colors['yellow'])
-                elif relative_location in ["AA"] and relative_dir in [0]:
+                elif relative_location in ["OO"] \
+                        or relative_location in ["AA"] and relative_dir in [0]:
                     entity.mobile.rowing = -1
                     message_log.add_message('{} slows to wait for you'.format(entity.name), colors['yellow'])
-
+        
         
         # critter can't see target - act like Peaceful Monster
         else:
