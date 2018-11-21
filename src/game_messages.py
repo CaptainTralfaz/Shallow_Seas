@@ -9,9 +9,9 @@ class MessageLog:
         self.messages = []
         self.height = height
     
-    def add_message(self, message):
+    def add_message(self, message, color=(200, 200, 200)):
         # wordwrap later
         if len(self.messages) >= self.height:
             del self.messages[0]
         
-        self.messages.append(Message(message.text, message.color))
+        self.messages.append(Message(message, color))

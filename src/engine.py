@@ -11,6 +11,7 @@ from src.input_handlers import handle_keys
 from src.loader_functions.initialize_new_game import get_constants
 from src.map_objects.game_map import make_map, change_wind
 from src.render_functions import render_display
+from src.game_messages import MessageLog
 
 
 def main():
@@ -25,6 +26,8 @@ def main():
     pygame.display.set_icon(constants['icons']['game_icon'])
     
     game_quit = False
+    
+    message_log = MessageLog(constants['log_size'])
     
     size_component = Size(4)
     view_component = View(size_component.size + 3)
@@ -56,7 +59,8 @@ def main():
                    entities=entities,
                    constants=constants,
                    mouse_x=mouse_x,
-                   mouse_y=mouse_y)
+                   mouse_y=mouse_y,
+                   message_log=message_log)
     
     pygame.display.flip()
     
@@ -106,26 +110,31 @@ def main():
 
                 for entity in entities:
                     if entity.ai:
-                        entity.ai.take_turn(game_map, player)
+                        entity.ai.take_turn(game_map, player, message_log, constants['colors'])
                 
                 # OTHER ACTIONS ---------------------------------------------------------------------------------------
                 if attack:
-                    print("player attacks {}!".format(attack))
+                    message_log.add_message('Player attacks {}!'.format(attack),
+                                            constants['colors']['aqua'])
                 
                 if other_action:
                     for decoration in game_map.decorations:
                         if (player.x, player.y) == decoration['location'] and decoration['name'] in ['salvage']:
-                            print("Grabbed {}!".format(decoration['name']))
+                            message_log.add_message('Grabbed {}!'.format(decoration['name']),
+                                                    constants['colors']['aqua'])
                             game_map.decorations.remove({'name': 'salvage', 'location': (player.x, player.y)})
                     if (player.x, player.y) in game_map.towns:
-                        print("here in towns, you can: trade, repair, hire crew... or Plunder!")
+                        message_log.add_message('Ahoy! In this town, ye can: trade, repair, hire crew... or Plunder!',
+                                                constants['colors']['aqua'])
                 
                 # MOMENTUM CHANGES ------------------------------------------------------------------------------------
                 if rowing:
                     player.mobile.rowing = 1
-                
+                    message_log.add_message('Rowing, +1 momentum')
+                    
                 if slowing:
                     player.mobile.change_momentum(amount=slowing)
+                    message_log.add_message('Slowing, -1 momentum', constants['colors']['aqua'])
                 
                 # ROWING ----------------------------------------------------------------------------------------------
                 if player.mobile.rowing and player.mobile.current_speed < player.mobile.max_speed:
@@ -139,6 +148,12 @@ def main():
                     # change momentum due to rowing
                     if entity.mobile.rowing and entity.mobile.current_speed < entity.mobile.max_speed:
                         entity.mobile.change_momentum(amount=entity.mobile.rowing)
+                        # if (entity.x, entity.y) in player.view.fov:
+                        #     message_log.add_message('{} at {}:{} momentum {}'.format(entity.name,
+                        #                                                              entity.x,
+                        #                                                              entity.y,
+                        #                                                              entity.mobile.rowing))
+                        
                         # check to make sure a ship can't go to max speed
                         if hasattr(entity, 'mast_sail') \
                                 and entity.mobile.current_speed == entity.mobile.max_speed:
@@ -149,16 +164,20 @@ def main():
                 # adjust speed for wind for each entity with a sail up if there is wind
                 if game_map.wind_direction is not None:
                     if hasattr(player, "mast_sail") and player.mast_sail.current_sails > 0:
-                        player.mast_sail.momentum_due_to_wind(wind_direction=game_map.wind_direction)
+                        amount = player.mast_sail.momentum_due_to_wind(wind_direction=game_map.wind_direction)
                         player.mast_sail.catching_wind = True
-                
+                        if amount:
+                            message_log.add_message('Catching Wind, {} momentum'.format(amount),
+                                                    constants['colors']['green'])
+
                 # adjust speed for wind for each entity with a sail up if there is wind
                 if game_map.wind_direction is not None:
                     for entity in entities:
                         if hasattr(entity, "mast_sail") and entity.mast_sail.current_sails > 0:
                             entity.mast_sail.momentum_due_to_wind(wind_direction=game_map.wind_direction)
                             entity.mast_sail.catching_wind = True
-                
+                            message_log.add_message('Catching Wind, + momentum')
+
                 # DRAG ------------------------------------------------------------------------------------------------
                 # change momentum due to drag if not rowing or catching wind
                 
@@ -200,11 +219,14 @@ def main():
                 # SAILS / ROTATE --------------------------------------------------------------------------------------
                 if sails:
                     player.mast_sail.adjust_sails(amount=sails)
-                
+                    message_log.add_message('Player Adjusts sails to {}'.format(player.mast_sail.current_sails),
+                                            constants['colors']['aqua'])
+
                 # rotate boat last
                 if rotate:
                     player.mobile.rotate(rotate=rotate)
-                
+                    message_log.add_message('Player rotates {}'.format('port' if rotate == 1 else 'starboard'))
+
                 if exit_screen:
                     game_quit = True
                 
@@ -217,7 +239,8 @@ def main():
                            constants=constants,
                            mouse_x=mouse_x,
                            mouse_y=mouse_y,
-                           targeting=targeting)
+                           targeting=targeting,
+                           message_log=message_log)
             pygame.display.flip()
         
         fps_clock.tick(constants['FPS'])

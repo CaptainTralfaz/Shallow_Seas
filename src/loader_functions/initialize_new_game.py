@@ -45,7 +45,8 @@ def get_constants():
         'light_red': (200, 0, 0),
         'dark_red': (150, 0, 0),
         'orange': (255, 127, 0),
-        'yellow': (255, 255, 0),
+        'bright_yellow': (255, 255, 0),
+        'yellow':  (200, 200, 0),
         'green': (0, 255, 0),
         'medium_green': (0, 175, 0),
         'light_green': (0, 125, 0),
@@ -75,6 +76,7 @@ def get_constants():
         'water': pygame.image.load('icons/Water3d.png'),
         'shallows': pygame.image.load('icons/Shallows3d.png'),
         'sand': pygame.image.load('icons/Sand3d.png'),
+        'swamp': pygame.image.load('icons/Swamp3d.png'),
         'grass': pygame.image.load('icons/Grass3d.png'),
         'forest': pygame.image.load('icons/Forest3d.png'),
         'mountain': pygame.image.load('icons/Mountain3d.png'),
@@ -119,7 +121,7 @@ def get_constants():
         'half_tile': half_tile,
         'max_entities': max_entities,
         'colors': colors,
-        'icons': icons
+        'icons': icons,
     }
     
     return constants
