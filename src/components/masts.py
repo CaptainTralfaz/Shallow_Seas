@@ -55,15 +55,19 @@ class Masts:
         if with_wind(self.owner.mobile.direction, wind_direction):  # with wind: +2 momentum
             self.owner.mobile.change_momentum(amount=2 * self.current_sails)
             self.catching_wind = True
+            return 2 * self.current_sails
         elif cross_wind(self.owner.mobile.direction, wind_direction):  # cross wind: +1 momentum
             self.owner.mobile.change_momentum(amount=self.current_sails)
             self.catching_wind = True
+            return self.current_sails
         elif against_wind(self.owner.mobile.direction, wind_direction):  # against wind: -1 momentum
             self.owner.mobile.change_momentum(amount=-self.current_sails)
             self.catching_wind = False
+            return -self.current_sails
         else:
             self.catching_wind = False
-
+            return
+        
 
 def with_wind(ship_direction: int, wind_direction: int):
     # print("ship Direction: {}, wind direction: {}".format(ship_direction, wind_direction))

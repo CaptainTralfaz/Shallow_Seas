@@ -15,7 +15,7 @@ class RenderOrder(Enum):
     FOG = 7
 
 
-def render_display(display, game_map, player, entities, constants, mouse_x, mouse_y, messages=None, targeting=False):
+def render_display(display, game_map, player, entities, constants, mouse_x, mouse_y, message_log, targeting=False):
     display.fill(constants['colors']['black'])
     
     board_surf = render_board(game_map, player, entities, constants, targeting)
@@ -29,15 +29,24 @@ def render_display(display, game_map, player, entities, constants, mouse_x, mous
     status_surf = render_status(game_map, player, entities, constants, mouse_x, mouse_y)
     display.blit(status_surf, (0, constants['map_height']))
     
-    message_surf = render_messages(messages, constants)
+    message_surf = render_messages(message_log, constants)
     display.blit(message_surf, (constants['status_width'], constants['view_height']))
     
     pygame.display.update()
 
 
-def render_messages(messages, constants):
+def render_messages(message_log, constants):
     message_surf = pygame.Surface((constants['message_width'] - 2 * constants['margin'],
                                    constants['message_height'] - 2 * constants['margin']))
+
+    y = message_surf.get_height() - constants['font'].get_linesize() * (len(message_log.messages) + 1)
+    for message in message_log.messages:
+        y += constants['font'].get_linesize()
+        message_text = constants['font'].render(str(message.text), 1, message.color)
+        message_surf.blit(message_text, (0, y))
+        message_rect = message_text.get_rect()
+        message_rect.centerx = message_surf.get_width() // 2
+
     border_panel = pygame.Surface((constants['message_width'], constants['message_height']))
     
     render_border(border_panel, constants['colors']['text'])
