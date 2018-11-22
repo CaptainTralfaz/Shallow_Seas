@@ -16,7 +16,7 @@ class GameMap:
         self.wind_direction = self.starting_wind
         self.wind_turn_count = 0
         self.max_wind_count = 50
-        self.terrain = {}
+        self.terrain = [[None for y in range(height)] for x in range(width)]
         self.decorations = []
         self.towns = []
         
@@ -99,7 +99,7 @@ def decorate(game_map: GameMap):
     for x in range(2, game_map.width - 3):
         for y in range(2, game_map.height - 3):
             decor = randint(0, 500)
-            if game_map.terrain[(x, y)].elevation < 3:
+            if game_map.terrain[x][y].elevation < 3:
                 if 0 <= decor <= 1:
                     locations.append({'name': 'rocks', 'location': (x, y)})
                 elif 2 <= decor <= 3:
@@ -130,7 +130,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
         while not placed:
             x = randint(1, game_map.width - 2)
             y = randint(1, game_map.height - 2)
-            if game_map.terrain[(x, y)].elevation <= 2:
+            if game_map.terrain[x][y].elevation <= 2:
                 placed = True
                 # TODO: get these from factory
                 if randint(0, 100) < 50:

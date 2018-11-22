@@ -4,6 +4,7 @@ from random import randint
 from src.map_objects.map_utils import hex_directions, get_hex_land_neighbors
 from src.map_objects.tile import Terrain
 
+
 def generate_terrain(game_map, island_size: int, max_seeds: int):
     """
     Generates the terrain on the map
@@ -59,7 +60,7 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
 
     for x in range(game_map.width):
         for y in range(game_map.height):
-            game_map.terrain[(x, y)] = Terrain(x=x, y=y, elevation=height_map[x][y])
+            game_map.terrain[x][y] = Terrain(x=x, y=y, elevation=height_map[x][y])
 
 
 def remove_bad_tiles(height_map, island):

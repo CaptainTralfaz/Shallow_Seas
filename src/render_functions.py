@@ -66,8 +66,8 @@ def render_board(game_map, player, entities, constants, targeting):
     
     for x in range(player.x - 10, player.x + 11):
         for y in range(player.y - 10, player.y + 11):
-            if (0 <= x < game_map.width) and (0 <= y < game_map.height) and game_map.terrain[(x, y)].seen:
-                game_map_surf.blit(constants['icons'][game_map.terrain[(x, y)].icon],
+            if (0 <= x < game_map.width) and (0 <= y < game_map.height) and game_map.terrain[x][y].seen:
+                game_map_surf.blit(constants['icons'][game_map.terrain[x][y].icon],
                                        (x * constants['tile_size'] - 10, y * constants['tile_size']
                                         + x % 2 * constants['half_tile'] - constants['half_tile'] - 10))
                 if (x, y) in target_hexes:
@@ -81,7 +81,7 @@ def render_board(game_map, player, entities, constants, targeting):
         (x, y) = decoration['location']
         if (player.x - 9 < x < player.x + 10) and \
                 (player.y - 10 < y < player.y + 11) and \
-                game_map.terrain[(x, y)].seen:
+                game_map.terrain[x][y].seen:
             if decoration['name'] == 'rocks':
                 icon = constants['icons']['rocks']
             elif decoration['name'] == 'sandbar':
@@ -121,7 +121,7 @@ def render_board(game_map, player, entities, constants, targeting):
         for y in range(player.y + 10, player.y - 11, -1):
             if (0 <= x < game_map.width) \
                     and (0 <= y < game_map.height) \
-                    and game_map.terrain[(x, y)].seen \
+                    and game_map.terrain[x][y].seen \
                     and (x, y) not in player.view.fov:
                 game_map_surf.blit(constants['icons']['shade'],
                                    (x * constants['tile_size'] - 2 * constants['margin'],
@@ -181,12 +181,12 @@ def render_status(game_map, player, entities, constants, mouse_x, mouse_y):
     
     if (0 <= grid_x < game_map.width) \
             and (0 <= grid_y < game_map.height) \
-            and game_map.terrain[(grid_x, grid_y)].seen \
+            and game_map.terrain[grid_x][grid_y].seen \
             and constants['map_width'] <= mouse_x < constants['display_width'] - 1 \
             and 0 <= mouse_y <= constants['view_height']:
         text = None
-        if game_map.terrain[(grid_x, grid_y)].elevation >= 0:
-            text = game_map.terrain[(grid_x, grid_y)].name
+        if game_map.terrain[grid_x][grid_y].elevation >= 0:
+            text = game_map.terrain[grid_x][grid_y].name
         if text:
             text_cube = hex_to_cube(Hex(grid_x, grid_y))
             decor_text = constants['font'].render("{} X:{} Y:{} Z:{}".format(text, text_cube.x,
@@ -333,8 +333,8 @@ def render_map(game_map, player, entities, constants):
     block.fill(constants['colors']['light_blue'])
     for x in range(constants['board_width']):
         for y in range(constants['board_height']):
-            if game_map.terrain[(x, y)].seen:
-                block.fill(constants['colors'][game_map.terrain[(x, y)].color])
+            if game_map.terrain[x][y].seen:
+                block.fill(constants['colors'][game_map.terrain[x][y].color])
                 if (x, y) == game_map.towns:
                     block.fill(constants['colors']['purple'])
                 map_surf.blit(block, (x * constants['block_size'],
@@ -344,7 +344,7 @@ def render_map(game_map, player, entities, constants):
     small_block = pygame.Surface((constants['block_size'] // 2, constants['block_size'] // 2))
     for decoration in game_map.decorations:
         x, y = decoration['location']
-        if game_map.terrain[(x, y)].seen:
+        if game_map.terrain[x][y].seen:
             if decoration['name'] == 'rocks':
                 small_block.fill(constants['colors']['text'])
             elif decoration['name'] == 'sandbar':
