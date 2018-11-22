@@ -1,41 +1,44 @@
+from enum import Enum
+
+
 class Terrain:
     def __init__(self, x, y, elevation):
-        self.elevation = elevation
+        self.elevation = Elevation(elevation)
         self.x = x
         self.y = y
         self.seen = False
         self.fog = False
         self.decoration = None
         
-        if self.elevation == 0:
+        if self.elevation == Elevation.DEEPS:
             self.name = 'Deeps'
             self.icon = 'deeps'
             self.color = 'light_blue'
-        elif self.elevation == 1:
+        elif elevation == Elevation.WATER:
             self.name = 'Water'
             self.icon = 'water'
             self.color = 'blue'
-        elif self.elevation == 2:
+        elif self.elevation == Elevation.SHALLOWS:
             self.name = 'Shallows'
             self.icon = 'shallows'
             self.color = 'aqua'
-        elif self.elevation == 3:
+        elif self.elevation == Elevation.DUNES:
             self.name = 'Dunes'
             self.icon = 'sand'
             self.color = 'cantaloupe'
-        elif self.elevation == 4:
+        elif self.elevation == Elevation.GRASSLAND:
             self.name = 'Grassland'
             self.icon = 'grass'
             self.color = 'light_green'
-        elif self.elevation == 5:
+        elif self.elevation == Elevation.JUNGLE:
             self.name = 'Jungle'
-            self.icon = 'forest'
+            self.icon = 'jungle'
             self.color = 'medium_green'
-        elif self.elevation == 6:
+        elif self.elevation == Elevation.MOUNTAIN:
             self.name = 'Mountain'
             self.icon = 'mountain'
             self.color = 'text'
-        elif self.elevation >= 7:
+        elif self.elevation == Elevation.VOLCANO:
             self.name = 'Volcano'
             self.icon = 'volcano'
             self.color = 'light_red'
@@ -61,4 +64,15 @@ class Decoration:
             self.color = 'medium_green'
         elif self.name == 'Town':
             self.icon = 'town'
-            self.color = 'purple'
+            self.color = 'black'
+
+
+class Elevation(Enum):
+    DEEPS = 0
+    WATER = 1
+    SHALLOWS = 2
+    DUNES = 3
+    GRASSLAND = 4
+    JUNGLE = 5
+    MOUNTAIN = 6
+    VOLCANO = 7

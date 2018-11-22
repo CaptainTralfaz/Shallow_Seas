@@ -1,5 +1,4 @@
-from enum import Enum
-
+from src.map_objects.tile import Elevation
 
 class Cube:
     def __init__(self, x, y, z):
@@ -21,14 +20,14 @@ hex_directions = [(0, -1), (-1, -1), (-1, 0), (0, 1), (1, 0), (1, -1)]
 
 direction_angle = [0, 60, 120, 180, 240, 300]
 
-compass_direction = {
-    "N": 0,
-    "NW": 1,
-    "SW": 2,
-    "S": 3,
-    "SE": 4,
-    "NE": 5
-}
+# compass_direction = {
+#     "N": 0,
+#     "NW": 1,
+#     "SW": 2,
+#     "S": 3,
+#     "SE": 4,
+#     "NE": 5
+# }
 
 elevation = {
     0: "ocean",
@@ -40,25 +39,6 @@ elevation = {
     6: "mountain",
     7: "volcano"
 }
-
-
-class Elevation(Enum):
-    OCEAN = 0
-    SHALLOWS = 1
-    REEFS = 2
-    BEACH = 3
-    SWAMP = 4
-    GRASSLAND = 5
-    JUNGLE = 6
-    HILLS = 7
-    VOLCANO = 8
-
-
-class Tile:
-    def __init__(self):
-        self.visible = False
-        self.seen = False
-        self.elevation = Elevation.OCEAN
 
 
 def get_grid_from_coords(coords, player_coords, constants):
@@ -207,7 +187,7 @@ def get_fov(fighter, game_map):
                 if hx not in viewed_hexes[1:]:
                     viewed_hexes.append(hx)
                 if (0 <= hx.col < game_map.width) and (0 <= hx.row < game_map.height) \
-                        and 2 < game_map.terrain[hx.col][hx.row].elevation:
+                        and Elevation.DUNES.value < game_map.terrain[hx.col][hx.row].elevation.value:
                     break
             
             current = cube_neighbor(current, i)

@@ -1,6 +1,6 @@
 import math
 from enum import Enum
-
+from src.map_objects.tile import Elevation
 import pygame
 
 from src.map_objects.map_utils import direction_angle, get_grid_from_coords, hex_to_cube, Hex, get_target_hexes
@@ -170,7 +170,7 @@ def render_status(game_map, player, entities, constants, mouse_x, mouse_y):
             and constants['map_width'] <= mouse_x < constants['display_width'] - 1 \
             and 0 <= mouse_y <= constants['view_height']:
         text = None
-        if game_map.terrain[grid_x][grid_y].elevation >= 0:
+        if game_map.terrain[grid_x][grid_y].elevation.value >= Elevation.DEEPS.value:
             text = game_map.terrain[grid_x][grid_y].name
         if text:
             text_cube = hex_to_cube(Hex(grid_x, grid_y))

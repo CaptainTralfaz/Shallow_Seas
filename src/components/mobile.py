@@ -1,4 +1,6 @@
 from src.map_objects.map_utils import hex_directions
+from src.map_objects.tile import Elevation
+
 
 class Mobile:
     def __init__(self, direction, max_momentum, max_speed=2, speed=0):
@@ -34,8 +36,8 @@ class Mobile:
                     self.owner.mast_sail.current_sails = 0
                 break
             # if not flying also...
-            elif (0 <= new_x < game_map.width) and (0 <= new_y < game_map.height) and \
-                    game_map.terrain[new_x][new_y].elevation > 2:
+            elif game_map.in_bounds(new_x, new_y) and \
+                    game_map.terrain[new_x][new_y].elevation.value > Elevation.SHALLOWS.value:
                 print("{} crashed into island!".format(self.owner.name))
                 # take damage depending on speed
                 self.current_speed = 0
@@ -80,7 +82,7 @@ def can_move_direction(neighbor, game_map):
     if not game_map.in_bounds(x=new_x, y=new_y, margin=1):
         return False
     # TODO: account for flyers
-    elif (0 <= new_x < game_map.width) and (0 <= new_y < game_map.height) \
-            and game_map.terrain[new_x][new_y].elevation > 2:
+    elif game_map.in_bounds(new_x, new_y) \
+            and game_map.terrain[new_x][new_y].elevation.value > Elevation.SHALLOWS.value:
         return False
     return True

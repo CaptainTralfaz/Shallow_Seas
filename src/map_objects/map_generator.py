@@ -2,7 +2,7 @@ from queue import Queue
 from random import randint
 
 from src.map_objects.map_utils import hex_directions, get_hex_land_neighbors
-from src.map_objects.tile import Terrain, Decoration
+from src.map_objects.tile import Terrain, Decoration, Elevation
 
 
 def generate_terrain(game_map, island_size: int, max_seeds: int):
@@ -30,7 +30,7 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
                 if dx != 0:
                     dy += x % 2
             # make sure direction is not out of bounds (leaving a 1 tile margin around map)
-            if 1 <= x + dx < game_map.width - 2 and 1 <= y + dy < game_map.width - 2:
+            if game_map.in_bounds(x + dx, y + dy, margin=1):
                 x = x + dx
                 y = y + dy
                 height_map[x][y] += 1
@@ -61,7 +61,9 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
             
     for x in range(game_map.width):
         for y in range(game_map.height):
-            game_map.terrain[x][y] = Terrain(x=x, y=y, elevation=height_map[x][y])
+            if height_map[x][y] > 7:
+                height_map[x][y] = 7
+            game_map.terrain[x][y] = Terrain(x=x, y=y, elevation=Elevation(height_map[x][y]))
             if x == town_x and y == town_y:
                 game_map.terrain[town_x][town_y].decoration = Decoration('Town')
 

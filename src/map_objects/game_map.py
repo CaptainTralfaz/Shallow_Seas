@@ -7,7 +7,7 @@ from src.components.view import View
 from src.entity import Entity
 from src.map_objects.map_generator import generate_terrain
 from src.map_objects.map_utils import hex_directions
-from src.map_objects.tile import Decoration
+from src.map_objects.tile import Decoration, Elevation
 
 
 class GameMap:
@@ -92,7 +92,7 @@ def decorate(game_map: GameMap):
     for x in range(2, game_map.width - 3):
         for y in range(2, game_map.height - 3):
             decor = randint(0, 500)
-            if game_map.terrain[x][y].elevation < 3:
+            if game_map.terrain[x][y].elevation.value < Elevation.DUNES.value:
                 if 0 <= decor <= 1:
                     game_map.terrain[x][y].decoration = Decoration('Rocks')
                 elif 2 <= decor <= 3:
@@ -119,7 +119,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
         while not placed:
             x = randint(1, game_map.width - 2)
             y = randint(1, game_map.height - 2)
-            if game_map.terrain[x][y].elevation <= 2:
+            if game_map.terrain[x][y].elevation.value < Elevation.DUNES.value:
                 placed = True
                 # TODO: get these from factory
                 if randint(0, 100) < 50:
