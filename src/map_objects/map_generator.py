@@ -2,7 +2,7 @@ from queue import Queue
 from random import randint
 
 from src.map_objects.map_utils import hex_directions, get_hex_land_neighbors
-from src.map_objects.tile import Terrain
+from src.map_objects.tile import Terrain, Decoration
 
 
 def generate_terrain(game_map, island_size: int, max_seeds: int):
@@ -37,7 +37,9 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
     
     islands = find_all_islands(height_map, game_map.width, game_map.height)
     largest, largest_islands = get_largest_islands(islands)
-    
+
+    town_x = None
+    town_y = None
     for island in islands:
         for tile in island:
             tile_x, tile_y = tile
@@ -51,16 +53,17 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
                 if (0 <= x < game_map.width) and (0 <= y < game_map.height) and height_map[x][y] == 0:
                     height_map[x][y] += 1
         
-        if len(island) == largest and not game_map.towns:
+        if len(island) == largest and not (town_x or town_y):
             valid_tiles = remove_bad_tiles(height_map, island)
             print(valid_tiles)
-            town_tile = randint(0, len(valid_tiles) - 1)
-            game_map.towns.append(valid_tiles[town_tile])
-            print(game_map.towns)
-
+            town_x, town_y = valid_tiles[randint(0, len(valid_tiles) - 1)]
+            print(town_x, town_y)
+            
     for x in range(game_map.width):
         for y in range(game_map.height):
             game_map.terrain[x][y] = Terrain(x=x, y=y, elevation=height_map[x][y])
+            if x == town_x and y == town_y:
+                game_map.terrain[town_x][town_y].decoration = Decoration('Town')
 
 
 def remove_bad_tiles(height_map, island):

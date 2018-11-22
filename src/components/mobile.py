@@ -1,6 +1,5 @@
 from src.map_objects.map_utils import hex_directions
 
-
 class Mobile:
     def __init__(self, direction, max_momentum, max_speed=2, speed=0):
         self.direction = direction
@@ -22,7 +21,10 @@ class Mobile:
                 new_y = self.owner.y + dy + self.owner.x % 2
             # check for collisions!
             # TODO: Send to collision method, as determined by movement type (sail, flying, swim/row, etc)
-            if (new_x, new_y) in game_map.towns and self.owner.name is "player":
+            if game_map.in_bounds(new_x, new_y) \
+                    and game_map.terrain[new_x][new_y].decoration \
+                    and game_map.terrain[new_x][new_y].decoration.name == 'Town' \
+                    and self.owner.name is "player":
                 print('{} sailed into Town'.format(self.owner.name))
                 self.owner.x = new_x
                 self.owner.y = new_y

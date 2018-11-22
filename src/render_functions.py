@@ -68,39 +68,24 @@ def render_board(game_map, player, entities, constants, targeting):
         for y in range(player.y - 10, player.y + 11):
             if (0 <= x < game_map.width) and (0 <= y < game_map.height) and game_map.terrain[x][y].seen:
                 game_map_surf.blit(constants['icons'][game_map.terrain[x][y].icon],
-                                       (x * constants['tile_size'] - 10, y * constants['tile_size']
-                                        + x % 2 * constants['half_tile'] - constants['half_tile'] - 10))
+                                       (x * constants['tile_size'] - 2 * constants['margin'],
+                                        y * constants['tile_size'] + x % 2 * constants['half_tile']
+                                        - constants['half_tile'] - 2 * constants['margin']))
+                if game_map.terrain[x][y].decoration:
+                    game_map_surf.blit(constants['icons'][game_map.terrain[x][y].decoration.icon],
+                                       (x * constants['tile_size'] - constants['margin'],
+                                        y * constants['tile_size'] + (x % 2) * constants['half_tile']
+                                        - constants['half_tile']))
+
                 if (x, y) in target_hexes:
                     icon = constants['icons']['highlight']
-                    game_map_surf.blit(icon, (x * constants['tile_size'] - 10,
+                    game_map_surf.blit(icon, (x * constants['tile_size'] - 2 * constants['margin'],
                                               y * constants['tile_size'] + x % 2 * constants['half_tile']
-                                              - constants['half_tile'] - 10))
-    
-    for decoration in game_map.decorations:
-        icon = constants['icons']['water']
-        (x, y) = decoration['location']
-        if (player.x - 9 < x < player.x + 10) and \
-                (player.y - 10 < y < player.y + 11) and \
-                game_map.terrain[x][y].seen:
-            if decoration['name'] == 'rocks':
-                icon = constants['icons']['rocks']
-            elif decoration['name'] == 'sandbar':
-                icon = constants['icons']['sandbar']
-            elif decoration['name'] == 'coral':
-                icon = constants['icons']['coral']
-            elif decoration['name'] == 'seaweed':
-                icon = constants['icons']['seaweed']
-            elif decoration['name'] == 'town':
-                icon = constants['icons']['town']
-            elif decoration['name'] == 'salvage':
-                icon = constants['icons']['salvage']
-            game_map_surf.blit(icon, (x * constants['tile_size'] - 5,
-                                      y * constants['tile_size'] + (x % 2) * constants['half_tile']
-                                      - constants['half_tile']))
-    
+                                              - constants['half_tile'] - 2 * constants['margin']))
+                    
     icon = create_ship_icon(player, constants)
     game_map_surf.blit(rot_center(icon, direction_angle[player.mobile.direction]),
-                       (player.x * constants['tile_size'] - 5,
+                       (player.x * constants['tile_size'] - constants['margin'],
                         player.y * constants['tile_size'] + player.x % 2 * constants['half_tile']
                         - constants['half_tile']))
     
@@ -113,7 +98,7 @@ def render_board(game_map, player, entities, constants, targeting):
             else:
                 icon = entity.icon
             game_map_surf.blit(rot_center(icon, direction_angle[entity.mobile.direction]),
-                               (entity.x * constants['tile_size'] - 5,
+                               (entity.x * constants['tile_size'] - constants['margin'],
                                 entity.y * constants['tile_size'] + entity.x % 2 * constants['half_tile']
                                 - constants['half_tile']))
     
@@ -204,14 +189,13 @@ def render_status(game_map, player, entities, constants, mouse_x, mouse_y):
                     and (entity.x, entity.y) == (grid_x, grid_y):
                 vertical = font_size + constants['margin'] + render_ship_info(status_panel, entity, constants, vertical)
         
-        for decor in game_map.decorations:
-            if decor['location'] == (grid_x, grid_y):
-                decor_text = constants['font'].render(decor['name'].capitalize(), 1,
-                                                      constants['colors'].get('text'))
-                decor_rect = decor_text.get_rect()
-                decor_rect.center = (constants['status_width'] // 2,
-                                     constants['status_height'] - constants['font'].get_height())
-                status_panel.blit(decor_text, decor_rect)
+        if game_map.terrain[grid_x][grid_y].decoration:
+            decor_text = constants['font'].render(game_map.terrain[grid_x][grid_y].decoration.name, 1,
+                                                  constants['colors'].get('text'))
+            decor_rect = decor_text.get_rect()
+            decor_rect.center = (constants['status_width'] // 2,
+                                 constants['status_height'] - constants['font'].get_height())
+            status_panel.blit(decor_text, decor_rect)
     
     border_panel = pygame.Surface((constants['status_width'],
                                    constants['status_height']))
@@ -330,34 +314,19 @@ def render_map(game_map, player, entities, constants):
     map_surf = pygame.Surface((constants['map_width'] - 2 * constants['margin'],
                                constants['map_height'] - 2 * constants['margin']))
     block = pygame.Surface(constants['map_block'])
-    block.fill(constants['colors']['light_blue'])
+    small_block = pygame.Surface((constants['block_size'] // 2, constants['block_size'] // 2))
     for x in range(constants['board_width']):
         for y in range(constants['board_height']):
             if game_map.terrain[x][y].seen:
                 block.fill(constants['colors'][game_map.terrain[x][y].color])
-                if (x, y) == game_map.towns:
-                    block.fill(constants['colors']['purple'])
                 map_surf.blit(block, (x * constants['block_size'],
                                       y * constants['block_size'] + (x % 2) * (constants['block_size'] // 2)
                                       - constants['block_size'] // 2))
-    
-    small_block = pygame.Surface((constants['block_size'] // 2, constants['block_size'] // 2))
-    for decoration in game_map.decorations:
-        x, y = decoration['location']
-        if game_map.terrain[x][y].seen:
-            if decoration['name'] == 'rocks':
-                small_block.fill(constants['colors']['text'])
-            elif decoration['name'] == 'sandbar':
-                small_block.fill(constants['colors']['cantaloupe'])
-            elif decoration['name'] == 'coral':
-                small_block.fill(constants['colors']['carnation'])
-            elif decoration['name'] == 'seaweed':
-                small_block.fill(constants['colors']['medium_green'])
-            else:
-                small_block.fill(constants['colors']['red'])
-            map_surf.blit(small_block, (x * constants['block_size'] + 1,
-                                        y * constants['block_size'] + (x % 2) * (constants['block_size'] // 2) + 1
-                                        - constants['block_size'] // 2))
+                if game_map.terrain[x][y].decoration:
+                    small_block.fill(constants['colors'][game_map.terrain[x][y].decoration.color])
+                    map_surf.blit(small_block, (x * constants['block_size'] + 1,
+                                                y * constants['block_size'] + (x % 2) * (constants['block_size'] // 2)
+                                                + 1 - constants['block_size'] // 2))
     
     block.fill(constants['colors']['white'])
     map_surf.blit(block, (player.x * constants['block_size'],

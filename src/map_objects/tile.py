@@ -1,11 +1,11 @@
 class Terrain:
-    def __init__(self, x, y, elevation, decorations=None):
+    def __init__(self, x, y, elevation):
         self.elevation = elevation
         self.x = x
         self.y = y
         self.seen = False
         self.fog = False
-        self.decorations = decorations
+        self.decoration = None
         
         if self.elevation == 0:
             self.name = 'Deeps'
@@ -39,3 +39,26 @@ class Terrain:
             self.name = 'Volcano'
             self.icon = 'volcano'
             self.color = 'light_red'
+
+
+class Decoration:
+    def __init__(self, name):
+        self.name = name
+        self.icon = None
+        self.color = None
+        
+        if self.name == 'Rocks':
+            self.icon = 'rocks'
+            self.color = 'text'
+        elif self.name == 'Coral':
+            self.icon = 'coral'
+            self.color = 'carnation'
+        elif self.name == 'Sandbar':
+            self.icon = 'sandbar'
+            self.color = 'cantaloupe'
+        elif self.name == 'Seaweed':
+            self.icon = 'seaweed'
+            self.color = 'medium_green'
+        elif self.name == 'Town':
+            self.icon = 'town'
+            self.color = 'purple'
