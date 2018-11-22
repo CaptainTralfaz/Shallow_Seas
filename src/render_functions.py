@@ -5,6 +5,7 @@ import pygame
 
 from src.map_objects.map_utils import direction_angle, get_grid_from_coords, hex_to_cube, Hex, get_target_hexes
 
+
 class RenderOrder(Enum):
     TERRAIN = 1
     DECORATION = 2
@@ -38,7 +39,7 @@ def render_display(display, game_map, player, entities, constants, mouse_x, mous
 def render_messages(message_log, constants):
     message_surf = pygame.Surface((constants['message_width'] - 2 * constants['margin'],
                                    constants['message_height'] - 2 * constants['margin']))
-
+    
     y = message_surf.get_height() - constants['font'].get_linesize() * (len(message_log.messages) + 1)
     for message in message_log.messages:
         y += constants['font'].get_linesize()
@@ -46,7 +47,7 @@ def render_messages(message_log, constants):
         message_surf.blit(message_text, (0, y))
         message_rect = message_text.get_rect()
         message_rect.centerx = message_surf.get_width() // 2
-
+    
     border_panel = pygame.Surface((constants['message_width'], constants['message_height']))
     
     render_border(border_panel, constants['colors']['text'])
@@ -62,41 +63,25 @@ def render_board(game_map, player, entities, constants, targeting):
     target_hexes = []
     if targeting:
         target_hexes = get_target_hexes(game_map, player, constants['icons'])
-        
+    
     for x in range(player.x - 10, player.x + 11):
         for y in range(player.y - 10, player.y + 11):
-            if (0 <= x < game_map.width) and (0 <= y < game_map.height) and game_map.seen[x][y]:
-                if game_map.terrain[x][y] == 0:
-                    icon = constants['icons']['deeps']
-                elif game_map.terrain[x][y] == 1:
-                    icon = constants['icons']['water']
-                elif game_map.terrain[x][y] == 2:
-                    icon = constants['icons']['shallows']
-                elif game_map.terrain[x][y] == 3:
-                    icon = constants['icons']['sand']
-                elif game_map.terrain[x][y] == 4:
-                    icon = constants['icons']['grass']
-                elif game_map.terrain[x][y] == 5:
-                    icon = constants['icons']['forest']
-                elif game_map.terrain[x][y] == 6:
-                    icon = constants['icons']['mountain']
-                else:
-                    icon = constants['icons']['volcano']
-                game_map_surf.blit(icon, (x * constants['tile_size'] - 10,
-                                          y * constants['tile_size'] + x % 2 * constants['half_tile']
-                                          - constants['half_tile'] - 10))
+            if (0 <= x < game_map.width) and (0 <= y < game_map.height) and game_map.terrain[(x, y)].seen:
+                game_map_surf.blit(constants['icons'][game_map.terrain[(x, y)].icon],
+                                       (x * constants['tile_size'] - 10, y * constants['tile_size']
+                                        + x % 2 * constants['half_tile'] - constants['half_tile'] - 10))
                 if (x, y) in target_hexes:
                     icon = constants['icons']['highlight']
                     game_map_surf.blit(icon, (x * constants['tile_size'] - 10,
                                               y * constants['tile_size'] + x % 2 * constants['half_tile']
                                               - constants['half_tile'] - 10))
-                    
+    
     for decoration in game_map.decorations:
         icon = constants['icons']['water']
         (x, y) = decoration['location']
         if (player.x - 9 < x < player.x + 10) and \
                 (player.y - 10 < y < player.y + 11) and \
-                game_map.seen[x][y]:
+                game_map.terrain[(x, y)].seen:
             if decoration['name'] == 'rocks':
                 icon = constants['icons']['rocks']
             elif decoration['name'] == 'sandbar':
@@ -136,7 +121,7 @@ def render_board(game_map, player, entities, constants, targeting):
         for y in range(player.y + 10, player.y - 11, -1):
             if (0 <= x < game_map.width) \
                     and (0 <= y < game_map.height) \
-                    and game_map.seen[x][y] \
+                    and game_map.terrain[(x, y)].seen \
                     and (x, y) not in player.view.fov:
                 game_map_surf.blit(constants['icons']['shade'],
                                    (x * constants['tile_size'] - 2 * constants['margin'],
@@ -170,7 +155,7 @@ def render_status(game_map, player, entities, constants, mouse_x, mouse_y):
     status_panel.fill(constants['colors']['black'])
     vertical = 0
     font_size = constants['font'].get_height()
-
+    
     # wind direction
     direction_text = constants['font'].render('Wind Direction:', 1, constants['colors'].get('text'))
     direction_rect = direction_text.get_rect()
@@ -196,26 +181,12 @@ def render_status(game_map, player, entities, constants, mouse_x, mouse_y):
     
     if (0 <= grid_x < game_map.width) \
             and (0 <= grid_y < game_map.height) \
-            and game_map.seen[grid_x][grid_y] \
+            and game_map.terrain[(grid_x, grid_y)].seen \
             and constants['map_width'] <= mouse_x < constants['display_width'] - 1 \
             and 0 <= mouse_y <= constants['view_height']:
         text = None
-        if game_map.terrain[grid_x][grid_y] == 0:
-            text = "Ocean"
-        elif game_map.terrain[grid_x][grid_y] == 1:
-            text = "Sea"
-        elif game_map.terrain[grid_x][grid_y] == 2:
-            text = "Shallows"
-        elif game_map.terrain[grid_x][grid_y] == 3:
-            text = "Dunes"
-        elif game_map.terrain[grid_x][grid_y] == 4:
-            text = "Grassland"
-        elif game_map.terrain[grid_x][grid_y] == 5:
-            text = "Jungle"
-        elif game_map.terrain[grid_x][grid_y] == 6:
-            text = "Mountain"
-        elif game_map.terrain[grid_x][grid_y] > 6:
-            text = "Volcano"
+        if game_map.terrain[(grid_x, grid_y)].elevation >= 0:
+            text = game_map.terrain[(grid_x, grid_y)].name
         if text:
             text_cube = hex_to_cube(Hex(grid_x, grid_y))
             decor_text = constants['font'].render("{} X:{} Y:{} Z:{}".format(text, text_cube.x,
@@ -362,23 +333,8 @@ def render_map(game_map, player, entities, constants):
     block.fill(constants['colors']['light_blue'])
     for x in range(constants['board_width']):
         for y in range(constants['board_height']):
-            if game_map.seen[x][y]:
-                if game_map.terrain[x][y] == 0:
-                    block.fill(constants['colors']['light_blue'])
-                elif game_map.terrain[x][y] == 1:
-                    block.fill(constants['colors']['blue'])
-                elif game_map.terrain[x][y] == 2:
-                    block.fill(constants['colors']['aqua'])
-                elif game_map.terrain[x][y] == 3:
-                    block.fill(constants['colors']['cantaloupe'])
-                elif game_map.terrain[x][y] == 4:
-                    block.fill(constants['colors']['light_green'])
-                elif game_map.terrain[x][y] == 5:
-                    block.fill(constants['colors']['medium_green'])
-                elif game_map.terrain[x][y] == 6:
-                    block.fill(constants['colors']['text'])
-                elif game_map.terrain[x][y] >= 7:
-                    block.fill(constants['colors']['red'])
+            if game_map.terrain[(x, y)].seen:
+                block.fill(constants['colors'][game_map.terrain[(x, y)].color])
                 if (x, y) == game_map.towns:
                     block.fill(constants['colors']['purple'])
                 map_surf.blit(block, (x * constants['block_size'],
@@ -388,7 +344,7 @@ def render_map(game_map, player, entities, constants):
     small_block = pygame.Surface((constants['block_size'] // 2, constants['block_size'] // 2))
     for decoration in game_map.decorations:
         x, y = decoration['location']
-        if game_map.seen[x][y]:
+        if game_map.terrain[(x, y)].seen:
             if decoration['name'] == 'rocks':
                 small_block.fill(constants['colors']['text'])
             elif decoration['name'] == 'sandbar':

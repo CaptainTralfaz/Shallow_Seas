@@ -70,11 +70,11 @@ def get_grid_from_coords(coords, player_coords, constants):
     return col, row
 
 
-def get_hex_land_neighbors(game_map, x, y):
+def get_hex_land_neighbors(height_map, x, y):
     neighbors = []
     for direction in hex_directions:
         dx, dy = direction
-        if game_map.terrain[dx + x][dy + y + (x % 2) * (dx % 2)] > 2:
+        if height_map[dx + x][dy + y + (x % 2) * (dx % 2)] > 2:
             neighbors.append((dx + x, dy + y + (x % 2) * (dx % 2)))
     return neighbors
 
@@ -207,7 +207,7 @@ def get_fov(fighter, game_map):
                 if hx not in viewed_hexes[1:]:
                     viewed_hexes.append(hx)
                 if (0 <= hx.col < game_map.width) and (0 <= hx.row < game_map.height) \
-                        and 2 < game_map.terrain[hx.col][hx.row]:
+                        and 2 < game_map.terrain[(hx.col, hx.row)].elevation:
                     break
             
             current = cube_neighbor(current, i)

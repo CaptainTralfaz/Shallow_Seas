@@ -2,7 +2,7 @@ from queue import Queue
 from random import randint
 
 from src.map_objects.map_utils import hex_directions, get_hex_land_neighbors
-
+from src.map_objects.tile import Terrain
 
 def generate_terrain(game_map, island_size: int, max_seeds: int):
     """
@@ -14,7 +14,8 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
     """
     num_seeds = randint(max_seeds // 2, max_seeds)
     seeds = get_seed_locations(width=game_map.width, height=game_map.height, num=num_seeds)
-    
+    height_map = [[0 for y in range(game_map.height)] for x in range(game_map.width)]
+
     for seed in seeds:
         size = randint(island_size // 2, island_size)
         x, y = seed
@@ -31,9 +32,9 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
             if 1 <= x + dx < game_map.width - 2 and 1 <= y + dy < game_map.width - 2:
                 x = x + dx
                 y = y + dy
-                game_map.terrain[x][y] += 1
+                height_map[x][y] += 1
     
-    islands = find_all_islands(game_map)
+    islands = find_all_islands(height_map, game_map.width, game_map.height)
     largest, largest_islands = get_largest_islands(islands)
     
     for island in islands:
@@ -46,22 +47,26 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
                     y = dy + tile_y
                 else:
                     y = dy + tile_y + tile_x % 2
-                if (0 <= x < game_map.width) and (0 <= y < game_map.height) and game_map.terrain[x][y] == 0:
-                    game_map.terrain[x][y] += 1
+                if (0 <= x < game_map.width) and (0 <= y < game_map.height) and height_map[x][y] == 0:
+                    height_map[x][y] += 1
         
         if len(island) == largest and not game_map.towns:
-            valid_tiles = remove_bad_tiles(game_map, island)
+            valid_tiles = remove_bad_tiles(height_map, island)
             print(valid_tiles)
             town_tile = randint(0, len(valid_tiles) - 1)
             game_map.towns.append(valid_tiles[town_tile])
             print(game_map.towns)
 
+    for x in range(game_map.width):
+        for y in range(game_map.height):
+            game_map.terrain[(x, y)] = Terrain(x=x, y=y, elevation=height_map[x][y])
 
-def remove_bad_tiles(game_map, island):
+
+def remove_bad_tiles(height_map, island):
     choices = []
     for (x, y) in island:
         # make sure elevation is sand, grass, or jungle, and make sure there is at least 1 water next to tile
-        if (3 <= game_map.terrain[x][y] <= 5) and len(get_hex_land_neighbors(game_map, x, y)) < 6:
+        if (3 <= height_map[x][y] <= 5) and len(get_hex_land_neighbors(height_map, x, y)) < 6:
             choices.append((x, y))
     return choices
 
@@ -88,16 +93,16 @@ def get_largest_islands(islands):
     return largest_length, largest_islands
 
 
-def find_all_islands(game_map):
+def find_all_islands(height_map, width, height):
     island_tiles = []  # holds set of all coordinates in island found so far
     explored = []
     island_list = []
-    for x in range(1, game_map.width - 2):
-        for y in range(1, game_map.height - 2):
-            if (x, y) not in island_tiles and (x, y) not in explored and game_map.terrain[x][y] > 2:
+    for x in range(1, width - 2):
+        for y in range(1, height - 2):
+            if (x, y) not in island_tiles and (x, y) not in explored and height_map[x][y] > 2:
                 # found a land tile, so...
                 #  get all tiles in this island
-                new_island_tiles = explore_hex_island_iterative(game_map, x, y)
+                new_island_tiles = explore_hex_island_iterative(height_map, x, y)
                 explored.extend(new_island_tiles)
                 island_list.append(new_island_tiles)
                 # print(island_list)
