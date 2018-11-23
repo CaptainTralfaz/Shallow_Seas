@@ -170,7 +170,7 @@ def render_status(game_map, player, entities, constants, mouse_x, mouse_y):
             and constants['map_width'] <= mouse_x < constants['display_width'] - 1 \
             and 0 <= mouse_y <= constants['view_height']:
         text = None
-        if game_map.terrain[grid_x][grid_y].elevation.value >= Elevation.DEEPS.value:
+        if game_map.terrain[grid_x][grid_y].elevation >= Elevation.DEEPS:
             text = game_map.terrain[grid_x][grid_y].name
         if text:
             text_cube = hex_to_cube(Hex(grid_x, grid_y))
