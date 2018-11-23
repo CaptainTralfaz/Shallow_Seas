@@ -31,7 +31,7 @@ def main():
     
     size_component = Size(2)
     view_component = View(size_component.size + 3)
-    mast_component = Masts(masts=2, size=size_component.size)
+    mast_component = Masts(name="Mast", masts=2, size=size_component.size)
     mobile_component = Mobile(direction=0, max_momentum=size_component.size * 2 + 2)
     player_icon = constants['icons']['ship_1_mast']
     player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
