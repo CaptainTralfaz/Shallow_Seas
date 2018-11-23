@@ -57,7 +57,7 @@ class MeleeMonster:
                     entity.mobile.rowing = 2
                     message_log.add_message('{} has a burst of speed'.format(entity.name), colors['yellow'])
                 elif relative_location in ["PH"] \
-                        or relative_location in ["PBH", "PBA"] and relative_dir in [0, 1, 2, 3, 4] \
+                        or relative_location in ["PBH", "PBA"] and relative_dir in [1, 2, 3, 4] \
                         or relative_location in ["PQA"] and relative_dir in [0, 1, 2, 3, 5] \
                         or relative_location in ["PQH"] and relative_dir in [0, 1, 2, 3] \
                         or relative_location in ["SQA"] and relative_dir in [2] \
@@ -68,7 +68,7 @@ class MeleeMonster:
                 elif relative_location in ["SH"] \
                         or relative_location in ["PQA"] and relative_dir in [4] \
                         or relative_location in ["PQH"] and relative_dir in [4, 5] \
-                        or relative_location in ["SBH", "SBA"] and relative_dir in [0, 2, 3, 4, 5] \
+                        or relative_location in ["SBH", "SBA"] and relative_dir in [2, 3, 4, 5] \
                         or relative_location in ["SQA"] and relative_dir in [0, 1, 3, 4, 5] \
                         or relative_location in ["SQH"] and relative_dir in [0, 3, 4, 5] \
                         or relative_location in ["FA", "AA"] and relative_dir in [4, 5] \
@@ -80,6 +80,9 @@ class MeleeMonster:
                         or relative_location in ["FA"] and relative_dir in [0, 3]:
                     entity.mobile.rowing = 2
                     message_log.add_message('{} has a burst of speed'.format(entity.name), colors['yellow'])
+                elif relative_location in ["PBH", "PBA", "SBH", "SBA"] and relative_dir in [0]:
+                    entity.mobile.rowing = 1
+                    message_log.add_message('{} paces your vessel'.format(entity.name), colors['yellow'])
                 elif relative_location in ["OO"] \
                         or relative_location in ["AA"] and relative_dir in [0]:
                     entity.mobile.rowing = -1

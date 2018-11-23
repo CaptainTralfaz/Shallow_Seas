@@ -1,5 +1,5 @@
 class Weapon:
-    def __init__(self, name, location, min_range, max_range, structure_points,  damage, effects):
+    def __init__(self, name, location, min_range, max_range, structure_points,  damage, effects, cool_down=None):
         self.name = name
         self.location = location
         self.min_range = min_range
@@ -8,6 +8,8 @@ class Weapon:
         self.max_sp = structure_points
         self.damage = damage
         self.effects = effects
+        self.current_cd = 0
+        self.cool_down = cool_down
         
     def take_damage(self, amount):
         messages = []

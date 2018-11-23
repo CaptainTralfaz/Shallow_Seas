@@ -37,7 +37,7 @@ class Mobile:
                 break
             # if not flying also...
             elif game_map.in_bounds(new_x, new_y) and \
-                    game_map.terrain[new_x][new_y].elevation.value > Elevation.SHALLOWS.value:
+                    game_map.terrain[new_x][new_y].elevation > Elevation.SHALLOWS:
                 print("{} crashed into island!".format(self.owner.name))
                 # take damage depending on speed
                 self.current_speed = 0
@@ -83,6 +83,6 @@ def can_move_direction(neighbor, game_map):
         return False
     # TODO: account for flyers
     elif game_map.in_bounds(new_x, new_y) \
-            and game_map.terrain[new_x][new_y].elevation.value > Elevation.SHALLOWS.value:
+            and game_map.terrain[new_x][new_y].elevation > Elevation.SHALLOWS:
         return False
     return True

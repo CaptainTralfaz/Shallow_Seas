@@ -177,7 +177,7 @@ def get_fov(fighter, game_map):
                 if hx not in viewed_hexes[1:]:
                     viewed_hexes.append(hx)
                 if game_map.in_bounds(hx.col, hx.row) \
-                        and Elevation.SHALLOWS.value < game_map.terrain[hx.col][hx.row].elevation.value:
+                        and Elevation.SHALLOWS < game_map.terrain[hx.col][hx.row].elevation:
                     break
             
             current = cube_neighbor(current, i)
