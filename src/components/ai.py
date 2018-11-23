@@ -27,7 +27,9 @@ class MeleeMonster:
         entity = self.owner
         neighbors = get_hex_neighbors(entity.x, entity.y)
         # critter can see target or has a target
-        if (target.x, target.y) in entity.view.fov and (target.x, target.y) not in game_map.towns:
+        if (target.x, target.y) in entity.view.fov:
+                # and hasattr(game_map.terrain[target.x][target.y], 'decoration') \
+                # and game_map.terrain[target.x][target.y].decoration.name is not 'Town':
             # can see you
             message_log.add_message('The {} at {}:{} has spotted you!!'.format(entity.name, entity.x, entity.y),
                                     colors['light_red'])

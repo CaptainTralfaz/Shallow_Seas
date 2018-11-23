@@ -118,12 +118,13 @@ def main():
                                             constants['colors']['aqua'])
                 
                 if other_action:
-                    for decoration in game_map.decorations:
-                        if (player.x, player.y) == decoration['location'] and decoration['name'] in ['salvage']:
-                            message_log.add_message('Grabbed {}!'.format(decoration['name']),
-                                                    constants['colors']['aqua'])
-                            game_map.decorations.remove({'name': 'salvage', 'location': (player.x, player.y)})
-                    if (player.x, player.y) in game_map.towns:
+                    # for decoration in game_map.decorations:
+                    #     if (player.x, player.y) == decoration['location'] and decoration['name'] in ['salvage']:
+                    #         message_log.add_message('Grabbed {}!'.format(decoration['name']),
+                    #                                 constants['colors']['aqua'])
+                    #         game_map.decorations.remove({'name': 'salvage', 'location': (player.x, player.y)})
+                    if game_map.terrain[player.x][player.y].decoration \
+                            and game_map.terrain[player.x][player.y].decoration.name == 'Town':
                         message_log.add_message('Ahoy! In this town, ye can: trade, repair, hire crew... or Plunder!',
                                                 constants['colors']['aqua'])
                 

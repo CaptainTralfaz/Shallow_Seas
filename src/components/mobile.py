@@ -1,4 +1,5 @@
 from src.map_objects.map_utils import hex_directions
+from src.map_objects.tile import Elevation
 
 
 class Mobile:
@@ -22,7 +23,10 @@ class Mobile:
                 new_y = self.owner.y + dy + self.owner.x % 2
             # check for collisions!
             # TODO: Send to collision method, as determined by movement type (sail, flying, swim/row, etc)
-            if (new_x, new_y) in game_map.towns and self.owner.name is "player":
+            if game_map.in_bounds(new_x, new_y) \
+                    and game_map.terrain[new_x][new_y].decoration \
+                    and game_map.terrain[new_x][new_y].decoration.name == 'Town' \
+                    and self.owner.name is "player":
                 print('{} sailed into Town'.format(self.owner.name))
                 self.owner.x = new_x
                 self.owner.y = new_y
@@ -32,8 +36,8 @@ class Mobile:
                     self.owner.mast_sail.current_sails = 0
                 break
             # if not flying also...
-            elif (0 <= new_x < game_map.width) and (0 <= new_y < game_map.height) and \
-                    game_map.terrain[new_x][new_y] >= 3:
+            elif game_map.in_bounds(new_x, new_y) and \
+                    game_map.terrain[new_x][new_y].elevation.value > Elevation.SHALLOWS.value:
                 print("{} crashed into island!".format(self.owner.name))
                 # take damage depending on speed
                 self.current_speed = 0
@@ -78,6 +82,7 @@ def can_move_direction(neighbor, game_map):
     if not game_map.in_bounds(x=new_x, y=new_y, margin=1):
         return False
     # TODO: account for flyers
-    elif (0 <= new_x < game_map.width) and (0 <= new_y < game_map.height) and game_map.terrain[new_x][new_y] > 2:
+    elif game_map.in_bounds(new_x, new_y) \
+            and game_map.terrain[new_x][new_y].elevation.value > Elevation.SHALLOWS.value:
         return False
     return True

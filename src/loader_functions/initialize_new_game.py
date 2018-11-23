@@ -78,7 +78,7 @@ def get_constants():
         'sand': pygame.image.load('icons/Sand3d.png'),
         'swamp': pygame.image.load('icons/Swamp3d.png'),
         'grass': pygame.image.load('icons/Grass3d.png'),
-        'forest': pygame.image.load('icons/Forest3d.png'),
+        'jungle': pygame.image.load('icons/Jungle3d.png'),
         'mountain': pygame.image.load('icons/Mountain3d.png'),
         'volcano': pygame.image.load('icons/Volcano3d.png'),
         'town': pygame.image.load('icons/Town3d.png'),

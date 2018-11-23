@@ -7,6 +7,7 @@ from src.components.view import View
 from src.entity import Entity
 from src.map_objects.map_generator import generate_terrain
 from src.map_objects.map_utils import hex_directions
+from src.map_objects.tile import Decoration, Elevation
 
 
 class GameMap:
@@ -16,10 +17,7 @@ class GameMap:
         self.wind_direction = self.starting_wind
         self.wind_turn_count = 0
         self.max_wind_count = 50
-        self.seen = [[False for y in range(height)] for x in range(width)]
-        self.terrain = [[0 for y in range(height)] for x in range(width)]
-        self.decorations = []
-        self.towns = []
+        self.terrain = [[None for y in range(height)] for x in range(width)]
         
         # TODO: add fog as another cellular automata layer that changes (grows or shrinks) every turn
     
@@ -40,7 +38,7 @@ class GameMap:
 def make_map(width: int, height: int, entities: list, max_entities: int, icons: list, islands: int, seeds: int):
     game_map = GameMap(width=width, height=height)
     generate_terrain(game_map, island_size=islands, max_seeds=seeds)
-    game_map.decorations = decorate(game_map)
+    decorate(game_map)
     place_entities(game_map, entities=entities, max_entities=max_entities, icons=icons)
     return game_map
 
@@ -57,7 +55,6 @@ def change_wind(game_map: GameMap, message_log, color):
     """
     delay = 10  # leave wind for at least this many turns
     change_chance = randint(0, game_map.max_wind_count)
-    # print("chance to change: {}/{}: {}".format(game_map.wind_turn_count, game_map.max_wind_count, change_chance))
     if change_chance + delay < game_map.wind_turn_count:
         # change wind 0: dies down / picks up
         #             1: rotate left
@@ -67,12 +64,11 @@ def change_wind(game_map: GameMap, message_log, color):
             # if no wind, wind starts in random direction
             game_map.wind_direction = randint(0, len(hex_directions) - 1)
             game_map.wind_turn_count = 0
-            # print("wind starts up, direction: {}".format(game_map.wind_direction))
+            message_log.add_message('Wind picks up.', color)
         else:
             # if wind, 0=die down, 1 = rotate left, 2 = rotate right
             change = randint(0, 4)
             if change == 0:
-                # print("{}: wind dies down".format(change))
                 # wind dies down
                 message_log.add_message('Wind dies down.', color)
                 game_map.wind_direction = None
@@ -82,39 +78,31 @@ def change_wind(game_map: GameMap, message_log, color):
                 game_map.wind_direction -= 1
                 if game_map.wind_direction < 0:
                     game_map.wind_direction += len(hex_directions)
-                # print("new wind direction: {}, rotated right".format(game_map.wind_direction))
             elif change in [3, 4]:
-                # print("{}: wind rotates left".format(change))
                 # wind rotates left
-                message_log.add_message('Wind rotates portward.', color)
+                message_log.add_message('Wind rotates port.', color)
                 game_map.wind_direction += 1
                 if game_map.wind_direction >= len(hex_directions):
                     game_map.wind_direction -= len(hex_directions)
-                # print("new wind direction: {}, rotated left".format(game_map.wind_direction))
     else:
         game_map.wind_turn_count += 1
 
 
 def decorate(game_map: GameMap):
-    locations = []  # leaving a 2 tile margin around map
     for x in range(2, game_map.width - 3):
         for y in range(2, game_map.height - 3):
             decor = randint(0, 500)
-            if game_map.terrain[x][y] < 3:
+            if game_map.terrain[x][y].elevation.value < Elevation.DUNES.value:
                 if 0 <= decor <= 1:
-                    locations.append({'name': 'rocks', 'location': (x, y)})
+                    game_map.terrain[x][y].decoration = Decoration('Rocks')
                 elif 2 <= decor <= 3:
-                    locations.append({'name': 'coral', 'location': (x, y)})
+                    game_map.terrain[x][y].decoration = Decoration('Coral')
                 elif 4 <= decor <= 6:
-                    locations.append({'name': 'sandbar', 'location': (x, y)})
+                    game_map.terrain[x][y].decoration = Decoration('Sandbar')
                 elif 7 <= decor <= 10:
-                    locations.append({'name': 'seaweed', 'location': (x, y)})
-                elif decor == 500 and randint(0, 9) in [0, 1]:
-                    locations.append({'name': 'salvage', 'location': (x, y)})
-                    print('salvage at {}:{}'.format(x, y))
-            elif (x, y) in game_map.towns:
-                locations.append({'name': 'town', 'location': (x, y)})
-    return locations
+                    game_map.terrain[x][y].decoration = Decoration('Seaweed')
+                # elif decor == 500 and randint(0, 9) in [0, 1]:
+                #     game_map.terrain[x][y].decoration = Decoration('salvage')
 
 
 def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: dict):
@@ -131,7 +119,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
         while not placed:
             x = randint(1, game_map.width - 2)
             y = randint(1, game_map.height - 2)
-            if game_map.terrain[x][y] <= 2:
+            if game_map.terrain[x][y].elevation.value < Elevation.DUNES.value:
                 placed = True
                 # TODO: get these from factory
                 if randint(0, 100) < 50:

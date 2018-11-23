@@ -1,45 +1,76 @@
-class Tile:
-    """
-    A tile on a map. It may or may not be blocked, and may or may not block sight.
-    """
-    
-    def __init__(self, blocked, block_sight=None):
-        self.blocked = blocked
-        
-        # By default, if a tile is blocked, it also blocks sight
-        if block_sight is None:
-            block_sight = blocked
-        
-        self.block_sight = block_sight
+from enum import Enum
 
 
 class Terrain:
-    def __init__(self, x, y, height, icons, colors):
-        self.height = height
-        self.x = x
-        self.y = y
+    def __init__(self, elevation):
+        self.elevation = Elevation(elevation)
+        self.seen = False
+        self.fog = False
+        self.decoration = None
         
-        if self.height == 0:
-            self.icon = icons['deeps']
-            self.color = colors['dark_blue']
-        elif self.height == 1:
-            self.icon = icons['water']
-            self.color = colors['blue']
-        elif self.height == 2:
-            self.icon = icons['shallows']
-            self.color = colors['aqua']
-        elif self.height == 3:
-            self.icon = icons['sand']
-            self.color = colors['cantaloupe']
-        elif self.height == 4:
-            self.icon = icons['grass']
-            self.color = colors['green']
-        elif self.height == 5:
-            self.icon = icons['forest']
-            self.color = colors['dark_green']
-        elif self.height == 6:
-            self.icon = icons['mountain']
-            self.color = colors['brown']
-        elif self.height > 7:
-            self.icon = icons['volcano']
-            self.color = colors['red']
+        if self.elevation == Elevation.DEEPS:
+            self.name = 'Deeps'
+            self.icon = 'deeps'
+            self.color = 'light_blue'
+        elif elevation == Elevation.WATER:
+            self.name = 'Water'
+            self.icon = 'water'
+            self.color = 'blue'
+        elif self.elevation == Elevation.SHALLOWS:
+            self.name = 'Shallows'
+            self.icon = 'shallows'
+            self.color = 'aqua'
+        elif self.elevation == Elevation.DUNES:
+            self.name = 'Dunes'
+            self.icon = 'sand'
+            self.color = 'cantaloupe'
+        elif self.elevation == Elevation.GRASSLAND:
+            self.name = 'Grassland'
+            self.icon = 'grass'
+            self.color = 'light_green'
+        elif self.elevation == Elevation.JUNGLE:
+            self.name = 'Jungle'
+            self.icon = 'jungle'
+            self.color = 'medium_green'
+        elif self.elevation == Elevation.MOUNTAIN:
+            self.name = 'Mountain'
+            self.icon = 'mountain'
+            self.color = 'text'
+        elif self.elevation == Elevation.VOLCANO:
+            self.name = 'Volcano'
+            self.icon = 'volcano'
+            self.color = 'light_red'
+
+
+class Decoration:
+    def __init__(self, name):
+        self.name = name
+        self.icon = None
+        self.color = None
+        
+        if self.name == 'Rocks':
+            self.icon = 'rocks'
+            self.color = 'text'
+        elif self.name == 'Coral':
+            self.icon = 'coral'
+            self.color = 'carnation'
+        elif self.name == 'Sandbar':
+            self.icon = 'sandbar'
+            self.color = 'cantaloupe'
+        elif self.name == 'Seaweed':
+            self.icon = 'seaweed'
+            self.color = 'medium_green'
+        elif self.name == 'Town':
+            self.icon = 'town'
+            self.color = 'black'
+
+
+class Elevation(Enum):
+    DEEPS = 0
+    WATER = 1
+    SHALLOWS = 2
+    DUNES = 3
+    GRASSLAND = 4
+    JUNGLE = 5
+    MOUNTAIN = 6
+    VOLCANO = 7
