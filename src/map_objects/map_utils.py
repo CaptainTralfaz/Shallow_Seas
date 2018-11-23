@@ -1,5 +1,6 @@
 from src.map_objects.tile import Elevation
 
+
 class Cube:
     def __init__(self, x, y, z):
         self.x = x
@@ -28,17 +29,6 @@ direction_angle = [0, 60, 120, 180, 240, 300]
 #     "SE": 4,
 #     "NE": 5
 # }
-
-elevation = {
-    0: "ocean",
-    1: "sea",
-    2: "shallows",
-    3: "dunes",
-    4: "grassland",
-    5: "jungle",
-    6: "mountain",
-    7: "volcano"
-}
 
 
 def get_grid_from_coords(coords, player_coords, constants):
@@ -186,8 +176,8 @@ def get_fov(fighter, game_map):
                 hx = cube_to_hex(cube)
                 if hx not in viewed_hexes[1:]:
                     viewed_hexes.append(hx)
-                if (0 <= hx.col < game_map.width) and (0 <= hx.row < game_map.height) \
-                        and Elevation.DUNES.value < game_map.terrain[hx.col][hx.row].elevation.value:
+                if game_map.in_bounds(hx.col, hx.row) \
+                        and Elevation.SHALLOWS.value < game_map.terrain[hx.col][hx.row].elevation.value:
                     break
             
             current = cube_neighbor(current, i)
@@ -242,51 +232,51 @@ def get_spatial_relation(tx, ty, td, ex, ey, ed):
         rotated_direction -= 1
     if rotated_direction < 0:
         rotated_direction += 6
-    print("relative direction: ", rotated_direction)
+    # print("relative direction: ", rotated_direction)
     target_rotated = cube_add(target_rotated, entity_cube)
     
     # find relationship
     if (entity_cube.x - target_rotated.x) > 0 and (entity_cube.y - target_rotated.y) > 0:
-        print("target was in Port Quarter hextant, relative direction: {}".format(rotated_direction))
+        # print("target was in Port Quarter hextant, relative direction: {}".format(rotated_direction))
         return "PQH", rotated_direction
     elif (entity_cube.x - target_rotated.x) < 0 and (entity_cube.y - target_rotated.y) < 0:
-        print("target was in Starboard Bow hextant, relative direction: {}".format(rotated_direction))
+        # print("target was in Starboard Bow hextant, relative direction: {}".format(rotated_direction))
         return "SBH", rotated_direction
     elif (entity_cube.x - target_rotated.x) > 0 and (entity_cube.z - target_rotated.z) > 0:
-        print("target was in Port Bow hextant, relative direction: {}".format(rotated_direction))
+        # print("target was in Port Bow hextant, relative direction: {}".format(rotated_direction))
         return "PBH", rotated_direction
     elif (entity_cube.x - target_rotated.x) < 0 and (entity_cube.z - target_rotated.z) < 0:
-        print("target was in Starboard Quarter hextant, relative direction: {}".format(rotated_direction))
+        # print("target was in Starboard Quarter hextant, relative direction: {}".format(rotated_direction))
         return "SQH", rotated_direction
     elif (entity_cube.y - target_rotated.y) > 0 and (entity_cube.z - target_rotated.z) > 0:
-        print("target was in Starboard hextant, relative direction: {}".format(rotated_direction))
+        # print("target was in Starboard hextant, relative direction: {}".format(rotated_direction))
         return "SH", rotated_direction
     elif (entity_cube.y - target_rotated.y) < 0 and (entity_cube.z - target_rotated.z) < 0:
-        print("target was in Port hextant, relative direction: {}".format(rotated_direction))
+        # print("target was in Port hextant, relative direction: {}".format(rotated_direction))
         return "PH", rotated_direction
     elif (entity_cube.x - target_rotated.x) > 0 > (entity_cube.y - target_rotated.y) \
             and (entity_cube.z - target_rotated.z) == 0:
-        print("target was on Port Bow axis, relative direction: {}".format(rotated_direction))
+        # print("target was on Port Bow axis, relative direction: {}".format(rotated_direction))
         return "PBA", rotated_direction
     elif (entity_cube.x - target_rotated.x) < 0 < (entity_cube.y - target_rotated.y) \
             and (entity_cube.z - target_rotated.z) == 0:
-        print("target was on Starboard Quarter axis, relative direction: {}".format(rotated_direction))
+        # print("target was on Starboard Quarter axis, relative direction: {}".format(rotated_direction))
         return "SQA", rotated_direction
     elif (entity_cube.x - target_rotated.x) > 0 > (entity_cube.z - target_rotated.z) \
             and ((entity_cube.y - target_rotated.y) == 0):
-        print("target was on Port Quarter axis, relative direction: {}".format(rotated_direction))
+        # print("target was on Port Quarter axis, relative direction: {}".format(rotated_direction))
         return "PQA", rotated_direction
     elif (entity_cube.x - target_rotated.x) < 0 < (entity_cube.z - target_rotated.z) \
             and ((entity_cube.y - target_rotated.y) == 0):
-        print("target was on Starboard Bow axis, relative direction: {}".format(rotated_direction))
+        # print("target was on Starboard Bow axis, relative direction: {}".format(rotated_direction))
         return "SBA", rotated_direction
     elif (entity_cube.y - target_rotated.y) > 0 > (entity_cube.z - target_rotated.z) \
             and ((entity_cube.x - target_rotated.x) == 0):
-        print("target was directly Astern, relative direction: {}".format(rotated_direction))
+        # print("target was directly Astern, relative direction: {}".format(rotated_direction))
         return "AA", rotated_direction
     elif (entity_cube.y - target_rotated.y) < 0 < (entity_cube.z - target_rotated.z) \
             and ((entity_cube.x - target_rotated.x) == 0):
-        print("target was directly Forward, relative direction: {}".format(rotated_direction))
+        # print("target was directly Forward, relative direction: {}".format(rotated_direction))
         return "FA", rotated_direction
     else:  # expected position of target is on entity's expected location
         return "OO", rotated_direction

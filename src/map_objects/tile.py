@@ -2,10 +2,8 @@ from enum import Enum
 
 
 class Terrain:
-    def __init__(self, x, y, elevation):
+    def __init__(self, elevation):
         self.elevation = Elevation(elevation)
-        self.x = x
-        self.y = y
         self.seen = False
         self.fog = False
         self.decoration = None

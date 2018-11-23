@@ -1,5 +1,4 @@
 from src.map_objects.map_utils import get_fov
-from collections import Set
 
 
 class View:

@@ -55,7 +55,6 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
         
         if len(island) == largest and not (town_x or town_y):
             valid_tiles = remove_bad_tiles(height_map, island)
-            print(valid_tiles)
             town_x, town_y = valid_tiles[randint(0, len(valid_tiles) - 1)]
             print(town_x, town_y)
             
@@ -63,7 +62,7 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
         for y in range(game_map.height):
             if height_map[x][y] > 7:
                 height_map[x][y] = 7
-            game_map.terrain[x][y] = Terrain(x=x, y=y, elevation=Elevation(height_map[x][y]))
+            game_map.terrain[x][y] = Terrain(elevation=Elevation(height_map[x][y]))
             if x == town_x and y == town_y:
                 game_map.terrain[town_x][town_y].decoration = Decoration('Town')
 
