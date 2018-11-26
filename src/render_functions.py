@@ -83,20 +83,15 @@ def render_board(game_map, player, entities, constants, targeting):
                                               y * constants['tile_size'] + x % 2 * constants['half_tile']
                                               - constants['half_tile'] - 2 * constants['margin']))
                     
-    icon = create_ship_icon(player, constants)
-    game_map_surf.blit(rot_center(icon, direction_angle[player.mobile.direction]),
-                       (player.x * constants['tile_size'] - constants['margin'],
-                        player.y * constants['tile_size'] + player.x % 2 * constants['half_tile']
-                        - constants['half_tile']))
-    
     for entity in entities:
         if (0 <= entity.x < game_map.width) \
                 and (0 <= entity.y < game_map.height) \
                 and (entity.x, entity.y) in player.view.fov:
-            if hasattr(entity, 'mast_sail'):
+            if entity.mast_sail:
                 icon = create_ship_icon(entity, constants)
             else:
                 icon = entity.icon
+            
             game_map_surf.blit(rot_center(icon, direction_angle[entity.mobile.direction]),
                                (entity.x * constants['tile_size'] - constants['margin'],
                                 entity.y * constants['tile_size'] + entity.x % 2 * constants['half_tile']
@@ -173,9 +168,7 @@ def render_status(game_map, player, entities, constants, mouse_x, mouse_y):
         if game_map.terrain[grid_x][grid_y].elevation >= Elevation.DEEPS:
             text = game_map.terrain[grid_x][grid_y].name
         if text:
-            text_cube = hex_to_cube(Hex(grid_x, grid_y))
-            decor_text = constants['font'].render("{} X:{} Y:{} Z:{}".format(text, text_cube.x,
-                                                                             text_cube.y, text_cube.z), 1,
+            decor_text = constants['font'].render("{} X:{} Y:{}".format(text, grid_x, grid_y), 1,
                                                   constants['colors'].get('text'))
             decor_rect = decor_text.get_rect()
             decor_rect.center = (constants['status_width'] // 2,
@@ -183,7 +176,8 @@ def render_status(game_map, player, entities, constants, mouse_x, mouse_y):
             status_panel.blit(decor_text, decor_rect)
         
         for entity in entities:
-            if (0 <= entity.x < game_map.width) \
+            if entity.name is not 'player' \
+                    and (0 <= entity.x < game_map.width) \
                     and (0 <= entity.y < game_map.height) \
                     and (entity.x, entity.y) in player.view.fov \
                     and (entity.x, entity.y) == (grid_x, grid_y):
@@ -221,80 +215,51 @@ def render_border(panel, color):
 
 
 def render_ship_info(status_panel, entity, constants, vertical):
-    font_size = constants['font'].get_height()
-    # ship status
-    
+    font= constants['font']
     # ship name
-    cube = hex_to_cube(Hex(entity.x, entity.y))
-    name_text = constants['font'].render("{} X:{} Y:{} Z:{}".format(entity.name, cube.x, cube.y, cube.z), 1,
-                                         constants['colors'].get('text'))
+    name_text = font.render("{} X:{} Y:{}".format(entity.name, entity.x, entity.y), 1, constants['colors']['text'])
     name_rect = name_text.get_rect()
     name_rect.center = (constants['status_width'] // 2, vertical + constants['half_tile'])
     status_panel.blit(name_text, name_rect)
-    vertical += font_size + constants['margin']
+    vertical += font.get_height() + constants['margin']
     
-    # ship sails
-    if hasattr(entity, 'mast_sail') and entity.mast_sail.masts > 0:
-        sail_text = constants['font'].render(
-            'Sails Raised:  {} / {}'.format(entity.mast_sail.current_sails, entity.mast_sail.max_sails), 1,
-            constants['colors'].get('text'))
-        sail_rect = sail_text.get_rect()
-        sail_rect.midleft = (constants['margin'], vertical + constants['half_tile'])
-        sail_max_bar = pygame.Surface(
-            (status_panel.get_width() - 2 * constants['margin'], constants['font'].get_height()))
-        sail_max_bar.fill(constants['colors'].get('dark_blue'))
-        bar_length = math.floor(float(entity.mast_sail.current_sails / entity.mast_sail.max_sails *
-                                      (status_panel.get_width() - 2 * constants['margin'])))
-        if bar_length < 0:
-            bar_length = 0
-        sail_bar = pygame.Surface((bar_length, constants['font'].get_height()))
-        sail_bar.fill(constants['colors'].get('light_blue'))
-        sail_max_bar.blit(sail_bar, (0, 0))
-        status_panel.blit(sail_max_bar, sail_rect)
-        status_panel.blit(sail_text, sail_rect)
-        vertical += font_size + constants['margin']
-    
-    # ship momentum
-    momentum_text = constants['font'].render('Momentum:  {} / {}'.format(entity.mobile.current_momentum,
-                                                                         entity.mobile.max_momentum),
-                                             1, constants['colors'].get('text'))
-    momentum_rect = momentum_text.get_rect()
-    momentum_rect.midleft = (constants['margin'], vertical + constants['half_tile'])
-    momentum_max_bar = pygame.Surface((status_panel.get_width() - 2 * constants['margin'],
-                                       constants['font'].get_height()))
-    momentum_max_bar.fill(constants['colors'].get('dark_red'))
-    bar_length = math.floor(float(entity.mobile.current_momentum / entity.mobile.max_momentum *
-                                  (status_panel.get_width() - 2 * constants['margin'])))
-    if bar_length < 0:
-        bar_length = 0
-    momentum_bar = pygame.Surface((bar_length, constants['font'].get_height()))
-    momentum_bar.fill(constants['colors'].get('light_red'))
-    momentum_max_bar.blit(momentum_bar, (0, 0))
-    status_panel.blit(momentum_max_bar, momentum_rect)
-    status_panel.blit(momentum_text, momentum_rect)
-    vertical += font_size + constants['margin']
-    
-    # ship speed
-    speed_text = constants['font'].render('Speed:  {} / {}'.format(entity.mobile.current_speed,
-                                                                   entity.mobile.max_speed), 1,
-                                          constants['colors'].get('text'))
-    speed_rect = speed_text.get_rect()
-    speed_rect.midleft = (constants['margin'], vertical + constants['half_tile'])
-    speed_max_bar = pygame.Surface((status_panel.get_width() - 2 * constants['margin'], constants['font'].get_height()))
-    speed_max_bar.fill(constants['colors'].get('dark_green'))
-    bar_length = math.floor(float(entity.mobile.current_speed / entity.mobile.max_speed *
-                                  (status_panel.get_width() - 2 * constants['margin'])))
-    if bar_length < 0:
-        bar_length = 0
-    speed_bar = pygame.Surface((bar_length, constants['font'].get_height()))
-    speed_bar.fill(constants['colors'].get('light_green'))
-    speed_max_bar.blit(speed_bar, (0, 0))
-    status_panel.blit(speed_max_bar, speed_rect)
-    status_panel.blit(speed_text, speed_rect)
-    vertical += font_size + constants['margin']
-    
+    if entity.mast_sail:
+        status_panel.blit(make_bar('Sails', font, constants['colors']['text'],
+                                   entity.mast_sail.current_sails, entity.mast_sail.max_sails,
+                                   constants['colors']['light_blue'], constants['colors']['dark_blue'],
+                                   status_panel.get_width() - 2 * constants['margin']),
+                          (constants['margin'], vertical+constants['margin']))
+        vertical += font.get_height() + constants['margin'] // 2
+    status_panel.blit(make_bar('Momentum', font, constants['colors']['text'],
+                               entity.mobile.current_momentum, entity.mobile.max_momentum,
+                               constants['colors']['light_red'], constants['colors']['dark_red'],
+                               status_panel.get_width() - 2 * constants['margin']),
+                      (constants['margin'], vertical+constants['margin']))
+    vertical += font.get_height() + constants['margin'] // 2
+    status_panel.blit(make_bar('Speed', font, constants['colors']['text'],
+                               entity.mobile.current_speed, entity.mobile.max_speed,
+                               constants['colors']['light_green'], constants['colors']['dark_green'],
+                               status_panel.get_width() - 2 * constants['margin']),
+                      (constants['margin'], vertical+constants['margin']))
+    vertical += font.get_height() + constants['margin']
+
     return vertical
 
+
+def make_bar(text, font, font_color, current, maximum, top_color, bottom_color, bar_width):
+    max_bar = pygame.Surface((bar_width, font.get_height()))
+    max_bar.fill(bottom_color)
+    current_bar_length = math.floor(float(current / maximum * bar_width))
+    if current_bar_length < 0:
+        current_bar_length = 0
+    current_bar = pygame.Surface((current_bar_length, font.get_height()))
+    current_bar.fill(top_color)
+    bar_text = font.render('{}:  {} / {}'.format(text, current, maximum), 1, font_color)
+    max_bar.blit(current_bar, (0, 0))
+    max_bar.blit(bar_text, (1, 1))
+
+    return max_bar
+    
 
 def clear_all(surface):
     surface.fill((0, 0, 0))
@@ -323,10 +288,17 @@ def render_map(game_map, player, entities, constants):
                                       y * constants['block_size'] + (x % 2) * (constants['block_size'] // 2)
                                       - constants['block_size'] // 2))
                 if game_map.terrain[x][y].decoration:
-                    small_block.fill(constants['colors'][game_map.terrain[x][y].decoration.color])
-                    map_surf.blit(small_block, (x * constants['block_size'] + 1,
-                                                y * constants['block_size'] + (x % 2) * (constants['block_size'] // 2)
-                                                + 1 - constants['block_size'] // 2))
+                    if game_map.terrain[x][y].decoration.name == 'Town':
+                        block.fill(constants['colors'][game_map.terrain[x][y].decoration.color])
+                        map_surf.blit(block, (x * constants['block_size'],
+                                              y * constants['block_size'] + (x % 2) * (constants['block_size'] // 2)
+                                              - constants['block_size'] // 2))
+
+                    else:
+                        small_block.fill(constants['colors'][game_map.terrain[x][y].decoration.color])
+                        map_surf.blit(small_block, (x * constants['block_size'] + 1,
+                                                    y * constants['block_size'] + (x % 2) * (constants['block_size'] // 2)
+                                                    + 1 - constants['block_size'] // 2))
     
     block.fill(constants['colors']['white'])
     map_surf.blit(block, (player.x * constants['block_size'],
@@ -353,7 +325,7 @@ def create_ship_icon(entity, constants):
     size = constants['tile_size']
     icon = pygame.Surface((size, size))
     icon.set_colorkey(constants['colors']['black'])
-    name = 'ship_' + str(entity.size.size) + '_mast'
+    name = 'ship_' + str(entity.size.value) + '_mast'
     sheet = constants['icons'][name]
     if entity.mobile.current_speed > 0:
         icon.blit(sheet.subsurface(0, 0, size, size), (0, 0))  # wake

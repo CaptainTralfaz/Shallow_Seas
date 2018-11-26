@@ -12,7 +12,8 @@ from src.loader_functions.initialize_new_game import get_constants
 from src.map_objects.game_map import make_map, change_wind
 from src.render_functions import render_display
 from src.game_messages import MessageLog
-
+from src.components.weapon_slots import WeaponSlots
+from src.components.weapon import Weapon
 
 def main():
     pygame.init()
@@ -29,16 +30,20 @@ def main():
     
     message_log = MessageLog(constants['log_size'])
     
-    size_component = Size(2)
-    view_component = View(size_component.size + 3)
-    mast_component = Masts(name="Mast", masts=2, size=size_component.size)
-    mobile_component = Mobile(direction=0, max_momentum=size_component.size * 2 + 2)
+    size_component = Size.MEDIUM
+    view_component = View(size=size_component.value + 3)
+    weapon_slot_component = WeaponSlots(size=size_component.value)
+    # name, min_range, max_range, structure_points, damage, cool_down=None, effects=None)
+    weapon_component = Weapon("ballista", 1, 4, 5, 3, cool_down=2)
+    weapon_slot_component.add_all()
+    mast_component = Masts(name="Mast", masts=size_component.value, size=size_component.value)
+    mobile_component = Mobile(direction=0, max_momentum=size_component.value * 2 + 2)
     player_icon = constants['icons']['ship_1_mast']
     player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
                     y=constants['board_height'] - 1, icon=player_icon, view=view_component, size=size_component,
-                    mast_sail=mast_component, mobile=mobile_component)
+                    mast_sail=mast_component, mobile=mobile_component, weapon_slots=weapon_slot_component)
     
-    entities = []
+    entities = [player]
     
     game_map = make_map(constants['board_width'],
                         constants['board_height'],
@@ -138,78 +143,40 @@ def main():
                     message_log.add_message('Slowing, -1 momentum', constants['colors']['aqua'])
                 
                 # ROWING ----------------------------------------------------------------------------------------------
-                if player.mobile.rowing and player.mobile.current_speed < player.mobile.max_speed:
-                    player.mobile.change_momentum(amount=player.mobile.rowing)
-                    # check to make sure a ship can't go to max speed
-                    if player.mobile.current_speed == player.mobile.max_speed:
-                        player.mobile.current_speed -= 1
-                        player.mobile.current_momentum = player.mobile.max_momentum
-                
                 for entity in entities:
                     # change momentum due to rowing
                     if entity.mobile.rowing and entity.mobile.current_speed < entity.mobile.max_speed:
                         entity.mobile.change_momentum(amount=entity.mobile.rowing)
-                        # if (entity.x, entity.y) in player.view.fov:
-                        #     message_log.add_message('{} at {}:{} momentum {}'.format(entity.name,
-                        #                                                              entity.x,
-                        #                                                              entity.y,
-                        #                                                              entity.mobile.rowing))
-                        
                         # check to make sure a ship can't go to max speed
-                        if hasattr(entity, 'mast_sail') \
-                                and entity.mobile.current_speed == entity.mobile.max_speed:
+                        if entity.mast_sail and entity.mobile.current_speed == entity.mobile.max_speed:
                             entity.mobile.current_speed -= 1
                             entity.mobile.current_momentum = entity.mobile.max_momentum
                 
                 # WIND ------------------------------------------------------------------------------------------------
                 # adjust speed for wind for each entity with a sail up if there is wind
                 if game_map.wind_direction is not None:
-                    if hasattr(player, "mast_sail") and player.mast_sail.current_sails > 0:
-                        amount = player.mast_sail.momentum_due_to_wind(wind_direction=game_map.wind_direction)
-                        player.mast_sail.catching_wind = True
-                        if amount:
-                            message_log.add_message('Catching Wind, {} momentum'.format(amount),
-                                                    constants['colors']['green'])
-
-                # adjust speed for wind for each entity with a sail up if there is wind
-                if game_map.wind_direction is not None:
                     for entity in entities:
-                        if hasattr(entity, "mast_sail") and entity.mast_sail.current_sails > 0:
+                        if entity.mast_sail and entity.mast_sail.current_sails > 0:
                             entity.mast_sail.momentum_due_to_wind(wind_direction=game_map.wind_direction)
                             entity.mast_sail.catching_wind = True
                             message_log.add_message('Catching Wind, + momentum')
 
                 # DRAG ------------------------------------------------------------------------------------------------
                 # change momentum due to drag if not rowing or catching wind
-                
-                drag = -1
-                if player.mast_sail.catching_wind or player.mobile.rowing:
-                    drag = 0
-                player.mobile.change_momentum(amount=drag)
-                player.mast_sail.catching_wind = False
-                player.mobile.rowing = 0
-                
                 for entity in entities:
                     drag = -1
-                    if hasattr(entity, "mast_sail") and entity.mast_sail.catching_wind:
+                    if entity.mast_sail and entity.mast_sail.catching_wind:
                         drag = 0
                     elif entity.mobile.rowing:
                         drag = 0
                     entity.mobile.change_momentum(amount=drag)
-                    if hasattr(entity, "mast_sail"):
+                    if entity.mast_sail:
                         entity.mast_sail.catching_wind = False
                     entity.mobile.rowing = 0
                 
                 # MOVEMENT --------------------------------------------------------------------------------------------
-                # move all entities with a current_speed
-                old_x = player.x
-                old_y = player.y
-                player.mobile.move(game_map=game_map)
-                if not (player.x == old_x and player.y == old_y):  # recalculate fov if entity moved
-                    player.view.set_fov(game_map)
-                
                 for entity in entities:
-                    if hasattr(entity, 'mobile'):
+                    if entity.mobile:
                         old_x = entity.x
                         old_y = entity.y
                         entity.mobile.move(game_map=game_map)

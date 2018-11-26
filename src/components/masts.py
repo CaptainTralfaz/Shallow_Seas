@@ -2,7 +2,7 @@ from src.map_objects.map_utils import hex_directions
 
 
 class Masts:
-    def __init__(self, name: str, masts: int, size: int):
+    def __init__(self, name, masts, size):
         self.name = name
         self.size = size
         self.masts = masts

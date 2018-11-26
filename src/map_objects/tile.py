@@ -62,7 +62,7 @@ class Decoration:
             self.color = 'medium_green'
         elif self.name == 'Town':
             self.icon = 'town'
-            self.color = 'black'
+            self.color = 'white'
 
 
 class Elevation(Enum):

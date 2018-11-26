@@ -12,7 +12,7 @@ def get_constants():
     
     map_width = 202  # includes margins
     map_height = 200  # includes margins
-    block_size = 4
+    block_size = 3
     map_block = (block_size, block_size)
     
     view_width = display_width - map_width  # includes margins
@@ -24,14 +24,14 @@ def get_constants():
     message_width = display_width - map_width  # includes margins
     message_height = display_height - view_height  # includes margins
     
-    board_width = 48
-    board_height = 48
+    board_width = 64
+    board_height = 64
     island_size = board_height // 2
     island_seeds = board_height
     
     font = pygame.font.Font('freesansbold.ttf', 15)
     
-    max_entities = 10
+    max_entities = board_width // 4
     log_size = 10
     
     tile_size = 32
@@ -93,6 +93,7 @@ def get_constants():
         'sea_serpent': pygame.image.load('icons/SeaSerpent.png'),
         'sea_turtle': pygame.image.load('icons/SeaTurtle.png'),
         'red_dragon': pygame.image.load('icons/RedDragon.png'),
+        'wyvern': pygame.image.load('icons/Wyvern.png'),
     }
     
     constants = {

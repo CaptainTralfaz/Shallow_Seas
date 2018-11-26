@@ -2,8 +2,8 @@ from src.map_objects.map_utils import get_fov
 
 
 class View:
-    def __init__(self, view=0):
-        self.view = view
+    def __init__(self, size: int):
+        self.view = size
         self.fov = {}
     
     def set_fov(self, game_map):

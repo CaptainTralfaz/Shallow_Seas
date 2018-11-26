@@ -123,9 +123,9 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                 placed = True
                 # TODO: get these from factory
                 if randint(0, 100) < 50:
-                    size_component = Size(2)
-                    view_component = View(size_component.size + 3)
-                    mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.size * 2 + 2)
+                    size_component = Size.MEDIUM
+                    view_component = View(size_component.value + 3)
+                    mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
                     ai_component = PeacefulMonster()
                     npc_icon = icons['sea_turtle']
                     npc = Entity(name='Sea Turtle', x=x, y=y,
@@ -137,12 +137,12 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                     npc.view.set_fov(game_map)
                     print('{} placed at {}:{}'.format(npc.name, x, y))
                 else:
-                    size_component = Size(1)
-                    view_component = View(size_component.size + 3)
-                    mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.size * 2 + 2)
+                    size_component = Size.SMALL
+                    view_component = View(size_component.value + 3)
+                    mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
                     ai_component = MeleeMonster()
-                    npc_icon = icons['sea_serpent']
-                    npc = Entity(name='Sea Serpent', x=x, y=y,
+                    npc_icon = icons['wyvern']
+                    npc = Entity(name='Wyvern', x=x, y=y,
                                  size=size_component,
                                  icon=npc_icon,
                                  view=view_component,
