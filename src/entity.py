@@ -4,7 +4,7 @@ class Entity:
     """
     
     def __init__(self, name, x, y, icon, ai=None, block_view=None, elevation=None, mobile=None,
-                 size=None, view=None, crew=None, mast_sail=None, weapons=None, weapon_slots=None, wings=None,
+                 size=None, view=None, crew=None, mast_sail=None, weapons=None, wings=None,
                  cargo=None, sprite_sheet=None):
         # generics
         self.name = name
@@ -21,7 +21,6 @@ class Entity:
         self.crew = crew
         self.mast_sail = mast_sail
         self.weapons = weapons
-        self.weapon_slots = weapon_slots
         self.wings = wings
         self.cargo = cargo
         self.sprite_sheet = sprite_sheet
@@ -45,8 +44,6 @@ class Entity:
             self.mast_sail.owner = self
         if self.weapons is not None:
             self.weapons.owner = self
-        if self.weapon_slots is not None:
-            self.weapon_slots.owner = self
         if self.wings is not None:
             self.wings.owner = self
         if self.cargo is not None:

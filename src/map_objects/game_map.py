@@ -125,7 +125,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                 if randint(0, 100) < 50:
                     size_component = Size.MEDIUM
                     view_component = View(size_component.value + 3)
-                    mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
+                    mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value)
                     ai_component = PeacefulMonster()
                     npc_icon = icons['sea_turtle']
                     npc = Entity(name='Sea Turtle', x=x, y=y,
@@ -139,7 +139,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                 else:
                     size_component = Size.SMALL
                     view_component = View(size_component.value + 3)
-                    mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
+                    mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value)
                     ai_component = MeleeMonster()
                     npc_icon = icons['wyvern']
                     npc = Entity(name='Wyvern', x=x, y=y,

@@ -198,24 +198,59 @@ def get_cell_from_mouse(x, y, player_column, player_row):
     return col, row
 
 
-def distance_and_values(player, entity):
-    p_cube = hex_to_cube(Hex(player.x, player.y))
-    e_cube = hex_to_cube(Hex(entity.x, entity.y))
-    # print("{},{},{} - {},{},{} = {},{},{} distance {}".format(p_cube.x, p_cube.y, p_cube.z,
-    #                                                           e_cube.x, e_cube.y, e_cube.z,
-    #                                                           p_cube.x - e_cube.x,
-    #                                                           p_cube.y - e_cube.y,
-    #                                                           p_cube.z - e_cube.z,
-    #                                                           cube_distance(p_cube, e_cube)))
-
-
-def get_target_hexes(game_map, player, highlight):
+def get_target_hexes(player):
     target_hexes = []
-    range = 4
-    # for weapon in player.weapons:
-    #     range = weapon.range
-    # for now, just range 1 neighbors
-    target_hexes.extend(get_hex_neighbors(player.x, player.y))
+    p_cube = hex_to_cube(Hex(player.x, player.y))
+    if player.weapons and player.weapons.weapon_list:
+            for weapon in player.weapons.weapon_list:
+                if weapon.location == "Bow":
+                    target_hexes.extend(get_axis_target_cubes(weapon.max_range, p_cube,
+                                                              player.mobile.direction))
+                if weapon.location == "Stern":
+                    target_hexes.extend(get_axis_target_cubes(weapon.max_range, p_cube,
+                                                              reverse_direction(player.mobile.direction)))
+                if weapon.location == "Port":
+                    target_hexes.extend(get_cone_target_cubes(weapon.max_range, p_cube,
+                                                              player.mobile.direction))
+                if weapon.location == "Starboard":
+                    target_hexes.extend(get_cone_target_cubes(weapon.max_range, p_cube,
+                                                              reverse_direction(player.mobile.direction)))
+    return target_hexes
+
+
+def reverse_direction(direction):
+    new_direction = direction - 3
+    if new_direction < 0:
+        return new_direction + 6
+    else:
+        return new_direction
+
+
+def get_axis_target_cubes(max_range, p_cube, direction):
+    target_hexes = []
+    current_cube = p_cube
+    for r in range(max_range):
+        tile = cube_to_hex(cube_add(current_cube, cube_directions[direction]))
+        target_hexes.append((tile.col, tile.row))
+        current_cube = hex_to_cube(tile)
+    return target_hexes
+
+
+def get_cone_target_cubes(max_range, p_cube, p_direction):
+    # this assumes direction 0, location x0 y0 z0
+    target_cubes = []
+    for x in range(1, max_range + 1):
+        for y in range(0, x + 1):
+            target_cubes.append(Cube(-x, y, x-y))
+    # rotate and translate, then convert to (x, y)
+    target_hexes = []
+    for cube in target_cubes:
+        r_cube = cube
+        for step in range(6 - p_direction):
+            r_cube = cube_rotate_cc(r_cube)
+        t_cube = cube_add(p_cube, r_cube)
+        t_hex = cube_to_hex(t_cube)
+        target_hexes.append((t_hex.col, t_hex.row))
     return target_hexes
 
 

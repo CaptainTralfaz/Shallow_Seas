@@ -12,8 +12,8 @@ from src.loader_functions.initialize_new_game import get_constants
 from src.map_objects.game_map import make_map, change_wind
 from src.render_functions import render_display
 from src.game_messages import MessageLog
-from src.components.weapon_slots import WeaponSlots
-from src.components.weapon import Weapon
+from src.components.weapon import WeaponList
+
 
 def main():
     pygame.init()
@@ -30,18 +30,16 @@ def main():
     
     message_log = MessageLog(constants['log_size'])
     
-    size_component = Size.MEDIUM
-    view_component = View(size=size_component.value + 3)
-    weapon_slot_component = WeaponSlots(size=size_component.value)
-    # name, min_range, max_range, structure_points, damage, cool_down=None, effects=None)
-    weapon_component = Weapon("ballista", 1, 4, 5, 3, cool_down=2)
-    weapon_slot_component.add_all()
+    player_icon = constants['icons']['ship_1_mast']
+    size_component = Size.LARGE
+    view_component = View(view=size_component.value + 3)
+    weapons_component = WeaponList()
+    weapons_component.add_all(size=str(size_component))  # Hacky for now
     mast_component = Masts(name="Mast", masts=size_component.value, size=size_component.value)
     mobile_component = Mobile(direction=0, max_momentum=size_component.value * 2 + 2)
-    player_icon = constants['icons']['ship_1_mast']
     player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
                     y=constants['board_height'] - 1, icon=player_icon, view=view_component, size=size_component,
-                    mast_sail=mast_component, mobile=mobile_component, weapon_slots=weapon_slot_component)
+                    mast_sail=mast_component, mobile=mobile_component, weapons=weapons_component)
     
     entities = [player]
     

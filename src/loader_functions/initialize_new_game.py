@@ -38,8 +38,9 @@ def get_constants():
     half_tile = tile_size // 2
     
     colors = {
-        'text': (200, 200, 200),
+        'text': (225, 225, 225),
         'black': (0, 0, 0),
+        'dark_gray': (25, 25, 25),
         'white': (255, 255, 255),
         'red': (255, 0, 0),
         'light_red': (200, 0, 0),

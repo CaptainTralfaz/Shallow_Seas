@@ -6,7 +6,7 @@ class Mobile:
     def __init__(self, direction, max_momentum, max_speed=2, speed=0):
         self.direction = direction
         self.max_momentum = max_momentum
-        self.current_momentum = max_momentum
+        self.current_momentum = self.max_momentum
         self.max_speed = max_speed
         self.current_speed = speed
         self.rowing = False
