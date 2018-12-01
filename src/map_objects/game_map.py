@@ -1,5 +1,5 @@
 from random import randint
-
+from src.components.fighter import Fighter
 from src.components.ai import PeacefulMonster, MeleeMonster
 from src.components.mobile import Mobile
 from src.components.size import Size
@@ -125,7 +125,8 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                 if randint(0, 100) < 50:
                     size_component = Size.MEDIUM
                     view_component = View(size_component.value + 3)
-                    mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value)
+                    mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
+                    fighter_component = Fighter("body", size_component.value * 10 + 5)
                     ai_component = PeacefulMonster()
                     npc_icon = icons['sea_turtle']
                     npc = Entity(name='Sea Turtle', x=x, y=y,
@@ -133,21 +134,24 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                                  icon=npc_icon,
                                  view=view_component,
                                  mobile=mobile_component,
-                                 ai=ai_component)
+                                 ai=ai_component,
+                                 fighter=fighter_component)
                     npc.view.set_fov(game_map)
                     print('{} placed at {}:{}'.format(npc.name, x, y))
                 else:
                     size_component = Size.SMALL
                     view_component = View(size_component.value + 3)
-                    mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value)
+                    mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
+                    fighter_component = Fighter("body", size_component.value * 10 + 5)
                     ai_component = MeleeMonster()
-                    npc_icon = icons['wyvern']
-                    npc = Entity(name='Wyvern', x=x, y=y,
+                    npc_icon = icons['sea_serpent']
+                    npc = Entity(name='Sea Serpent', x=x, y=y,
                                  size=size_component,
                                  icon=npc_icon,
                                  view=view_component,
                                  mobile=mobile_component,
-                                 ai=ai_component)
+                                 ai=ai_component,
+                                 fighter=fighter_component)
                     npc.view.set_fov(game_map)
                     print('{} placed at {}:{}'.format(npc.name, x, y))
                 entities.append(npc)

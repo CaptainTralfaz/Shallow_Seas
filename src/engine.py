@@ -1,7 +1,7 @@
 from random import randint
 
 import pygame
-
+from src.components.fighter import Fighter
 from src.components.masts import Masts
 from src.components.mobile import Mobile
 from src.components.size import Size
@@ -13,7 +13,8 @@ from src.map_objects.game_map import make_map, change_wind
 from src.render_functions import render_display
 from src.game_messages import MessageLog
 from src.components.weapon import WeaponList
-
+from src.map_objects.map_utils import get_target_hexes_at_location
+from src.game_states import GameStates
 
 def main():
     pygame.init()
@@ -31,15 +32,17 @@ def main():
     message_log = MessageLog(constants['log_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.LARGE
+    size_component = Size.MEDIUM
     view_component = View(view=size_component.value + 3)
+    fighter_component = Fighter("hull", size_component.value * 10 + 5)
     weapons_component = WeaponList()
     weapons_component.add_all(size=str(size_component))  # Hacky for now
     mast_component = Masts(name="Mast", masts=size_component.value, size=size_component.value)
     mobile_component = Mobile(direction=0, max_momentum=size_component.value * 2 + 2)
     player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
                     y=constants['board_height'] - 1, icon=player_icon, view=view_component, size=size_component,
-                    mast_sail=mast_component, mobile=mobile_component, weapons=weapons_component)
+                    mast_sail=mast_component, mobile=mobile_component, weapons=weapons_component,
+                    fighter=fighter_component)
     
     entities = [player]
     
@@ -52,7 +55,8 @@ def main():
                         constants['island_seeds'])
     
     player.view.set_fov(game_map)
-    
+    game_state = GameStates.CURRENT_TURN
+
     mouse_x = 0
     mouse_y = 0
     
@@ -63,7 +67,8 @@ def main():
                    constants=constants,
                    mouse_x=mouse_x,
                    mouse_y=mouse_y,
-                   message_log=message_log)
+                   message_log=message_log,
+                   game_state=game_state)
     
     pygame.display.flip()
     
@@ -97,7 +102,7 @@ def main():
         
         if not game_quit:
             
-            action = handle_keys(event=user_input)
+            action = handle_keys(event=user_input, game_state=game_state)
             
             rowing = action.get('rowing')
             slowing = action.get('slowing')
@@ -107,9 +112,34 @@ def main():
             other_action = action.get('other_action')
             exit_screen = action.get('exit')
             targeting = action.get('targeting')
-            
+            if targeting:
+                game_state = GameStates.TARGETING
+
+            # VERIFY PLAYER ACTION ------------------------------------------------------------------------------------
+
+            if attack:
+                # make sure there is a target
+                weapon_list = player.weapons.get_weapons_at_location(attack)
+                if len(weapon_list) > 0:  # make sure there is a weapon on that side
+                    attack_range = weapon_list[0].max_range
+                    target_hexes = get_target_hexes_at_location(player, attack, attack_range)
+                    valid_target = False
+                    for entity in entities:
+                        if (entity.x, entity.y) in target_hexes:
+                            valid_target = True
+                    if not valid_target:  # no targets in range
+                        attack = None
+                else:
+                    attack = None  # no weapons at that location
+            if sails:
+                if (sails > 0 and player.mast_sail.current_sails == player.mast_sail.max_sails) \
+                        or (sails < 0 and player.mast_sail.current_sails == 0):
+                    sails = None
+
             # PROCESS ACTION ------------------------------------------------------------------------------------------
             if rowing or slowing or sails or attack or rotate or other_action or exit_screen:
+                
+                game_state = GameStates.CURRENT_TURN
 
                 for entity in entities:
                     if entity.ai:
@@ -117,6 +147,7 @@ def main():
                 
                 # OTHER ACTIONS ---------------------------------------------------------------------------------------
                 if attack:
+                    player.weapons.attack(entities, attack, message_log)
                     message_log.add_message('Player attacks {}!'.format(attack),
                                             constants['colors']['aqua'])
                 
@@ -127,8 +158,8 @@ def main():
                     #                                 constants['colors']['aqua'])
                     #         game_map.decorations.remove({'name': 'salvage', 'location': (player.x, player.y)})
                     if game_map.terrain[player.x][player.y].decoration \
-                            and game_map.terrain[player.x][player.y].decoration.name == 'Town':
-                        message_log.add_message('Ahoy! In this town, ye can: trade, repair, hire crew... or Plunder!',
+                            and game_map.terrain[player.x][player.y].decoration.name == 'Port':
+                        message_log.add_message('Ahoy! In this port, ye can: trade, repair, hire crew... or Plunder!',
                                                 constants['colors']['aqua'])
                 
                 # MOMENTUM CHANGES ------------------------------------------------------------------------------------
@@ -205,7 +236,7 @@ def main():
                            constants=constants,
                            mouse_x=mouse_x,
                            mouse_y=mouse_y,
-                           targeting=targeting,
+                           game_state=game_state,
                            message_log=message_log)
             pygame.display.flip()
         

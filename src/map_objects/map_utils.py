@@ -218,6 +218,20 @@ def get_target_hexes(player):
     return target_hexes
 
 
+def get_target_hexes_at_location(player, location, max_range):
+    target_hexes = []
+    p_cube = hex_to_cube(Hex(player.x, player.y))
+    if location == "Bow":
+        target_hexes.extend(get_axis_target_cubes(max_range, p_cube, player.mobile.direction))
+    if location == "Stern":
+        target_hexes.extend(get_axis_target_cubes(max_range, p_cube, reverse_direction(player.mobile.direction)))
+    if location == "Port":
+        target_hexes.extend(get_cone_target_cubes(max_range, p_cube, player.mobile.direction))
+    if location == "Starboard":
+        target_hexes.extend(get_cone_target_cubes(max_range, p_cube, reverse_direction(player.mobile.direction)))
+    return target_hexes
+
+
 def reverse_direction(direction):
     new_direction = direction - 3
     if new_direction < 0:

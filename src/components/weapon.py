@@ -1,4 +1,4 @@
-
+from src.map_objects.map_utils import get_target_hexes_at_location
 
 max_weapons = {
     "Size.TINY": {"Bow": 0,
@@ -32,11 +32,6 @@ class WeaponList:
         for slot in max_weapons[size]:
             for w in range(max_weapons[size][slot]):
                 self.weapon_list.append(Weapon("Ballista", slot, 1, 4, 5, 3, cool_down=2))
-                # print(self.weapon_list)
-        # print(self.get_weapons_count_at_location("Bow"),
-        #       self.get_weapons_count_at_location("Port"),
-        #       self.get_weapons_count_at_location("Stern"),
-        #       self.get_weapons_count_at_location("Starboard"))
 
     def add_weapon(self, weapon, location, size):
         if self.get_weapons_count_at_location(location) < max_weapons[size][location]:
@@ -47,13 +42,29 @@ class WeaponList:
             return {'message': 'No empty weapon slots for {} on {}'.format(weapon.name, weapon.location)}
         
     def get_weapons_count_at_location(self, location):
-        return len([True for weapon in self.weapon_list if weapon.location == location])
-        
+        return len(self.get_weapons_at_location(location))
+
+    def get_weapons_at_location(self, location):
+        return [weapon for weapon in self.weapon_list if weapon.location == location]
+
     def remove_weapon(self, weapon):
         self.weapon_list.remove(weapon)
         return {'message': 'Removed {} on {}'.format(weapon.name, weapon.location)}
         
-    
+    def attack(self, entities, location, message_log):
+        weapons = self.get_weapons_at_location(location)
+        target_hexes = []
+        total_damage = 0
+        for weapon in weapons:
+            target_hexes.extend(get_target_hexes_at_location(self.owner, location, weapon.max_range))
+            total_damage += weapon.damage
+        targeted_entities = [entity for entity in entities if (entity.x, entity.y) in target_hexes]
+        for entity in targeted_entities:
+            amount = total_damage // len(targeted_entities)
+            entity.fighter.take_damage(amount)
+            message_log.add_message('{} takes {} damage!'.format(entity.name, amount), (200, 150, 40))
+
+
 class Weapon:
     def __init__(self, name, location, min_range, max_range, structure_points, damage, cool_down=None, effects=None):
         self.name = name
@@ -86,5 +97,4 @@ class Weapon:
         else:
             messages.append({'message': 'A {} was repaired {} points.'.format(self.name, amount)})
         return messages
-
 

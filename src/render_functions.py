@@ -4,22 +4,23 @@ from src.map_objects.tile import Elevation
 import pygame
 
 from src.map_objects.map_utils import direction_angle, get_grid_from_coords, hex_to_cube, Hex, get_target_hexes
+from src.game_states import GameStates
 
 
 class RenderOrder(Enum):
     TERRAIN = 1
     DECORATION = 2
     SUNK = 3
-    TOWN = 4
+    PORT = 4
     BOAT = 5
     FLYING = 6
     FOG = 7
 
 
-def render_display(display, game_map, player, entities, constants, mouse_x, mouse_y, message_log, targeting=False):
+def render_display(display, game_map, player, entities, constants, mouse_x, mouse_y, message_log, game_state):
     display.fill(constants['colors']['black'])
     
-    board_surf = render_board(game_map, player, entities, constants, targeting)
+    board_surf = render_board(game_map, player, entities, constants, game_state)
     display.blit(board_surf, (constants['map_width'], 0))
     
     # draw and blit mini-map
@@ -46,8 +47,6 @@ def render_messages(message_log, constants):
         y += constants['font'].get_linesize()
         message_text = constants['font'].render(str(message.text), 1, message.color)
         message_surf.blit(message_text, (0, y))
-        message_rect = message_text.get_rect()
-        message_rect.centerx = message_surf.get_width() // 2
     
     border_panel = pygame.Surface((constants['message_width'], constants['message_height']))
     
@@ -57,14 +56,18 @@ def render_messages(message_log, constants):
     return border_panel
 
 
-def render_board(game_map, player, entities, constants, targeting):
+def render_board(game_map, player, entities, constants, game_state):
     game_map_surf = pygame.Surface((constants['board_width'] * constants['tile_size'] - 2 * constants['margin'],
                                     constants['board_height'] * constants['tile_size'] - constants['half_tile']))
     game_map_surf.fill(constants['colors']['dark_gray'])
     
-    targeted_hexes = []
-    if targeting:
-        targeted_hexes.extend(get_target_hexes(player))
+    if game_state == GameStates.TARGETING:
+        targeted_hexes = []
+        if game_map.in_bounds(player.x, player.y, -1):
+                if game_map.terrain[player.x][player.y].decoration is None \
+                        or (game_map.terrain[player.x][player.y].decoration
+                            and game_map.terrain[player.x][player.y].decoration.name != "Port"):
+                    targeted_hexes.extend(get_target_hexes(player))
     
     for x in range(player.x - 10, player.x + 11):
         for y in range(player.y - 10, player.y + 11):
@@ -78,12 +81,19 @@ def render_board(game_map, player, entities, constants, targeting):
                                        (x * constants['tile_size'] - constants['margin'],
                                         y * constants['tile_size'] + (x % 2) * constants['half_tile']
                                         - constants['half_tile']))
+                # TODO: move this here eventually ??
+                # if (x, y) not in player.view.fov:
+                #     game_map_surf.blit(constants['icons']['shade'],
+                #                        (x * constants['tile_size'] - 2 * constants['margin'],
+                #                         y * constants['tile_size'] + x % 2 * constants['half_tile']
+                #                         - constants['half_tile'] - 2 * constants['margin']))  # -10 for big tile size
 
-                if (x, y) in targeted_hexes and (x,y) in player.view.fov:
-                    icon = constants['icons']['highlight']
-                    game_map_surf.blit(icon, (x * constants['tile_size'] - 2 * constants['margin'],
-                                              y * constants['tile_size'] + x % 2 * constants['half_tile']
-                                              - constants['half_tile'] - 2 * constants['margin']))
+                if game_state == GameStates.TARGETING:
+                    if (x, y) in targeted_hexes and (x,y) in player.view.fov:
+                        icon = constants['icons']['highlight']
+                        game_map_surf.blit(icon, (x * constants['tile_size'] - 2 * constants['margin'],
+                                                  y * constants['tile_size'] + x % 2 * constants['half_tile']
+                                                  - constants['half_tile'] - 2 * constants['margin']))
                     
     for entity in entities:
         if (0 <= entity.x < game_map.width) \
@@ -205,24 +215,6 @@ def render_weapons(status_panel, entity, constants, vertical):
         status_panel.blit(hp_text, (status_panel.get_width() - constants['margin'] - hp_text.get_width(),
                                     vertical))
         vertical += constants['font'].get_height()
-    # for weapon in entity.weapon_slots.port:
-    #     weapon_text = constants['font'].render("Port {}".format(weapon.name), 1, constants['colors']['text'])
-    #     status_panel.blit(weapon_text, (constants['margin'], vertical))
-    #     hp_text = constants['font'].render("{}/{}".format(weapon.current_sp, weapon.max_sp), 1, constants['colors']['text'])
-    #     status_panel.blit(hp_text, (status_panel.get_width() - constants['margin'] - hp_text.get_width(), vertical))
-    #     vertical += constants['font'].get_height()
-    # for weapon in entity.weapon_slots.stern:
-    #     weapon_text = constants['font'].render("Stern {}".format(weapon.name), 1, constants['colors']['text'])
-    #     status_panel.blit(weapon_text, (constants['margin'], vertical))
-    #     hp_text = constants['font'].render("{}/{}".format(weapon.current_sp, weapon.max_sp), 1, constants['colors']['text'])
-    #     status_panel.blit(hp_text, (status_panel.get_width() - constants['margin'] - hp_text.get_width(), vertical))
-    #     vertical += constants['font'].get_height()
-    # for weapon in entity.weapon_slots.starboard:
-    #     weapon_text = constants['font'].render("Starboard {}".format(weapon.name), 1, constants['colors']['text'])
-    #     status_panel.blit(weapon_text, (constants['margin'], vertical))
-    #     hp_text = constants['font'].render("{}/{}".format(weapon.current_sp, weapon.max_sp), 1, constants['colors']['text'])
-    #     status_panel.blit(hp_text, (status_panel.get_width() - constants['margin'] - hp_text.get_width(), vertical))
-    #     vertical += constants['font'].get_height()
     return vertical
 
 
@@ -250,7 +242,7 @@ def render_ship_info(status_panel, entity, constants, vertical):
     status_panel.blit(name_text, (constants['margin'] + 1, vertical + 1))
     vertical += font.get_height()
     
-    if entity.mast_sail:
+    if entity.mast_sail and entity.mast_sail.masts > 0:
         status_panel.blit(make_bar('Sails', font, constants['colors']['text'],
                                    entity.mast_sail.current_sails, entity.mast_sail.max_sails,
                                    constants['colors']['light_blue'], constants['colors']['dark_blue'],
@@ -316,7 +308,7 @@ def render_map(game_map, player, entities, constants):
                                       y * constants['block_size'] + (x % 2) * (constants['block_size'] // 2)
                                       - constants['block_size'] // 2))
                 if game_map.terrain[x][y].decoration:
-                    if game_map.terrain[x][y].decoration.name == 'Town':
+                    if game_map.terrain[x][y].decoration.name == 'Port':
                         block.fill(constants['colors'][game_map.terrain[x][y].decoration.color])
                         map_surf.blit(block, (x * constants['block_size'],
                                               y * constants['block_size'] + (x % 2) * (constants['block_size'] // 2)

@@ -60,8 +60,8 @@ class Decoration:
         elif self.name == 'Seaweed':
             self.icon = 'seaweed'
             self.color = 'medium_green'
-        elif self.name == 'Town':
-            self.icon = 'town'
+        elif self.name == 'Port':
+            self.icon = 'port'
             self.color = 'white'
 
 
