@@ -203,16 +203,16 @@ def get_target_hexes(player):
     p_cube = hex_to_cube(Hex(player.x, player.y))
     if player.weapons and player.weapons.weapon_list:
             for weapon in player.weapons.weapon_list:
-                if weapon.location == "Bow":
+                if weapon.location == "Bow" and weapon.current_cd == 0:
                     target_hexes.extend(get_axis_target_cubes(weapon.max_range, p_cube,
                                                               player.mobile.direction))
-                if weapon.location == "Stern":
+                if weapon.location == "Stern" and weapon.current_cd == 0:
                     target_hexes.extend(get_axis_target_cubes(weapon.max_range, p_cube,
                                                               reverse_direction(player.mobile.direction)))
-                if weapon.location == "Port":
+                if weapon.location == "Port" and weapon.current_cd == 0:
                     target_hexes.extend(get_cone_target_cubes(weapon.max_range, p_cube,
                                                               player.mobile.direction))
-                if weapon.location == "Starboard":
+                if weapon.location == "Starboard" and weapon.current_cd == 0:
                     target_hexes.extend(get_cone_target_cubes(weapon.max_range, p_cube,
                                                               reverse_direction(player.mobile.direction)))
     return target_hexes

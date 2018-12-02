@@ -208,7 +208,7 @@ def render_status(game_map, player, entities, constants, mouse_x, mouse_y):
 
 def render_weapons(status_panel, entity, constants, vertical):
     for weapon in entity.weapons.weapon_list:
-        weapon_text = constants['font'].render("{} {}".format(weapon.location, weapon.name),
+        weapon_text = constants['font'].render("{} {}  [{}]".format(weapon.location, weapon.name, weapon.current_cd),
                                                1, constants['colors']['text'])
         status_panel.blit(weapon_text, (constants['margin'], vertical))
         hp_text = constants['font'].render("{}/{}".format(weapon.current_sp, weapon.max_sp),

@@ -34,7 +34,7 @@ def main():
     message_log = MessageLog(constants['log_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.TINY
+    size_component = Size.HUGE
     view_component = View(view=size_component.value + 3)
     fighter_component = Fighter("hull", size_component.value * 10 + 5)
     weapons_component = WeaponList()
@@ -148,6 +148,13 @@ def main():
                         entity.ai.take_turn(game_map, player, message_log, constants['colors'])
                 
                 # OTHER ACTIONS ---------------------------------------------------------------------------------------
+                # update weapon cool downs - and other things later?
+                for entity in entities:
+                    if entity.weapons and entity.weapons.weapon_list:
+                        for weapon in entity.weapons.weapon_list:
+                            if weapon.current_cd > 0:
+                                weapon.current_cd -= 1
+                
                 if attack:
                     player.weapons.attack(entities, attack, message_log)
                     message_log.add_message('Player attacks to the {}!'.format(attack),

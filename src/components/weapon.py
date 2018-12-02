@@ -31,7 +31,7 @@ class WeaponList:
     def add_all(self, size):  # TODO remove this later - just here to initialize a ship's weapons
         for slot in max_weapons[size]:
             for w in range(max_weapons[size][slot]):
-                self.weapon_list.append(Weapon("Ballista", slot, 1, 4, 5, 3, cool_down=2))
+                self.weapon_list.append(Weapon("Ballista", slot, 1, 4, 5, 3, cool_down=3))
     
     def add_weapon(self, weapon, location, size):
         if self.get_weapons_count_at_location(location) < max_weapons[size][location]:
@@ -45,7 +45,7 @@ class WeaponList:
         return len(self.get_weapons_at_location(location))
     
     def get_weapons_at_location(self, location):
-        return [weapon for weapon in self.weapon_list if weapon.location == location]
+        return [weapon for weapon in self.weapon_list if weapon.location == location and weapon.current_cd == 0]
     
     def remove_weapon(self, weapon):
         self.weapon_list.remove(weapon)
@@ -58,11 +58,13 @@ class WeaponList:
         for weapon in weapons:
             target_hexes.extend(get_target_hexes_at_location(self.owner, location, weapon.max_range))
             total_damage += weapon.damage
+            weapon.current_cd = weapon.cool_down
         targeted_entities = [entity for entity in entities if (entity.x, entity.y) in target_hexes]
         for entity in targeted_entities:
             amount = total_damage // len(targeted_entities)
-            entity.fighter.take_damage(amount)
+            result = entity.fighter.take_damage(amount)
             message_log.add_message('{} takes {} damage!'.format(entity.name, amount), (200, 150, 40))
+            message_log.add_message(result)
 
 
 class Weapon:
