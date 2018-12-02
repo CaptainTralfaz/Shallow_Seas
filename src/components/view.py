@@ -23,7 +23,7 @@ class View:
             for x, y in visible_tiles:
                 if game_map.terrain[x][y].decoration and game_map.terrain[x][y].decoration.name == 'Port':
                     port = (x, y)
-                    
+        
         if port:
             visible_tiles.remove(port)
         # replace old visible list

@@ -21,18 +21,18 @@ max_weapons = {
                   "Port": 4,
                   "Stern": 2,
                   "Starboard": 4}
-    }
+}
 
 
 class WeaponList:
     def __init__(self):
         self.weapon_list = []
-        
+    
     def add_all(self, size):  # TODO remove this later - just here to initialize a ship's weapons
         for slot in max_weapons[size]:
             for w in range(max_weapons[size][slot]):
                 self.weapon_list.append(Weapon("Ballista", slot, 1, 4, 5, 3, cool_down=2))
-
+    
     def add_weapon(self, weapon, location, size):
         if self.get_weapons_count_at_location(location) < max_weapons[size][location]:
             # add weapon
@@ -40,17 +40,17 @@ class WeaponList:
             return {'message': '{} added to {}'.format(weapon.name, weapon.location)}
         else:
             return {'message': 'No empty weapon slots for {} on {}'.format(weapon.name, weapon.location)}
-        
+    
     def get_weapons_count_at_location(self, location):
         return len(self.get_weapons_at_location(location))
-
+    
     def get_weapons_at_location(self, location):
         return [weapon for weapon in self.weapon_list if weapon.location == location]
-
+    
     def remove_weapon(self, weapon):
         self.weapon_list.remove(weapon)
         return {'message': 'Removed {} on {}'.format(weapon.name, weapon.location)}
-        
+    
     def attack(self, entities, location, message_log):
         weapons = self.get_weapons_at_location(location)
         target_hexes = []
@@ -77,7 +77,7 @@ class Weapon:
         self.cool_down = cool_down
         self.current_cd = 0
         self.effects = effects
-
+    
     def take_damage(self, amount):
         messages = []
         self.current_sp -= amount
@@ -87,7 +87,7 @@ class Weapon:
         else:
             messages.append({'message': 'A {} took {} damage!'.format(self.name, amount)})
         return messages
-
+    
     def repair(self, amount):
         messages = []
         self.current_sp += amount
@@ -97,4 +97,3 @@ class Weapon:
         else:
             messages.append({'message': 'A {} was repaired {} points.'.format(self.name, amount)})
         return messages
-

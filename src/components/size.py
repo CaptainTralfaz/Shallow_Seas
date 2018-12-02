@@ -37,4 +37,3 @@ class Size(Enum):
         if self.__class__ is other.__class__:
             return self.value != other.value
         return NotImplemented
-

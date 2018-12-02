@@ -30,7 +30,7 @@ class Wings:
         self.wing_hp += amount
         if self.wing_hp > self.size * 2 + 2:
             self.wing_hp = self.size * 2 + 2
-       
+    
     def momentum_due_to_wind(self, wind_direction: int):
         if with_wind(self.owner.mobile.direction, wind_direction):  # with wind: +2 momentum
             self.owner.mobile.change_momentum(amount=2 * self.current_wing_power)

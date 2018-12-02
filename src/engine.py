@@ -1,20 +1,22 @@
 from random import randint
 
 import pygame
+
 from src.components.fighter import Fighter
 from src.components.masts import Masts
 from src.components.mobile import Mobile
 from src.components.size import Size
 from src.components.view import View
+from src.components.weapon import WeaponList
 from src.entity import Entity
+from src.game_messages import MessageLog
+from src.game_states import GameStates
 from src.input_handlers import handle_keys
 from src.loader_functions.initialize_new_game import get_constants
 from src.map_objects.game_map import make_map, change_wind
-from src.render_functions import render_display
-from src.game_messages import MessageLog
-from src.components.weapon import WeaponList
 from src.map_objects.map_utils import get_target_hexes_at_location
-from src.game_states import GameStates
+from src.render_functions import render_display
+
 
 def main():
     pygame.init()
@@ -32,7 +34,7 @@ def main():
     message_log = MessageLog(constants['log_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.MEDIUM
+    size_component = Size.TINY
     view_component = View(view=size_component.value + 3)
     fighter_component = Fighter("hull", size_component.value * 10 + 5)
     weapons_component = WeaponList()
@@ -56,7 +58,7 @@ def main():
     
     player.view.set_fov(game_map)
     game_state = GameStates.CURRENT_TURN
-
+    
     mouse_x = 0
     mouse_y = 0
     
@@ -114,9 +116,9 @@ def main():
             targeting = action.get('targeting')
             if targeting:
                 game_state = GameStates.TARGETING
-
+            
             # VERIFY PLAYER ACTION ------------------------------------------------------------------------------------
-
+            
             if attack:
                 # make sure there is a target
                 weapon_list = player.weapons.get_weapons_at_location(attack)
@@ -135,12 +137,12 @@ def main():
                 if (sails > 0 and player.mast_sail.current_sails == player.mast_sail.max_sails) \
                         or (sails < 0 and player.mast_sail.current_sails == 0):
                     sails = None
-
+            
             # PROCESS ACTION ------------------------------------------------------------------------------------------
             if rowing or slowing or sails or attack or rotate or other_action or exit_screen:
                 
                 game_state = GameStates.CURRENT_TURN
-
+                
                 for entity in entities:
                     if entity.ai:
                         entity.ai.take_turn(game_map, player, message_log, constants['colors'])
@@ -148,7 +150,7 @@ def main():
                 # OTHER ACTIONS ---------------------------------------------------------------------------------------
                 if attack:
                     player.weapons.attack(entities, attack, message_log)
-                    message_log.add_message('Player attacks {}!'.format(attack),
+                    message_log.add_message('Player attacks to the {}!'.format(attack),
                                             constants['colors']['aqua'])
                 
                 if other_action:
@@ -166,7 +168,7 @@ def main():
                 if rowing:
                     player.mobile.rowing = 1
                     message_log.add_message('Rowing, +1 momentum')
-                    
+                
                 if slowing:
                     player.mobile.change_momentum(amount=slowing)
                     message_log.add_message('Slowing, -1 momentum', constants['colors']['aqua'])
@@ -189,7 +191,7 @@ def main():
                             entity.mast_sail.momentum_due_to_wind(wind_direction=game_map.wind_direction)
                             entity.mast_sail.catching_wind = True
                             message_log.add_message('Catching Wind, + momentum')
-
+                
                 # DRAG ------------------------------------------------------------------------------------------------
                 # change momentum due to drag if not rowing or catching wind
                 for entity in entities:
@@ -218,12 +220,12 @@ def main():
                     player.mast_sail.adjust_sails(amount=sails)
                     message_log.add_message('Player Adjusts sails to {}'.format(player.mast_sail.current_sails),
                                             constants['colors']['aqua'])
-
+                
                 # rotate boat last
                 if rotate:
                     player.mobile.rotate(rotate=rotate)
                     message_log.add_message('Player rotates {}'.format('port' if rotate == 1 else 'starboard'))
-
+                
                 if exit_screen:
                     game_quit = True
                 

@@ -65,7 +65,7 @@ class Masts:
         else:
             self.catching_wind = False
             return
-        
+
 
 def with_wind(entity_direction: int, wind_direction: int):
     if entity_direction == wind_direction:

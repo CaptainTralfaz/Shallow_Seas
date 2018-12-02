@@ -11,7 +11,7 @@ class Entity:
         self.x = x
         self.y = y
         self.icon = icon
-
+        
         self.ai = ai
         self.block_view = block_view
         self.elevation = elevation
