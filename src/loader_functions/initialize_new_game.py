@@ -38,9 +38,11 @@ def get_constants():
     half_tile = tile_size // 2
     
     colors = {
-        'text': (225, 225, 225),
+        'text': (200, 200, 200),
         'black': (0, 0, 0),
+        
         'dark_gray': (25, 25, 25),
+        'gray': (150, 150, 150),
         'white': (255, 255, 255),
         'red': (255, 0, 0),
         'light_red': (200, 0, 0),
@@ -95,6 +97,7 @@ def get_constants():
         'sea_turtle': pygame.image.load('icons/SeaTurtle.png'),
         'red_dragon': pygame.image.load('icons/RedDragon.png'),
         'wyvern': pygame.image.load('icons/Wyvern.png'),
+        'carcass': pygame.image.load('icons/Carcass.png'),
     }
     
     constants = {

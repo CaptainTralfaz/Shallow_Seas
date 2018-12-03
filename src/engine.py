@@ -156,9 +156,8 @@ def main():
                                 weapon.current_cd -= 1
                 
                 if attack:
+                    message_log.add_message('Player attacks to the {}!'.format(attack), constants['colors']['aqua'])
                     player.weapons.attack(entities, attack, message_log)
-                    message_log.add_message('Player attacks to the {}!'.format(attack),
-                                            constants['colors']['aqua'])
                 
                 if other_action:
                     # for decoration in game_map.decorations:

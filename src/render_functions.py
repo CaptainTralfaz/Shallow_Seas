@@ -177,7 +177,7 @@ def render_status(game_map, player, entities, constants, mouse_x, mouse_y):
             decor_rect.center = (constants['status_width'] // 2,
                                  constants['status_height'] - 2 * constants['font'].get_height())
             status_panel.blit(decor_text, decor_rect)
-        
+
         for entity in entities:
             if entity.name is not 'player' \
                     and (0 <= entity.x < game_map.width) \
@@ -185,10 +185,6 @@ def render_status(game_map, player, entities, constants, mouse_x, mouse_y):
                     and (entity.x, entity.y) in player.view.fov \
                     and (entity.x, entity.y) == (grid_x, grid_y):
                 vertical = render_ship_info(status_panel, entity, constants, vertical)
-            elif entity.name is 'player' \
-                    and entity.weapons \
-                    and (entity.x, entity.y) == (grid_x, grid_y):
-                vertical = render_weapons(status_panel, entity, constants, vertical)
         
         if game_map.terrain[grid_x][grid_y].decoration:
             decor_text = constants['font'].render(game_map.terrain[grid_x][grid_y].decoration.name, 1,
@@ -208,11 +204,15 @@ def render_status(game_map, player, entities, constants, mouse_x, mouse_y):
 
 def render_weapons(status_panel, entity, constants, vertical):
     for weapon in entity.weapons.weapon_list:
+        if weapon.current_cd == 0:
+            color = constants['colors']['text']
+        else:
+            color = constants['colors']['gray']
         weapon_text = constants['font'].render("{} {}  [{}]".format(weapon.location, weapon.name, weapon.current_cd),
-                                               1, constants['colors']['text'])
+                                               1, color)
         status_panel.blit(weapon_text, (constants['margin'], vertical))
         hp_text = constants['font'].render("{}/{}".format(weapon.current_sp, weapon.max_sp),
-                                           1, constants['colors']['text'])
+                                           1, color)
         status_panel.blit(hp_text, (status_panel.get_width() - constants['margin'] - hp_text.get_width(),
                                     vertical))
         vertical += constants['font'].get_height()
@@ -262,6 +262,9 @@ def render_ship_info(status_panel, entity, constants, vertical):
                                status_panel.get_width() - 2 * constants['margin']),
                       (constants['margin'], vertical))
     vertical += font.get_height() + constants['margin'] // 2
+    if entity.weapons:
+        vertical = render_weapons(status_panel, entity, constants, vertical)
+
     return vertical
 
 

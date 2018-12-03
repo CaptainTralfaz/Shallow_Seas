@@ -31,7 +31,7 @@ class WeaponList:
     def add_all(self, size):  # TODO remove this later - just here to initialize a ship's weapons
         for slot in max_weapons[size]:
             for w in range(max_weapons[size][slot]):
-                self.weapon_list.append(Weapon("Ballista", slot, 1, 4, 5, 3, cool_down=3))
+                self.weapon_list.append(Weapon("Ballista", slot, 1, 4, 5, 3, cool_down=4))
     
     def add_weapon(self, weapon, location, size):
         if self.get_weapons_count_at_location(location) < max_weapons[size][location]:
