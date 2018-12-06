@@ -211,7 +211,7 @@ def render_weapons(status_panel, entity, constants, vertical):
         weapon_text = constants['font'].render("{} {}  [{}]".format(weapon.location, weapon.name, weapon.current_cd),
                                                1, color)
         status_panel.blit(weapon_text, (constants['margin'], vertical))
-        hp_text = constants['font'].render("{}/{}".format(weapon.current_sp, weapon.max_sp),
+        hp_text = constants['font'].render("{}/{}".format(weapon.hps, weapon.max_hps),
                                            1, color)
         status_panel.blit(hp_text, (status_panel.get_width() - constants['margin'] - hp_text.get_width(),
                                     vertical))

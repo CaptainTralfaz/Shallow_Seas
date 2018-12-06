@@ -34,7 +34,7 @@ def main():
     message_log = MessageLog(constants['log_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.HUGE
+    size_component = Size.MEDIUM
     view_component = View(view=size_component.value + 3)
     fighter_component = Fighter("hull", size_component.value * 10 + 5)
     weapons_component = WeaponList()

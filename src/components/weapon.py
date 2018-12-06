@@ -73,8 +73,8 @@ class Weapon:
         self.location = location
         self.min_range = min_range
         self.max_range = max_range
-        self.current_sp = structure_points
-        self.max_sp = structure_points
+        self.hps = structure_points
+        self.max_hps = structure_points
         self.damage = damage
         self.cool_down = cool_down
         self.current_cd = 0
@@ -82,8 +82,8 @@ class Weapon:
     
     def take_damage(self, amount):
         messages = []
-        self.current_sp -= amount
-        if self.current_sp <= 0:
+        self.hps -= amount
+        if self.hps <= 0:
             # destroy the weapon
             messages.append({'message': 'A {}  was destroyed!'.format(self.name)})
         else:
@@ -92,9 +92,9 @@ class Weapon:
     
     def repair(self, amount):
         messages = []
-        self.current_sp += amount
-        if self.current_sp >= self.max_sp:
-            self.current_sp = self.max_sp
+        self.hps += amount
+        if self.hps >= self.max_hps:
+            self.hps = self.max_hps
             messages.append({'message': 'A {} was fully repaired!'.format(self.name)})
         else:
             messages.append({'message': 'A {} was repaired {} points.'.format(self.name, amount)})

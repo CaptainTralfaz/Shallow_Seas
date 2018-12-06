@@ -98,6 +98,7 @@ def get_constants():
         'red_dragon': pygame.image.load('icons/RedDragon.png'),
         'wyvern': pygame.image.load('icons/Wyvern.png'),
         'carcass': pygame.image.load('icons/Carcass.png'),
+        'sunken_ship': pygame.image.load('icons/SunkenShip.png'),
     }
     
     constants = {
