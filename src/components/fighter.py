@@ -7,8 +7,8 @@ class Fighter:
     def take_damage(self, amount: int):
         self.hps -= amount
         if self.hps < 1:
-            return '{} {} has died!'.format(self.owner.name, self.name)
-        return '{} {} is wounded'.format(self.owner.name, self.name)
+            return '{} {} is destroyed!'.format(self.owner.name, self.name), True
+        return '{} {} is damaged'.format(self.owner.name, self.name), False
 
     def heal_damage(self, amount: int):
         self.hps += amount

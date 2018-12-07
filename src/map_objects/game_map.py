@@ -8,7 +8,7 @@ from src.entity import Entity
 from src.map_objects.map_generator import generate_terrain
 from src.map_objects.map_utils import hex_directions
 from src.map_objects.tile import Decoration, Elevation
-
+from src.components.weapon import WeaponList, Weapon
 
 class GameMap:
     def __init__(self, width: int, height: int):

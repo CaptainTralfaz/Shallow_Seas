@@ -3,10 +3,10 @@ from random import randint
 from src.components.mobile import can_move_direction
 from src.map_objects.map_utils import get_hex_neighbors, hex_to_cube, Hex, get_spatial_relation, \
     cube_add, cube_direction, cube_to_hex
-
+from src.death_functions import kill_player
 
 class PeacefulMonster:
-    def take_turn(self, game_map, player, message_log, colors):
+    def take_turn(self, game_map, player, message_log, colors, icons):
         entity = self.owner
         neighbors = get_hex_neighbors(entity.x, entity.y)
         if entity.mobile.current_speed < 1 \
@@ -19,11 +19,13 @@ class PeacefulMonster:
             entity.mobile.rotate(direction)
             if (entity.x, entity.y) in player.view.fov:
                 message_log.add_message("{} at {}:{} wanders aimlessly".format(entity.name, entity.x, entity.y))
+        return None
 
 
-class MeleeMonster:
+class MeleeMonster:  # SeaSerpent
     # TODO: find a way to implement last known location (last_seen) as a target hex
-    def take_turn(self, game_map, target, message_log, colors):
+    def take_turn(self, game_map, target, message_log, colors, icons):
+        state = None
         entity = self.owner
         neighbors = get_hex_neighbors(entity.x, entity.y)
         # critter can see target or has a target
@@ -35,8 +37,17 @@ class MeleeMonster:
                                     colors['light_red'])
             # in melee range
             if (target.x, target.y) in neighbors or (target.x, target.y) == (entity.x, entity.y):
-                
-                message_log.add_message('The {} attacked your ship!'.format(entity.name), colors['light_red'])
+                damage = 2
+                message, result = target.fighter.take_damage(damage)
+                message_log.add_message('The {} attacked your {} for {} damage!'.format(entity.name,
+                                                                                        target.fighter.name,
+                                                                                        damage), colors['light_red'])
+                message_log.add_message(message)
+                if result:  # entity is dead
+                    message, state = kill_player(target, icons)
+                message_log.add_message(message)
+                return state
+            
             # chase target
             else:
                 expected_target_tile = Hex(target.x, target.y)
@@ -101,7 +112,9 @@ class MeleeMonster:
                 entity.mobile.rotate(direction)
                 if (entity.x, entity.y) in target.view.fov:
                     message_log.add_message("{} at {}:{} wanders aimlessly".format(entity.name, entity.x, entity.y))
-
+        
+        return state
+    
 
 class BasicShip:
     def take_turn(self):

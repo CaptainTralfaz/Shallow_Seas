@@ -114,8 +114,11 @@ def main():
             other_action = action.get('other_action')
             exit_screen = action.get('exit')
             targeting = action.get('targeting')
+            untargeting = action.get('untargeting')
             if targeting:
                 game_state = GameStates.TARGETING
+            if untargeting:
+                game_state = GameStates.CURRENT_TURN
             
             # VERIFY PLAYER ACTION ------------------------------------------------------------------------------------
             
@@ -127,7 +130,7 @@ def main():
                     target_hexes = get_target_hexes_at_location(player, attack, attack_range)
                     valid_target = False
                     for entity in entities:
-                        if (entity.x, entity.y) in target_hexes:
+                        if entity.fighter and (entity.x, entity.y) in target_hexes:
                             valid_target = True
                     if not valid_target:  # no targets in range
                         attack = None
@@ -139,13 +142,21 @@ def main():
                     sails = None
             
             # PROCESS ACTION ------------------------------------------------------------------------------------------
-            if rowing or slowing or sails or attack or rotate or other_action or exit_screen:
+            if (rowing or slowing or sails or attack or rotate or other_action) \
+                    and not game_state == GameStates.PLAYER_DEAD \
+                    or exit_screen:
                 
                 game_state = GameStates.CURRENT_TURN
                 
                 for entity in entities:
                     if entity.ai:
-                        entity.ai.take_turn(game_map, player, message_log, constants['colors'])
+                        result = entity.ai.take_turn(game_map,
+                                                     player,
+                                                     message_log,
+                                                     constants['colors'],
+                                                     constants['icons'])
+                        if result:
+                            game_state = GameStates.PLAYER_DEAD
                 
                 # OTHER ACTIONS ---------------------------------------------------------------------------------------
                 # update weapon cool downs - and other things later?
@@ -157,7 +168,7 @@ def main():
                 
                 if attack:
                     message_log.add_message('Player attacks to the {}!'.format(attack), constants['colors']['aqua'])
-                    player.weapons.attack(entities, attack, message_log)
+                    player.weapons.attack(entities, attack, message_log, constants['icons'])
                 
                 if other_action:
                     # for decoration in game_map.decorations:
@@ -165,6 +176,14 @@ def main():
                     #         message_log.add_message('Grabbed {}!'.format(decoration['name']),
                     #                                 constants['colors']['aqua'])
                     #         game_map.decorations.remove({'name': 'salvage', 'location': (player.x, player.y)})
+                    for entity in entities:
+                        if not entity.ai and entity.name not in ['player', ''] and \
+                                (entity.x, entity.y) == (player.x, player.y):
+                            message_log.add_message('You harvest the {}'.format(entity.name),
+                                                    constants['colors']['aqua'])
+                            entity.name = ''
+                            entity.icon = None
+
                     if game_map.terrain[player.x][player.y].decoration \
                             and game_map.terrain[player.x][player.y].decoration.name == 'Port':
                         message_log.add_message('Ahoy! In this port, ye can: trade, repair, hire crew... or Plunder!',
@@ -182,7 +201,7 @@ def main():
                 # ROWING ----------------------------------------------------------------------------------------------
                 for entity in entities:
                     # change momentum due to rowing
-                    if entity.mobile.rowing and entity.mobile.current_speed < entity.mobile.max_speed:
+                    if entity.mobile and entity.mobile.rowing and entity.mobile.current_speed < entity.mobile.max_speed:
                         entity.mobile.change_momentum(amount=entity.mobile.rowing)
                         # check to make sure a ship can't go to max speed
                         if entity.mast_sail and entity.mobile.current_speed == entity.mobile.max_speed:
@@ -204,12 +223,14 @@ def main():
                     drag = -1
                     if entity.mast_sail and entity.mast_sail.catching_wind:
                         drag = 0
-                    elif entity.mobile.rowing:
+                    elif entity.mobile and entity.mobile.rowing:
                         drag = 0
-                    entity.mobile.change_momentum(amount=drag)
+                    if entity.mobile:
+                        entity.mobile.change_momentum(amount=drag)
                     if entity.mast_sail:
                         entity.mast_sail.catching_wind = False
-                    entity.mobile.rowing = 0
+                    if entity.mobile:
+                        entity.mobile.rowing = 0
                 
                 # MOVEMENT --------------------------------------------------------------------------------------------
                 for entity in entities:

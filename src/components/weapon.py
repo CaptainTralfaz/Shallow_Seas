@@ -1,4 +1,5 @@
 from src.map_objects.map_utils import get_target_hexes_at_location
+from src.death_functions import kill_monster
 
 max_weapons = {
     "Size.TINY": {"Bow": 0,
@@ -51,7 +52,7 @@ class WeaponList:
         self.weapon_list.remove(weapon)
         return {'message': 'Removed {} on {}'.format(weapon.name, weapon.location)}
     
-    def attack(self, entities, location, message_log):
+    def attack(self, entities, location, message_log, icons):
         weapons = self.get_weapons_at_location(location)
         target_hexes = []
         total_damage = 0
@@ -59,12 +60,15 @@ class WeaponList:
             target_hexes.extend(get_target_hexes_at_location(self.owner, location, weapon.max_range))
             total_damage += weapon.damage
             weapon.current_cd = weapon.cool_down
-        targeted_entities = [entity for entity in entities if (entity.x, entity.y) in target_hexes]
+        targeted_entities = [entity for entity in entities if (entity.x, entity.y) in target_hexes and entity.fighter]
         for entity in targeted_entities:
             amount = total_damage // len(targeted_entities)
-            result = entity.fighter.take_damage(amount)
-            message_log.add_message('{} takes {} damage!'.format(entity.name, amount), (200, 150, 40))
-            message_log.add_message(result)
+            message_log.add_message('{} {} takes {} damage!'.format(entity.name, entity.fighter.name, amount),
+                                    (200, 150, 40))
+            message, result = entity.fighter.take_damage(amount)
+            if result:  # entity is dead
+                kill_monster(entity, icons)
+            message_log.add_message(message)
 
 
 class Weapon:
@@ -81,21 +85,21 @@ class Weapon:
         self.effects = effects
     
     def take_damage(self, amount):
-        messages = []
+        results = []
         self.hps -= amount
         if self.hps <= 0:
             # destroy the weapon
-            messages.append({'message': 'A {}  was destroyed!'.format(self.name)})
+            results.append({'message': 'A {}  was destroyed!'.format(self.name)})
         else:
-            messages.append({'message': 'A {} took {} damage!'.format(self.name, amount)})
-        return messages
+            results.append({'message': 'A {} took {} damage!'.format(self.name, amount)})
+        return results
     
     def repair(self, amount):
-        messages = []
+        results = []
         self.hps += amount
         if self.hps >= self.max_hps:
             self.hps = self.max_hps
-            messages.append({'message': 'A {} was fully repaired!'.format(self.name)})
+            results.append({'message': 'A {} was fully repaired!'.format(self.name)})
         else:
-            messages.append({'message': 'A {} was repaired {} points.'.format(self.name, amount)})
-        return messages
+            results.append({'message': 'A {} was repaired {} points.'.format(self.name, amount)})
+        return results
