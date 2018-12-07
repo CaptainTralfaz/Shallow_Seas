@@ -6,7 +6,7 @@ class Mobile:
     def __init__(self, direction, max_momentum, max_speed=2, speed=0):
         self.direction = direction
         self.max_momentum = max_momentum
-        self.current_momentum = max_momentum
+        self.current_momentum = self.max_momentum
         self.max_speed = max_speed
         self.current_speed = speed
         self.rowing = False
@@ -25,9 +25,9 @@ class Mobile:
             # TODO: Send to collision method, as determined by movement type (sail, flying, swim/row, etc)
             if game_map.in_bounds(new_x, new_y) \
                     and game_map.terrain[new_x][new_y].decoration \
-                    and game_map.terrain[new_x][new_y].decoration.name == 'Town' \
+                    and game_map.terrain[new_x][new_y].decoration.name == 'Port' \
                     and self.owner.name is "player":
-                print('{} sailed into Town'.format(self.owner.name))
+                print('{} sailed into Port'.format(self.owner.name))
                 self.owner.x = new_x
                 self.owner.y = new_y
                 self.current_speed = 0

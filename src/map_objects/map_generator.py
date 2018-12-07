@@ -38,8 +38,8 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
     islands = find_all_islands(height_map, game_map.width, game_map.height)
     largest, largest_islands = get_largest_islands(islands)
 
-    town_x = None
-    town_y = None
+    port_x = None
+    port_y = None
     for island in islands:
         for tile in island:
             tile_x, tile_y = tile
@@ -53,18 +53,18 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
                 if (0 <= x < game_map.width) and (0 <= y < game_map.height) and height_map[x][y] == 0:
                     height_map[x][y] += 1
         
-        if len(island) == largest and not (town_x or town_y):
+        if len(island) == largest and not (port_x or port_y):
             valid_tiles = remove_bad_tiles(height_map, island)
-            town_x, town_y = valid_tiles[randint(0, len(valid_tiles) - 1)]
-            print(town_x, town_y)
+            port_x, port_y = valid_tiles[randint(0, len(valid_tiles) - 1)]
+            print(port_x, port_y)
             
     for x in range(game_map.width):
         for y in range(game_map.height):
             if height_map[x][y] > 7:
                 height_map[x][y] = 7
             game_map.terrain[x][y] = Terrain(elevation=Elevation(height_map[x][y]))
-            if x == town_x and y == town_y:
-                game_map.terrain[town_x][town_y].decoration = Decoration('Town')
+            if x == port_x and y == port_y:
+                game_map.terrain[port_x][port_y].decoration = Decoration('Port')
 
 
 def remove_bad_tiles(height_map, island):

@@ -2,7 +2,8 @@ from src.map_objects.map_utils import hex_directions
 
 
 class Masts:
-    def __init__(self, masts: int, size: int):
+    def __init__(self, name, masts, size):
+        self.name = name
         self.size = size
         self.masts = masts
         self.max_sails = masts
@@ -17,8 +18,6 @@ class Masts:
             self.current_sails = 0
         elif self.current_sails > self.max_sails:
             self.current_sails = self.max_sails
-    
-    # update sprite sheet, but... need constants... will need to refactor
     
     def take_sail_damage(self, amount):
         self.sail_hp -= amount
@@ -50,7 +49,6 @@ class Masts:
         if self.mast_hp > self.size + 3:
             self.mast_hp = self.size + 3
     
-    # TODO: move to Masts class
     def momentum_due_to_wind(self, wind_direction: int):
         if with_wind(self.owner.mobile.direction, wind_direction):  # with wind: +2 momentum
             self.owner.mobile.change_momentum(amount=2 * self.current_sails)
@@ -67,37 +65,36 @@ class Masts:
         else:
             self.catching_wind = False
             return
-        
 
-def with_wind(ship_direction: int, wind_direction: int):
-    # print("ship Direction: {}, wind direction: {}".format(ship_direction, wind_direction))
-    if ship_direction == wind_direction:
+
+def with_wind(entity_direction: int, wind_direction: int):
+    if entity_direction == wind_direction:
         return True
     else:
         return False
 
 
-def cross_wind(ship_direction: int, wind_direction: int):
+def cross_wind(entity_direction: int, wind_direction: int):
     rotate_left = wind_direction + 1
     if rotate_left >= len(hex_directions):
         rotate_left -= len(hex_directions)
     rotate_right = wind_direction - 1
     if rotate_right < 0:
         rotate_right += len(hex_directions)
-    if ship_direction == rotate_right or ship_direction == rotate_left:
+    if entity_direction == rotate_right or entity_direction == rotate_left:
         return True
     else:
         return False
 
 
-def against_wind(ship_direction: int, wind_direction: int):
+def against_wind(entity_direction: int, wind_direction: int):
     rotate_left = wind_direction + 3
     if rotate_left > len(hex_directions):
         rotate_left -= len(hex_directions)
     rotate_right = wind_direction - 3
     if rotate_right < 0:
         rotate_right += len(hex_directions)
-    if ship_direction == rotate_left or ship_direction == rotate_right:
+    if entity_direction == rotate_left or entity_direction == rotate_right:
         return True
     else:
         return False

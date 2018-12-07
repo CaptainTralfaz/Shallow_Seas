@@ -12,7 +12,7 @@ def get_constants():
     
     map_width = 202  # includes margins
     map_height = 200  # includes margins
-    block_size = 4
+    block_size = 3
     map_block = (block_size, block_size)
     
     view_width = display_width - map_width  # includes margins
@@ -24,14 +24,14 @@ def get_constants():
     message_width = display_width - map_width  # includes margins
     message_height = display_height - view_height  # includes margins
     
-    board_width = 48
-    board_height = 48
+    board_width = 64
+    board_height = 64
     island_size = board_height // 2
     island_seeds = board_height
     
     font = pygame.font.Font('freesansbold.ttf', 15)
     
-    max_entities = 10
+    max_entities = board_width // 4
     log_size = 10
     
     tile_size = 32
@@ -40,6 +40,9 @@ def get_constants():
     colors = {
         'text': (200, 200, 200),
         'black': (0, 0, 0),
+        
+        'dark_gray': (25, 25, 25),
+        'gray': (150, 150, 150),
         'white': (255, 255, 255),
         'red': (255, 0, 0),
         'light_red': (200, 0, 0),
@@ -81,7 +84,7 @@ def get_constants():
         'jungle': pygame.image.load('icons/Jungle3d.png'),
         'mountain': pygame.image.load('icons/Mountain3d.png'),
         'volcano': pygame.image.load('icons/Volcano3d.png'),
-        'town': pygame.image.load('icons/Town3d.png'),
+        'port': pygame.image.load('icons/Port.png'),
         'seaweed': pygame.image.load('icons/Seaweed.png'),
         'sandbar': pygame.image.load('icons/Sandbar.png'),
         'rocks': pygame.image.load('icons/Rocks.png'),
@@ -93,6 +96,9 @@ def get_constants():
         'sea_serpent': pygame.image.load('icons/SeaSerpent.png'),
         'sea_turtle': pygame.image.load('icons/SeaTurtle.png'),
         'red_dragon': pygame.image.load('icons/RedDragon.png'),
+        'wyvern': pygame.image.load('icons/Wyvern.png'),
+        'carcass': pygame.image.load('icons/Carcass.png'),
+        'sunken_ship': pygame.image.load('icons/SunkenShip.png'),
     }
     
     constants = {
