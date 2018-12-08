@@ -9,11 +9,12 @@ from src.map_objects.tile import Elevation
 
 
 class RenderOrder(Enum):
-    TERRAIN = 1
-    DECORATION = 2
-    SUNK = 3
-    PORT = 4
-    BOAT = 5
+    TERRAIN = 0
+    DECORATION = 1
+    CORPSE = 2
+    FLOATING = 3
+    SWIMMING = 4
+    PLAYER = 5
     FLYING = 6
     FOG = 7
 
@@ -95,8 +96,9 @@ def render_board(game_map, player, entities, constants, game_state):
                         game_map_surf.blit(icon, (x * constants['tile_size'] - 2 * constants['margin'],
                                                   y * constants['tile_size'] + x % 2 * constants['half_tile']
                                                   - constants['half_tile'] - 2 * constants['margin']))
-    
-    for entity in entities:
+
+    ordered_entities = sorted(entities, key=lambda e: e.render_order.value)
+    for entity in ordered_entities:
         if (0 <= entity.x < game_map.width) \
                 and (0 <= entity.y < game_map.height) \
                 and (entity.x, entity.y) in player.view.fov:

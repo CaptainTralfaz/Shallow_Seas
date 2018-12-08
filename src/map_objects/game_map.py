@@ -9,6 +9,8 @@ from src.map_objects.map_generator import generate_terrain
 from src.map_objects.map_utils import hex_directions
 from src.map_objects.tile import Decoration, Elevation
 from src.components.weapon import WeaponList, Weapon
+from src.render_functions import RenderOrder
+
 
 class GameMap:
     def __init__(self, width: int, height: int):
@@ -132,6 +134,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                     npc = Entity(name='Sea Turtle', x=x, y=y,
                                  size=size_component,
                                  icon=npc_icon,
+                                 render_order=RenderOrder.FLOATING,
                                  view=view_component,
                                  mobile=mobile_component,
                                  ai=ai_component,
@@ -148,6 +151,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                     npc = Entity(name='Sea Serpent', x=x, y=y,
                                  size=size_component,
                                  icon=npc_icon,
+                                 render_order=RenderOrder.FLOATING,
                                  view=view_component,
                                  mobile=mobile_component,
                                  ai=ai_component,
