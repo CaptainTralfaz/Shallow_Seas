@@ -65,8 +65,8 @@ class WeaponList:
             amount = total_damage // len(targeted_entities)
             message_log.add_message('{} {} takes {} damage!'.format(entity.name, entity.fighter.name, amount),
                                     (200, 150, 40))
-            message, result = entity.fighter.take_damage(amount)
-            if result:  # entity is dead
+            message, dead_result = entity.fighter.take_damage(amount)
+            if dead_result:  # entity is dead
                 kill_monster(entity, icons)
             message_log.add_message(message)
 

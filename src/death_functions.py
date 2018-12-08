@@ -1,4 +1,5 @@
 from src.game_states import GameStates
+from src.render_functions import RenderOrder
 
 
 def kill_player(player, icons):
@@ -6,15 +7,16 @@ def kill_player(player, icons):
     return 'You died!', GameStates.PLAYER_DEAD
 
 
-def kill_monster(monster, icons):
-    death_message = '{0} is dead!'.format(monster.name)
-    monster.size = None
-    monster.icon = icons['carcass']
-    monster.view = None
-    monster.mobile = None
-    monster.ai = None
-    monster.fighter = None
+def kill_monster(entity, icons):
+    death_message = '{0} is dead!'.format(entity.name)
+    entity.size = None
+    entity.icon = icons['carcass']
+    entity.view = None
+    entity.mobile = None
+    entity.ai = None
+    entity.fighter = None
+    entity.render_order = RenderOrder.CORPSE
 
-    monster.name = 'Dead {}'.format(monster.name)
+    entity.name = 'Dead {}'.format(entity.name)
 
     return death_message

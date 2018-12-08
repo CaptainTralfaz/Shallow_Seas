@@ -15,7 +15,7 @@ from src.input_handlers import handle_keys
 from src.loader_functions.initialize_new_game import get_constants
 from src.map_objects.game_map import make_map, change_wind
 from src.map_objects.map_utils import get_target_hexes_at_location
-from src.render_functions import render_display
+from src.render_functions import render_display, RenderOrder
 
 
 def main():
@@ -42,9 +42,9 @@ def main():
     mast_component = Masts(name="Mast", masts=size_component.value, size=size_component.value)
     mobile_component = Mobile(direction=0, max_momentum=size_component.value * 2 + 2)
     player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
-                    y=constants['board_height'] - 1, icon=player_icon, view=view_component, size=size_component,
-                    mast_sail=mast_component, mobile=mobile_component, weapons=weapons_component,
-                    fighter=fighter_component)
+                    y=constants['board_height'] - 1, icon=player_icon, render_order=RenderOrder.PLAYER,
+                    view=view_component, size=size_component, mast_sail=mast_component, mobile=mobile_component,
+                    weapons=weapons_component, fighter=fighter_component)
     
     entities = [player]
     

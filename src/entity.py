@@ -1,16 +1,20 @@
+from src.render_functions import RenderOrder
+
+
 class Entity:
     """
     A generic object to represent ships, enemies, etc.
     """
     
-    def __init__(self, name, x, y, icon, ai=None, block_view=None, elevation=None, mobile=None,
-                 size=None, view=None, crew=None, mast_sail=None, weapons=None, wings=None,
+    def __init__(self, name, x, y, icon, render_order=RenderOrder.CORPSE, ai=None, block_view=None, elevation=None,
+                 mobile=None, size=None, view=None, crew=None, mast_sail=None, weapons=None, wings=None,
                  cargo=None, sprite_sheet=None, fighter=None):
         # generics
         self.name = name
         self.x = x
         self.y = y
         self.icon = icon
+        self.render_order = render_order
         
         self.ai = ai
         self.block_view = block_view
