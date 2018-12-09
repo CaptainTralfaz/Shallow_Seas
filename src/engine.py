@@ -14,7 +14,7 @@ from src.game_states import GameStates
 from src.input_handlers import handle_keys
 from src.loader_functions.initialize_new_game import get_constants
 from src.map_objects.game_map import make_map, change_wind
-from src.map_objects.map_utils import get_target_hexes_at_location
+# from src.map_objects.map_utils import get_target_hexes_at_location
 from src.render_functions import render_display, RenderOrder
 
 
@@ -34,7 +34,7 @@ def main():
     message_log = MessageLog(constants['log_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.MEDIUM
+    size_component = Size.TINY
     view_component = View(view=size_component.value + 3)
     fighter_component = Fighter("hull", size_component.value * 10 + 5)
     weapons_component = WeaponList()
@@ -108,34 +108,32 @@ def main():
             
             rowing = action.get('rowing')
             slowing = action.get('slowing')
-            sails = action.get('sails')
-            attack = action.get('attack')
             rotate = action.get('rotate')
             other_action = action.get('other_action')
             exit_screen = action.get('exit')
+            
+            sails = action.get('sails')
+            sails_change = action.get('sails_change')
+            sails_cancel = action.get('sails_cancel')
+            if sails_change and player.mast_sail.masts:
+                game_state = GameStates.SAILS
+            if sails_cancel:
+                game_state = GameStates.CURRENT_TURN
+            
+            attack = action.get('attack')
             targeting = action.get('targeting')
-            untargeting = action.get('untargeting')
+            target_cancel = action.get('target_cancel')
             if targeting:
                 game_state = GameStates.TARGETING
-            if untargeting:
+            if target_cancel:
                 game_state = GameStates.CURRENT_TURN
             
             # VERIFY PLAYER ACTION ------------------------------------------------------------------------------------
             
             if attack:
                 # make sure there is a target
-                weapon_list = player.weapons.get_weapons_at_location(attack)
-                if len(weapon_list) > 0:  # make sure there is a weapon on that side
-                    attack_range = weapon_list[0].max_range
-                    target_hexes = get_target_hexes_at_location(player, attack, attack_range)
-                    valid_target = False
-                    for entity in entities:
-                        if entity.fighter and (entity.x, entity.y) in target_hexes:
-                            valid_target = True
-                    if not valid_target:  # no targets in range
-                        attack = None
-                else:
-                    attack = None  # no weapons at that location
+                if not player.weapons.verify_target_at_location(attack, entities):
+                    attack = None
             if sails:
                 if (sails > 0 and player.mast_sail.current_sails == player.mast_sail.max_sails) \
                         or (sails < 0 and player.mast_sail.current_sails == 0):
@@ -184,7 +182,8 @@ def main():
                             entity.name = ''
                             entity.icon = None
 
-                    if game_map.terrain[player.x][player.y].decoration \
+                    if game_map.in_bounds(player.x, player.y) \
+                            and game_map.terrain[player.x][player.y].decoration \
                             and game_map.terrain[player.x][player.y].decoration.name == 'Port':
                         message_log.add_message('Ahoy! In this port, ye can: trade, repair, hire crew... or Plunder!',
                                                 constants['colors']['aqua'])

@@ -7,6 +7,8 @@ def handle_keys(event, game_state):
         return handle_keys_current_turn(event)
     elif game_state == GameStates.TARGETING:
         return handle_keys_targeting(event)
+    elif game_state == GameStates.SAILS:
+        return handle_keys_adjust_sails(event)
     elif game_state == GameStates.PLAYER_DEAD:
         return handle_keys_player_dead(event)
     
@@ -24,6 +26,8 @@ def handle_keys_current_turn(event):
             # mac shift    mod L:1    R:2     key L:304 R:303
             if event.key in [309, 310]:  # Mac command keys
                 return {'targeting': True}
+            elif event.key in [303, 304]:
+                return {'sails_change': True}
             elif event.key == K_LEFT and event.mod in [256, 512]:
                 return {'special': 'left'}
             elif event.key == K_RIGHT and event.mod in [256, 512]:
@@ -32,10 +36,6 @@ def handle_keys_current_turn(event):
                 return {'special': 'up'}
             elif event.key == K_DOWN and event.mod in [256, 512]:
                 return {'special': 'down'}
-            elif event.key == K_UP and event.mod in [1, 2]:
-                return {'sails': 1}
-            elif event.key == K_DOWN and event.mod in [1, 2]:
-                return {'sails': -1}
             elif event.key == K_LEFT:
                 return {'rotate': 1}
             elif event.key == K_RIGHT:
@@ -53,7 +53,7 @@ def handle_keys_targeting(event):
     if event:
         if event.key == K_ESCAPE:
             # Exit the game
-            return {'untargeting': True}
+            return {'target_cancel': True}
         
         if event.type == KEYDOWN:
             # print(event)
@@ -69,7 +69,27 @@ def handle_keys_targeting(event):
             elif event.key == K_DOWN:
                 return {'attack': 'Stern'}
             elif event.key in [309, 310]:  # Mac command keys
-                return {'untargeting': True}
+                return {'target_cancel': True}
+    return {}
+
+
+def handle_keys_adjust_sails(event):
+    if event:
+        if event.key == K_ESCAPE:
+            # Exit the game
+            return {'sails_cancel': True}
+        
+        if event.type == KEYDOWN:
+            # print(event)
+            # mac command  mod L:1024 R:2048  key L:310 R:309
+            # mac option   mod L:256  R:512   key L:308 R:307
+            # mac shift    mod L:1    R:2     key L:304 R:303
+            if event.key == K_UP:
+                return {'sails': 1}
+            elif event.key == K_DOWN:
+                return {'sails': -1}
+            elif event.key in [303, 304]:  # Mac command keys
+                return {'sails_cancel': True}
     return {}
 
 
