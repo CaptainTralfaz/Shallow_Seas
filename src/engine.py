@@ -34,7 +34,7 @@ def main():
     message_log = MessageLog(constants['log_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.MEDIUM
+    size_component = Size.HUGE
     view_component = View(view=size_component.value + 3)
     fighter_component = Fighter("hull", size_component.value * 10 + 5)
     weapons_component = WeaponList()
@@ -184,7 +184,8 @@ def main():
                             entity.name = ''
                             entity.icon = None
 
-                    if game_map.terrain[player.x][player.y].decoration \
+                    if game_map.in_bounds(player.x, player.y) \
+                            and game_map.terrain[player.x][player.y].decoration \
                             and game_map.terrain[player.x][player.y].decoration.name == 'Port':
                         message_log.add_message('Ahoy! In this port, ye can: trade, repair, hire crew... or Plunder!',
                                                 constants['colors']['aqua'])

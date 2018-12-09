@@ -17,9 +17,12 @@ def get_constants():
     
     view_width = display_width - map_width  # includes margins
     view_height = 618  # includes margins
+
+    control_width = map_width
+    control_height = display_height - view_height
     
     status_width = map_width  # includes margins
-    status_height = display_height - map_height  # includes margins
+    status_height = display_height - map_height - control_height # includes margins
     
     message_width = display_width - map_width  # includes margins
     message_height = display_height - view_height  # includes margins
@@ -91,8 +94,9 @@ def get_constants():
         'coral': pygame.image.load('icons/Coral.png'),
         'fog': pygame.image.load('icons/Fog2.png'),
         'salvage': pygame.image.load('icons/Salvage.png'),
-        'arrow': pygame.image.load('icons/Arrow.png'),
+        'pointer': pygame.image.load('icons/Pointer.png'),
         'compass': pygame.image.load('icons/Compass.png'),
+        'arrow': pygame.image.load('icons/Arrow.png'),
         'sea_serpent': pygame.image.load('icons/SeaSerpent.png'),
         'sea_turtle': pygame.image.load('icons/SeaTurtle.png'),
         'red_dragon': pygame.image.load('icons/RedDragon.png'),
@@ -108,6 +112,8 @@ def get_constants():
         'display_height': display_height,
         'status_width': status_width,
         'status_height': status_height,
+        'control_width': control_width,
+        'control_height': control_height,
         'message_width': message_width,
         'message_height': message_height,
         'margin': margin,
