@@ -166,7 +166,7 @@ def main():
                 
                 if attack:
                     message_log.add_message('Player attacks to the {}!'.format(attack), constants['colors']['aqua'])
-                    player.weapons.attack(entities, attack, message_log, constants['icons'])
+                    player.weapons.attack(game_map.terrain, entities, attack, message_log, constants['icons'])
                 
                 if other_action:
                     # for decoration in game_map.decorations:
@@ -214,7 +214,11 @@ def main():
                         if entity.mast_sail and entity.mast_sail.current_sails > 0:
                             entity.mast_sail.momentum_due_to_wind(wind_direction=game_map.wind_direction)
                             entity.mast_sail.catching_wind = True
-                            message_log.add_message('Catching Wind, + momentum')
+                            message_log.add_message('{} catching Wind, + momentum'.format(entity.name.capitalize()))
+                        elif entity.wings and entity.wings.current_wing_power > 0:
+                            entity.wings.momentum_due_to_wind(wind_direction=game_map.wind_direction)
+                            entity.mast_sail.catching_wind = True
+                            message_log.add_message('{} catching Wind, + momentum'.format(entity.name.capitalize()))
                 
                 # DRAG ------------------------------------------------------------------------------------------------
                 # change momentum due to drag if not rowing or catching wind
