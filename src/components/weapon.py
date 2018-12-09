@@ -70,6 +70,21 @@ class WeaponList:
                 kill_monster(entity, icons)
             message_log.add_message(message)
 
+    def verify_target_at_location(self, attack, entities):
+        weapon_list = self.get_weapons_at_location(attack)
+        if len(weapon_list) > 0:  # make sure there is a weapon on that side
+            attack_range = weapon_list[0].max_range
+            target_hexes = get_target_hexes_at_location(self.owner, attack, attack_range)
+            valid_target = False
+            for entity in entities:
+                if entity.fighter and (entity.x, entity.y) in target_hexes:
+                    return True
+            if not valid_target:  # no targets in range
+                return False
+        else:
+            return False  # no weapons at that location
+        return False
+
 
 class Weapon:
     def __init__(self, name, location, min_range, max_range, structure_points, damage, cool_down=None, effects=None):

@@ -206,36 +206,67 @@ def render_control(game_map, player, entities, constants, game_state):
         for key in arrow_keys:
             vertical = make_arrow_button(control_panel, split, margin, key['rotation'],
                                          key['text'], constants, vertical)
-        text_keys = [{'name': 'Ctrl', 'text': 'Targeting'},
-                     {'name': 'Shift', 'text': 'Sails'},
-                     {'name': 'Alt', 'text': 'Special'}]
-        for entity in entities:
-            if (player.x, player.y) == (entity.x, entity.y) \
-                    and not entity.ai and entity.name not in ['player', '']:
-                text_keys.append({'name': 'Space', 'text': 'Other Action'})
+        text_keys = [{'name': 'Ctrl', 'text': 'Targeting'}]
+        if player.mast_sail and player.mast_sail.masts:
+            text_keys.append({'name': 'Shift', 'text': 'Sails'})
+        text_keys.append({'name': 'Alt', 'text': 'Special'})
+        spacebar = False
         if game_map.in_bounds(player.x, player.y) \
                 and game_map.terrain[player.x][player.y].decoration \
                 and game_map.terrain[player.x][player.y].decoration.name == 'Port':
-            text_keys.append({'name': 'Space', 'text': 'Other Action'})
+            text_keys.append({'name': 'Space', 'text': 'Visit Town'})
+            spacebar = True
+        else:
+            for entity in entities:
+                if (player.x, player.y) == (entity.x, entity.y) \
+                        and not entity.ai and entity.name not in ['player', '']:
+                    text_keys.append({'name': 'Space', 'text': 'Salvage'})
+                    spacebar = True
+        if not spacebar:
+            text_keys.append({'name': 'Space', 'text': 'Pass'})
         text_keys.append({'name': 'Esc', 'text': 'Quit'})
         for key in text_keys:
             vertical = make_text_button(control_panel, split, margin, key['name'],
                                         key['text'], constants, vertical)
     elif game_state == GameStates.TARGETING:
         split = 58
-        arrow_keys = [{'rotation': 0, 'text': 'Attack Fore'},
-                      {'rotation': 180, 'text': 'Attack Aft'},
-                      {'rotation': 90, 'text': 'Attack Port'},
-                      {'rotation': 270, 'text': 'Attack Starboard'}]
+        arrow_keys = []
+        if player.weapons.verify_target_at_location('Bow', entities):
+            arrow_keys.append({'rotation': 0, 'text': 'Attack Fore'})
+        if player.weapons.verify_target_at_location('Stern', entities):
+            arrow_keys.append({'rotation': 180, 'text': 'Attack Aft'})
+        if player.weapons.verify_target_at_location('Port', entities):
+            arrow_keys.append({'rotation': 90, 'text': 'Attack Port'})
+        if player.weapons.verify_target_at_location('Starboard', entities):
+            arrow_keys.append({'rotation': 270, 'text': 'Attack Starboard'})
         for key in arrow_keys:
             vertical = make_arrow_button(control_panel, split, margin, key['rotation'],
                                          key['text'], constants, vertical)
-        text_keys = [{'name': 'Space', 'text': 'Arrow Attack'},
+        text_keys = [#{'name': 'Space', 'text': 'Arrow Attack'},
                      {'name': 'Ctrl', 'text': 'Exit Targeting'},
                      {'name': 'Esc', 'text': 'Exit Targeting'}]
         for key in text_keys:
             vertical = make_text_button(control_panel, split, margin, key['name'],
                                         key['text'], constants, vertical)
+    elif game_state == GameStates.SAILS:
+        split = 58
+        arrow_keys = []
+        if player.mast_sail and player.mast_sail.max_sails > 0:
+            if player.mast_sail.current_sails < player.mast_sail.max_sails:
+                arrow_keys.append({'rotation': 0, 'text': 'Raise Sails'})
+            if player.mast_sail.current_sails > 0:
+                arrow_keys.append({'rotation': 180, 'text': 'Lower Sails'})
+            # left repair sails
+            # right repair masts
+        for key in arrow_keys:
+            vertical = make_arrow_button(control_panel, split, margin, key['rotation'],
+                                         key['text'], constants, vertical)
+        text_keys = [{'name': 'Ctrl', 'text': 'Exit Adjust Sails'},
+                     {'name': 'Esc', 'text': 'Exit Adjust Sails'}]
+        for key in text_keys:
+            vertical = make_text_button(control_panel, split, margin, key['name'],
+                                        key['text'], constants, vertical)
+
     else:
         split = 58
         text_keys = [{'name': 'Esc', 'text': 'Quit'}]
