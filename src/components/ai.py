@@ -5,6 +5,7 @@ from src.map_objects.map_utils import get_hex_neighbors, hex_to_cube, Hex, get_s
     cube_add, cube_direction, cube_to_hex
 from src.death_functions import kill_player
 
+
 class PeacefulMonster:
     def take_turn(self, game_map, player, message_log, colors, icons):
         entity = self.owner
@@ -98,7 +99,6 @@ class MeleeMonster:  # SeaSerpent
                         or relative_location in ["AA"] and relative_dir in [0]:
                     entity.mobile.rowing = -1
                     message_log.add_message('{} slows to wait for you'.format(entity.name), colors['yellow'])
-        
         
         # critter can't see target - act like Peaceful Monster
         else:

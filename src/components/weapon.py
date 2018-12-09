@@ -52,7 +52,7 @@ class WeaponList:
         self.weapon_list.remove(weapon)
         return {'message': 'Removed {} on {}'.format(weapon.name, weapon.location)}
     
-    def attack(self, entities, location, message_log, icons):
+    def attack(self, terrain, entities, location, message_log, icons):
         weapons = self.get_weapons_at_location(location)
         target_hexes = []
         total_damage = 0
@@ -67,7 +67,7 @@ class WeaponList:
                                     (200, 150, 40))
             message, dead_result = entity.fighter.take_damage(amount)
             if dead_result:  # entity is dead
-                kill_monster(entity, icons)
+                kill_monster(terrain[entity.x][entity.y].elevation.value, entity, icons)
             message_log.add_message(message)
 
     def verify_target_at_location(self, attack, entities):
