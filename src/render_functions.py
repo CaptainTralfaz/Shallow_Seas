@@ -261,7 +261,7 @@ def render_control(game_map, player, entities, constants, game_state):
         for key in arrow_keys:
             vertical = make_arrow_button(control_panel, split, margin, key['rotation'],
                                          key['text'], constants, vertical)
-        text_keys = [{'name': 'Ctrl', 'text': 'Exit Adjust Sails'},
+        text_keys = [{'name': 'Shift', 'text': 'Exit Adjust Sails'},
                      {'name': 'Esc', 'text': 'Exit Adjust Sails'}]
         for key in text_keys:
             vertical = make_text_button(control_panel, split, margin, key['name'],
