@@ -4,6 +4,7 @@ from src.components.ai import PeacefulMonster, MeleeMonster
 from src.components.mobile import Mobile
 from src.components.size import Size
 from src.components.view import View
+from src.components.wings import Wings
 from src.entity import Entity
 from src.map_objects.map_generator import generate_terrain
 from src.map_objects.map_utils import hex_directions
@@ -142,20 +143,39 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                     npc.view.set_fov(game_map)
                     print('{} placed at {}:{}'.format(npc.name, x, y))
                 else:
-                    size_component = Size.SMALL
-                    view_component = View(size_component.value + 3)
+                    size_component = Size.TINY
+                    view_component = View(size_component.value + 5)
                     mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
                     fighter_component = Fighter("body", size_component.value * 10 + 5)
+                    wing_component = Wings("wings", 2, size_component.value)
                     ai_component = MeleeMonster()
-                    npc_icon = icons['sea_serpent']
-                    npc = Entity(name='Sea Serpent', x=x, y=y,
+                    npc_icon = icons['giant_bat']
+                    npc = Entity(name='Giant Bat', x=x, y=y,
                                  size=size_component,
                                  icon=npc_icon,
-                                 render_order=RenderOrder.FLOATING,
+                                 render_order=RenderOrder.FLYING,
                                  view=view_component,
                                  mobile=mobile_component,
                                  ai=ai_component,
+                                 wings=wing_component,
                                  fighter=fighter_component)
                     npc.view.set_fov(game_map)
                     print('{} placed at {}:{}'.format(npc.name, x, y))
                 entities.append(npc)
+
+                    # size_component = Size.SMALL
+                    # view_component = View(size_component.value + 3)
+                    # mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
+                    # fighter_component = Fighter("body", size_component.value * 10 + 5)
+                    # ai_component = MeleeMonster()
+                    # npc_icon = icons['sea_serpent']
+                    # npc = Entity(name='Sea Serpent', x=x, y=y,
+                    #              size=size_component,
+                    #              icon=npc_icon,
+                    #              render_order=RenderOrder.FLOATING,
+                    #              view=view_component,
+                    #              mobile=mobile_component,
+                    #              ai=ai_component,
+                    #              fighter=fighter_component)
+                    # npc.view.set_fov(game_map)
+                    # print('{} placed at {}:{}'.format(npc.name, x, y))

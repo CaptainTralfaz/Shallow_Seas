@@ -35,9 +35,9 @@ class Mobile:
                 if hasattr(self.owner, "mast_sail"):
                     self.owner.mast_sail.current_sails = 0
                 break
-            # if not flying also...
             elif game_map.in_bounds(new_x, new_y) and \
-                    game_map.terrain[new_x][new_y].elevation > Elevation.SHALLOWS:
+                    game_map.terrain[new_x][new_y].elevation > Elevation.SHALLOWS \
+                    and not self.owner.wings:
                 print("{} crashed into island!".format(self.owner.name))
                 # take damage depending on speed
                 self.current_speed = 0

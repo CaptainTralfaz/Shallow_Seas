@@ -101,6 +101,7 @@ def get_constants():
         'sea_turtle': pygame.image.load('icons/SeaTurtle.png'),
         'red_dragon': pygame.image.load('icons/RedDragon.png'),
         'wyvern': pygame.image.load('icons/Wyvern.png'),
+        'giant_bat': pygame.image.load('icons/GiantBat.png'),
         'carcass': pygame.image.load('icons/Carcass.png'),
         'sunken_ship': pygame.image.load('icons/SunkenShip.png'),
     }
