@@ -22,6 +22,7 @@ class RenderOrder(Enum):
 def render_display(display, game_map, player, entities, constants, mouse_x, mouse_y, message_log, game_state):
     display.fill(constants['colors']['black'])
     
+    # draw and blit game play area
     board_surf = render_board(game_map, player, entities, constants, game_state)
     display.blit(board_surf, (constants['map_width'], 0))
     
@@ -31,14 +32,17 @@ def render_display(display, game_map, player, entities, constants, mouse_x, mous
     
     # draw and blit status panel
     status_surf = render_status(game_map, player, entities, constants, mouse_x, mouse_y, game_state)
-    display.blit(status_surf, (0, constants['map_height']))
+    display.blit(status_surf, (0, constants['map_height'] + constants['control_height']))
     
+    # draw and blit available controls
     control_surf = render_control(game_map, player, entities, constants, game_state)
-    display.blit(control_surf, (0, constants['map_height'] + constants['status_height']))
+    display.blit(control_surf, (0, constants['map_height']))
     
+    # draw and blit game messages
     message_surf = render_messages(message_log, constants)
     display.blit(message_surf, (constants['status_width'], constants['view_height']))
     
+    # Draw and blit info under mouse, but now out of bounds
     info_surf = get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants)
     if info_surf:
         location_x = mouse_x + constants['half_tile']
@@ -56,13 +60,14 @@ def render_messages(message_log, constants):
     message_surf = pygame.Surface((constants['message_width'] - 2 * constants['margin'],
                                    constants['message_height'] - 2 * constants['margin']))
     message_surf.fill(constants['colors']['dark_gray'])
-    
-    y = message_surf.get_height() - constants['font'].get_linesize() * (len(message_log.messages) + 1)
-    for message in message_log.messages:
-        y += constants['font'].get_linesize()
-        message_text = constants['font'].render(str(message.text), 1, message.color)
+
+    y = constants['margin'] // 2
+    for message in message_log.messages[message_log.view_pointer:message_log.view_pointer
+                                                                 + constants['message_panel_size']]:
+        message_text = constants['font'].render(str(message.text), True, message.color)
         message_surf.blit(message_text, (0, y))
-    
+        y += constants['font'].get_height() + constants['margin'] // 2
+
     border_panel = pygame.Surface((constants['message_width'], constants['message_height']))
     
     render_border(border_panel, constants['colors']['text'])
@@ -168,7 +173,7 @@ def render_status(game_map, player, entities, constants, mouse_x, mouse_y, state
     status_panel.fill(constants['colors']['dark_gray'])
     
     # wind direction
-    direction_text = constants['font'].render('Wind Direction:', 1, constants['colors'].get('text'))
+    direction_text = constants['font'].render('Wind Direction:', True, constants['colors'].get('text'))
     status_panel.blit(direction_text, (constants['half_tile'], constants['half_tile']))
     status_panel.blit(constants['icons']['compass'],
                       (constants['status_width'] - 2 * constants['tile_size'] + constants['margin'],
@@ -194,15 +199,15 @@ def render_control(game_map, player, entities, constants, game_state):
                                     constants['control_height'] - 2 * constants['margin']))
     control_panel.fill(constants['colors']['dark_gray'])
     
-    margin = 3
-    vertical = 1
+    margin = 2
+    vertical = 2
     
     if game_state == GameStates.CURRENT_TURN:
         split = 58
         arrow_keys = [{'rotation': 0, 'text': 'Row'},
                       {'rotation': 180, 'text': 'Drag'},
-                      {'rotation': 90, 'text': 'Rotate Port'},
-                      {'rotation': 270, 'text': 'Rotate Starboard'}]
+                      {'rotation': 90, 'text': 'Turn Port'},
+                      {'rotation': 270, 'text': 'Turn Starboard'}]
         for key in arrow_keys:
             vertical = make_arrow_button(control_panel, split, margin, key['rotation'],
                                          key['text'], constants, vertical)
@@ -283,7 +288,7 @@ def render_control(game_map, player, entities, constants, game_state):
 
 
 # def render_mouse_coords(status_panel, constants, grid_x, grid_y):
-#     xy_text = constants['font'].render('X: {}, Y: {}'.format(grid_x, grid_y), 1, constants['colors'].get('text'))
+#     xy_text = constants['font'].render('X: {}, Y: {}'.format(grid_x, grid_y), True, constants['colors'].get('text'))
 #     xy_rect = xy_text.get_rect()
 #     xy_rect.center = (status_panel.get_width() // 2, xy_text.get_height() * 2)
 #     status_panel.blit(xy_text, xy_rect)
@@ -291,20 +296,20 @@ def render_control(game_map, player, entities, constants, game_state):
 def make_arrow_button(panel, split, margin, rotation, text, constants, vertical):
     panel.blit(rot_center(constants['icons']['arrow'], rotation),
                (split - margin - constants['icons']['arrow'].get_width(), vertical))
-    panel.blit(constants['font'].render(text, 1, constants['colors']['text']),
+    panel.blit(constants['font'].render(text, True, constants['colors']['text']),
                (split + margin, vertical + 1))
     vertical += constants['font'].get_height() + margin
     return vertical
 
 
 def make_text_button(panel, split, margin, name, text, constants, vertical):
-    key_text = constants['font'].render(name, 1, constants['colors']['dark_gray'])
+    key_text = constants['font'].render(name, True, constants['colors']['dark_gray'])
     w, h = constants['font'].size(name)
     key_surf = pygame.Surface((w + 3, h))
     key_surf.fill(constants['colors']['text'])
     key_surf.blit(key_text, (1, 1))
     panel.blit(key_surf, (split - margin - key_surf.get_width(), vertical))
-    panel.blit(constants['font'].render(text, 1, constants['colors']['text']),
+    panel.blit(constants['font'].render(text, True, constants['colors']['text']),
                (split + margin, vertical + 1))
     vertical += constants['font'].get_height() + margin
     return vertical
@@ -321,14 +326,24 @@ def render_border(panel, color):
 def render_entity_info(panel, entity, constants, vertical):
     font = constants['font']
     # ship name
-    name_text = font.render(entity.name, 1, constants['colors']['text'])
+    name_text = font.render(entity.name, True, constants['colors']['text'])
     panel.blit(name_text, (0, vertical + 1))
-    vertical += font.get_height()
+    vertical += font.get_height() + constants['margin'] // 2
     
     if entity.mast_sail and entity.mast_sail.masts > 0:
         panel.blit(make_bar('Sails', font, constants['colors']['text'],
                             entity.mast_sail.current_sails, entity.mast_sail.max_sails,
                             constants['colors']['light_blue'], constants['colors']['dark_blue'],
+                            panel.get_width()), (0, vertical))
+        vertical += font.get_height() + 1
+        panel.blit(make_bar('Sails HPs', font, constants['colors']['text'],
+                            entity.mast_sail.sail_hp, entity.mast_sail.sail_hp_max,
+                            constants['colors']['light_red'], constants['colors']['dark_red'],
+                            panel.get_width()), (0, vertical))
+        vertical += font.get_height() + constants['margin'] // 2
+        panel.blit(make_bar('Masts HPs', font, constants['colors']['text'],
+                            entity.mast_sail.mast_hp, entity.mast_sail.mast_hp_max,
+                            constants['colors']['light_red'], constants['colors']['dark_red'],
                             panel.get_width()), (0, vertical))
         vertical += font.get_height() + constants['margin'] // 2
     if entity.mobile:
@@ -349,6 +364,14 @@ def render_entity_info(panel, entity, constants, vertical):
                             constants['colors']['light_red'], constants['colors']['dark_red'],
                             panel.get_width()), (0, vertical))
         vertical += font.get_height() + constants['margin'] // 2
+    if entity.crew:
+        panel.blit(make_bar('Crew'.format(entity.fighter.name.capitalize()), font,
+                            constants['colors']['text'],
+                            entity.crew.crew, entity.crew.max_crew,
+                            constants['colors']['light_red'], constants['colors']['dark_red'],
+                            panel.get_width()), (0, vertical))
+        vertical += font.get_height() + constants['margin'] // 2
+
     if entity.weapons:
         vertical = render_weapons(panel, entity, constants, vertical)
     
@@ -362,11 +385,11 @@ def render_weapons(panel, entity, constants, vertical):
         else:
             color = constants['colors']['gray']
         weapon_text = constants['font'].render("{} {}".format(weapon.location,
-                                                              weapon.name), 1, color)
+                                                              weapon.name), True, color)
         panel.blit(weapon_text, (0, vertical))
-        hp_text = constants['font'].render("[{}]   {}/{}".format(weapon.current_cd,
-                                                                 weapon.hps,
-                                                                 weapon.max_hps), 1, color)
+        hp_text = constants['font'].render("[{}] {}/{}".format(weapon.current_cd,
+                                                               weapon.hps,
+                                                               weapon.max_hps), True, color)
         panel.blit(hp_text, (panel.get_width() - hp_text.get_width(), vertical))
         vertical += constants['font'].get_height()
     return vertical
@@ -380,8 +403,8 @@ def make_bar(text, font, font_color, current, maximum, top_color, bottom_color, 
         current_bar_length = 0
     current_bar = pygame.Surface((current_bar_length, font.get_height()))
     current_bar.fill(top_color)
-    bar_text = font.render('{}:'.format(text), 1, font_color)
-    bar_nums = font.render('{}/{}'.format(current, maximum), 1, font_color)
+    bar_text = font.render('{}:'.format(text), True, font_color)
+    bar_nums = font.render('{}/{}'.format(current, maximum), True, font_color)
     max_bar.blit(current_bar, (0, 0))
     max_bar.blit(bar_text, (1, 1))
     max_bar.blit(bar_nums, (max_bar.get_width() - bar_nums.get_width(), 1))
@@ -407,9 +430,10 @@ def render_map(game_map, player, entities, constants):
     map_surf = pygame.Surface((constants['map_width'] - 2 * constants['margin'],
                                constants['map_height'] - 2 * constants['margin']))
     map_surf.fill(constants['colors']['dark_gray'])
-    
+    town = None
     block = pygame.Surface(constants['map_block'])
     small_block = pygame.Surface((constants['block_size'] // 2, constants['block_size'] // 2))
+    big_block = pygame.Surface((constants['block_size'] + 2, constants['block_size'] + 2))
     for x in range(constants['board_width']):
         for y in range(constants['board_height']):
             if game_map.terrain[x][y].seen:
@@ -419,17 +443,38 @@ def render_map(game_map, player, entities, constants):
                                       - constants['block_size'] // 2))
                 if game_map.terrain[x][y].decoration:
                     if game_map.terrain[x][y].decoration.name == 'Port':
-                        block.fill(constants['colors'][game_map.terrain[x][y].decoration.color])
-                        map_surf.blit(block, (x * constants['block_size'],
-                                              y * constants['block_size'] + (x % 2) * (constants['block_size'] // 2)
-                                              - constants['block_size'] // 2))
+                        town = (x, y)
                     else:
                         small_block.fill(constants['colors'][game_map.terrain[x][y].decoration.color])
-                        map_surf.blit(small_block, (x * constants['block_size'] + 1,
-                                                    y * constants['block_size'] + (x % 2) * (
-                                                            constants['block_size'] // 2)
-                                                    + 1 - constants['block_size'] // 2))
-    
+                        map_surf.blit(small_block, (x * constants['block_size']
+                                                    +1,
+                                                    y * constants['block_size']
+                                                    + (x % 2) * (constants['block_size'] // 2)
+                                                    - constants['block_size'] // 2
+                                                    + 1))
+    if town:
+        (x, y) = town
+        # big_block.fill(constants['colors'][game_map.terrain[x][y].decoration.color])
+        big_block.fill(constants['colors']['white'])
+        map_surf.blit(big_block, (x * constants['block_size']
+                                  - 1,
+                                  y * constants['block_size']
+                                  + (x % 2) * (constants['block_size'] // 2)
+                                  - constants['block_size'] // 2
+                                  - 1))
+        block.fill(constants['colors']['black'])
+        map_surf.blit(block, (x * constants['block_size'],
+                                  y * constants['block_size']
+                                  + (x % 2) * (constants['block_size'] // 2)
+                                  - constants['block_size'] // 2))
+        # small_block.fill(constants['colors']['white'])
+        # map_surf.blit(small_block, (x * constants['block_size']
+        #                             + 1,
+        #                             y * constants['block_size']
+        #                             + (x % 2) * (constants['block_size'] // 2)
+        #                             - constants['block_size'] // 2
+        #                             + 1))
+
     for entity in entities:
         if (0 <= entity.x < game_map.width) and (0 <= entity.y < game_map.height) \
                 and (entity.x, entity.y) in player.view.fov \
@@ -468,31 +513,34 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
         
         if game_map.terrain[grid_x][grid_y].elevation >= Elevation.DEEPS:
             location_name = "X:{} Y:{}".format(grid_x, grid_y)
-            location_text = constants['font'].render(location_name, 1, constants['colors']['text'])
+            location_text = constants['font'].render(location_name, True, constants['colors']['text'])
             w, h = constants['font'].size(location_name)
             if width < w:
                 width = w
             vertical += h
             location_surf = pygame.Surface((w, h))
+            location_surf.fill(constants['colors']['dark_gray'])
             location_surf.blit(location_text, (0, 0))
             
             terrain_name = game_map.terrain[grid_x][grid_y].name
-            terrain_text = constants['font'].render(terrain_name, 1, constants['colors']['text'])
+            terrain_text = constants['font'].render(terrain_name, True, constants['colors']['text'])
             w, h = constants['font'].size(terrain_name)
             if w > width:
                 width = w
             vertical += h
             terrain_surf = pygame.Surface((w, h))
+            terrain_surf.fill(constants['colors']['dark_gray'])
             terrain_surf.blit(terrain_text, (0, 0))
             
             if game_map.terrain[grid_x][grid_y].decoration:
                 decor_name = game_map.terrain[grid_x][grid_y].decoration.name
-                decor_text = constants['font'].render(decor_name, 1, constants['colors']['text'])
+                decor_text = constants['font'].render(decor_name, True, constants['colors']['text'])
                 w, h = constants['font'].size(decor_name)
                 if w > width:
                     width = w
                 vertical += h
                 decor_surf = pygame.Surface((w, h))
+                decor_surf.fill(constants['colors']['dark_gray'])
                 decor_surf.blit(decor_text, (0, 0))
         
         entities_under_mouse = []
@@ -505,7 +553,7 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
                     and entity.icon:
                 entities_under_mouse.append(entity)
         if len(entities_under_mouse) > 0:
-            height = 0
+            height = 2
             for entity in entities_under_mouse:
                 w, h = constants['font'].size(entity.name)
                 height += h + constants['margin'] // 2
@@ -532,6 +580,7 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
                         width = w
             
             entity_surf = pygame.Surface((width, height + constants['margin'] * (len(entities_under_mouse) - 1)))
+            entity_surf.fill(constants['colors']['dark_gray'])
             vert = constants['margin']
             for entity in entities_under_mouse:
                 vert += render_entity_info(entity_surf, entity, constants, vert)
@@ -541,6 +590,8 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
         vert = constants['margin']
         info_surf = pygame.Surface((width + 2 * constants['margin'],
                                     vertical + 2 * constants['margin']))
+        info_surf.fill(constants['colors']['dark_gray'])
+
         info_surf.blit(location_surf, (constants['margin'], vert))
         vert += constants['font'].get_height()
         if terrain_surf:

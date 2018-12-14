@@ -44,7 +44,16 @@ def get_hex_land_neighbors(height_map, x, y):
     neighbors = []
     for direction in hex_directions:
         dx, dy = direction
-        if height_map[dx + x][dy + y + (x % 2) * (dx % 2)] > 2:
+        if height_map[dx + x][dy + y + (x % 2) * (dx % 2)] >= Elevation.DUNES.value:
+            neighbors.append((dx + x, dy + y + (x % 2) * (dx % 2)))
+    return neighbors
+
+
+def get_hex_water_neighbors(height_map, x, y):
+    neighbors = []
+    for direction in hex_directions:
+        dx, dy = direction
+        if height_map[dx + x][dy + y + (x % 2) * (dx % 2)] < Elevation.DUNES.value:
             neighbors.append((dx + x, dy + y + (x % 2) * (dx % 2)))
     return neighbors
 
