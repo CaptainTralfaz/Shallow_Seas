@@ -14,8 +14,8 @@ from src.game_states import GameStates
 from src.input_handlers import handle_keys
 from src.loader_functions.initialize_new_game import get_constants
 from src.map_objects.game_map import make_map, change_wind
-# from src.map_objects.map_utils import get_target_hexes_at_location
 from src.render_functions import render_display, RenderOrder
+from src.components.crew import Crew
 
 
 def main():
@@ -31,20 +31,21 @@ def main():
     
     game_quit = False
     
-    message_log = MessageLog(constants['log_size'])
+    message_log = MessageLog(constants['log_size'], constants['message_panel_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.MEDIUM
+    size_component = Size.LARGE
     view_component = View(view=size_component.value + 3)
-    fighter_component = Fighter("hull", size_component.value * 10 + 5)
+    fighter_component = Fighter("hull", size_component.value * 10 + 10)
     weapons_component = WeaponList()
     weapons_component.add_all(size=str(size_component))  # Hacky for now
     mast_component = Masts(name="Mast", masts=size_component.value, size=size_component.value)
     mobile_component = Mobile(direction=0, max_momentum=size_component.value * 2 + 2)
+    crew_component = Crew(size=size_component.value, crew=50)
     player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
                     y=constants['board_height'] - 1, icon=player_icon, render_order=RenderOrder.PLAYER,
                     view=view_component, size=size_component, mast_sail=mast_component, mobile=mobile_component,
-                    weapons=weapons_component, fighter=fighter_component)
+                    weapons=weapons_component, fighter=fighter_component, crew=crew_component)
     
     entities = [player]
     
@@ -82,7 +83,6 @@ def main():
         # Get Input ---------------------------------------------------------------------------------------------------
         event_list = pygame.event.get()
         for event in event_list:
-            
             if event.type == pygame.QUIT:
                 user_input = event
                 game_quit = True
@@ -93,7 +93,8 @@ def main():
                 mouse_x, mouse_y = event.pos
                 user_mouse_input = True
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                user_mouse_input = event
+                user_mouse_input = True
+                user_input = event
                 break
             else:
                 user_input = None
@@ -111,6 +112,7 @@ def main():
             rotate = action.get('rotate')
             other_action = action.get('other_action')
             exit_screen = action.get('exit')
+            scroll = action.get('scroll')
             
             sails = action.get('sails')
             sails_change = action.get('sails_change')
@@ -145,6 +147,7 @@ def main():
                     or exit_screen:
                 
                 game_state = GameStates.CURRENT_TURN
+                # message_log.adjust_view(len(message_log.messages) - constants['message_panel_size'])
                 
                 for entity in entities:
                     if entity.ai:
@@ -261,6 +264,11 @@ def main():
                 
                 change_wind(game_map, message_log, constants['colors']['yellow'])
             
+            elif scroll:
+                if constants['map_width'] <= mouse_x < constants['display_width'] \
+                        and constants['view_height'] <= mouse_y < constants['display_height']:
+                    message_log.adjust_view(scroll)
+                
             render_display(display=display_surface,
                            game_map=game_map,
                            player=player,

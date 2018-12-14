@@ -24,7 +24,7 @@ class PeacefulMonster:
 
 
 class MeleeMonster:  # SeaSerpent
-    # TODO: find a way to implement last known location (last_seen) as a target hex
+    # TODO: find a way to implement last known location (last_seen) as a target hex - add state? need dijkstra maps
     def take_turn(self, game_map, target, message_log, colors, icons):
         state = None
         entity = self.owner

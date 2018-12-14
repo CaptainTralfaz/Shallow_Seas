@@ -9,8 +9,10 @@ class Masts:
         self.max_sails = masts
         self.current_sails = 0
         self.catching_wind = False
-        self.mast_hp = size + 3
-        self.sail_hp = size * 2 + 2
+        self.mast_hp_max = size + 3
+        self.mast_hp = self.mast_hp_max
+        self.sail_hp_max = size * 2 + 2
+        self.sail_hp = self.sail_hp_max
     
     def adjust_sails(self, amount: int):
         self.current_sails += amount

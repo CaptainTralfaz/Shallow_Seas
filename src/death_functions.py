@@ -15,7 +15,7 @@ def kill_monster(elevation, entity, icons):
     entity.ai = None
     entity.fighter = None
     entity.render_order = RenderOrder.CORPSE
-    if elevation < 2:
+    if elevation < 3:
         entity.name = 'Dead {}'.format(entity.name)
         entity.icon = icons['carcass']
     else:
