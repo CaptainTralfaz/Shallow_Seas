@@ -6,3 +6,5 @@ class GameStates(Enum):
     TARGETING = 2
     PLAYER_DEAD = 3
     SAILS = 4
+    SPECIAL = 5
+    CARGO = 6

@@ -9,12 +9,12 @@ class Terrain:
         self.decoration = None
         
         if self.elevation == Elevation.DEEPS:
-            self.name = 'Deeps'
-            self.icon = 'deeps'
+            self.name = 'Deep Sea'
+            self.icon = 'deep_sea'
             self.color = 'light_blue'
         elif elevation == Elevation.WATER:
-            self.name = 'Water'
-            self.icon = 'water'
+            self.name = 'Sea'
+            self.icon = 'sea'
             self.color = 'blue'
         elif self.elevation == Elevation.SHALLOWS:
             self.name = 'Shallows'
@@ -22,11 +22,11 @@ class Terrain:
             self.color = 'aqua'
         elif self.elevation == Elevation.DUNES:
             self.name = 'Dunes'
-            self.icon = 'sand'
+            self.icon = 'dunes'
             self.color = 'cantaloupe'
         elif self.elevation == Elevation.GRASSLAND:
             self.name = 'Grassland'
-            self.icon = 'grass'
+            self.icon = 'grassland'
             self.color = 'light_green'
         elif self.elevation == Elevation.JUNGLE:
             self.name = 'Jungle'

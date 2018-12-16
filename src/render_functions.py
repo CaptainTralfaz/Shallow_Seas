@@ -22,10 +22,6 @@ class RenderOrder(Enum):
 def render_display(display, game_map, player, entities, constants, mouse_x, mouse_y, message_log, game_state):
     display.fill(constants['colors']['black'])
     
-    # draw and blit game play area
-    board_surf = render_board(game_map, player, entities, constants, game_state)
-    display.blit(board_surf, (constants['map_width'], 0))
-    
     # draw and blit mini-map
     map_surf = render_map(game_map, player, entities, constants)
     display.blit(map_surf, (0, 0))
@@ -41,19 +37,47 @@ def render_display(display, game_map, player, entities, constants, mouse_x, mous
     # draw and blit game messages
     message_surf = render_messages(message_log, constants)
     display.blit(message_surf, (constants['status_width'], constants['view_height']))
+
+    if game_state == GameStates.CARGO:
+        inventory_surf = render_inventory(player.cargo, constants)
+        display.blit(inventory_surf, (constants['map_width'], 0))
+    else:
+        # draw and blit game play area
+        board_surf = render_board(game_map, player, entities, constants, game_state)
+        display.blit(board_surf, (constants['map_width'], 0))
     
-    # Draw and blit info under mouse, but now out of bounds
-    info_surf = get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants)
-    if info_surf:
-        location_x = mouse_x + constants['half_tile']
-        location_y = mouse_y + constants['half_tile']
-        if location_x + info_surf.get_width() > constants['display_width'] - constants['margin']:
-            location_x = constants['display_width'] - constants['margin'] - info_surf.get_width()
-        if location_y + info_surf.get_height() > constants['view_height'] - constants['margin']:
-            location_y = constants['view_height'] - constants['margin'] - info_surf.get_height()
-        display.blit(info_surf, (location_x, location_y))
+        # Draw and blit info under mouse, but now out of bounds
+        info_surf = get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants)
+        if info_surf:
+            location_x = mouse_x + constants['half_tile']
+            location_y = mouse_y + constants['half_tile']
+            if location_x + info_surf.get_width() > constants['display_width'] - constants['margin']:
+                location_x = constants['display_width'] - constants['margin'] - info_surf.get_width()
+            if location_y + info_surf.get_height() > constants['view_height'] - constants['margin']:
+                location_y = constants['view_height'] - constants['margin'] - info_surf.get_height()
+            display.blit(info_surf, (location_x, location_y))
     
     pygame.display.update()
+
+
+def render_inventory(cargo, constants):
+    inventory_surf = pygame.Surface((constants['view_width'] - 2 * constants['margin'],
+                                     constants['view_height'] - 2 * constants['margin']))
+    inventory_surf.fill(constants['colors']['dark_gray'])
+    
+    vertical = constants['margin']
+    for item in cargo.manifest:
+        inventory_surf.blit(item.icon, (constants['margin'], vertical))
+        item_name = constants['font'].render(item.name, True, constants['colors']['text'])
+        inventory_surf.blit(item_name, (item.icon.get_width() + 2 * constants['margin'], vertical))
+        vertical += constants['font'].get_height() + constants['margin']
+        
+    border_panel = pygame.Surface((constants['view_width'],
+                                   constants['view_height']))
+    render_border(border_panel, constants['colors']['text'])
+
+    border_panel.blit(inventory_surf, (constants['margin'], constants['margin']))
+    return border_panel
 
 
 def render_messages(message_log, constants):
@@ -271,8 +295,22 @@ def render_control(game_map, player, entities, constants, game_state):
         for key in text_keys:
             vertical = make_text_button(control_panel, split, margin, key['name'],
                                         key['text'], constants, vertical)
-
-    else:
+    elif game_state == GameStates.SPECIAL:
+        split = 58
+        arrow_keys = [{'rotation': 0, 'text': 'Ram'},
+                      {'rotation': 180, 'text': 'Drop Mines'},
+                      {'rotation': 90, 'text': 'Assign Crew'},
+                      {'rotation': 270, 'text': 'Assign Crew'}]
+        for key in arrow_keys:
+            vertical = make_arrow_button(control_panel, split, margin, key['rotation'],
+                                         key['text'], constants, vertical)
+        text_keys = [{'name': 'Space', 'text': 'Cargo'},
+                     {'name': 'Alt', 'text': 'Quit'},
+                     {'name': 'Esc', 'text': 'Quit'}]
+        for key in text_keys:
+            vertical = make_text_button(control_panel, split, margin, key['name'],
+                                        key['text'], constants, vertical)
+    else:  # Dead
         split = 58
         text_keys = [{'name': 'Esc', 'text': 'Quit'}]
         for key in text_keys:
@@ -454,8 +492,7 @@ def render_map(game_map, player, entities, constants):
                                                     + 1))
     if town:
         (x, y) = town
-        # big_block.fill(constants['colors'][game_map.terrain[x][y].decoration.color])
-        big_block.fill(constants['colors']['white'])
+        big_block.fill(constants['colors'][game_map.terrain[x][y].decoration.color])
         map_surf.blit(big_block, (x * constants['block_size']
                                   - 1,
                                   y * constants['block_size']
@@ -464,17 +501,10 @@ def render_map(game_map, player, entities, constants):
                                   - 1))
         block.fill(constants['colors']['black'])
         map_surf.blit(block, (x * constants['block_size'],
-                                  y * constants['block_size']
-                                  + (x % 2) * (constants['block_size'] // 2)
-                                  - constants['block_size'] // 2))
-        # small_block.fill(constants['colors']['white'])
-        # map_surf.blit(small_block, (x * constants['block_size']
-        #                             + 1,
-        #                             y * constants['block_size']
-        #                             + (x % 2) * (constants['block_size'] // 2)
-        #                             - constants['block_size'] // 2
-        #                             + 1))
-
+                              y * constants['block_size']
+                              + (x % 2) * (constants['block_size'] // 2)
+                              - constants['block_size'] // 2))
+ 
     for entity in entities:
         if (0 <= entity.x < game_map.width) and (0 <= entity.y < game_map.height) \
                 and (entity.x, entity.y) in player.view.fov \

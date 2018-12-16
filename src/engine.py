@@ -16,7 +16,7 @@ from src.loader_functions.initialize_new_game import get_constants
 from src.map_objects.game_map import make_map, change_wind
 from src.render_functions import render_display, RenderOrder
 from src.components.crew import Crew
-
+from src.components.cargo import Cargo, Item
 
 def main():
     pygame.init()
@@ -35,6 +35,21 @@ def main():
     
     player_icon = constants['icons']['ship_1_mast']
     size_component = Size.LARGE
+    manifest = []
+    manifest.append(Item(name='Pearl', icon=constants['icons']['pearl'], weight=0.01, volume=0.01, quantity=3))
+    manifest.append(Item(name='Fish', icon=constants['icons']['fish'], weight=1, volume=1, quantity=3))
+    manifest.append(Item(name='Wood', icon=constants['icons']['wood'], weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Brick', icon=constants['icons']['brick'], weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Rope', icon=constants['icons']['rope'], weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Stone', icon=constants['icons']['stone'], weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Water', icon=constants['icons']['water'], weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Fruit', icon=constants['icons']['fruit'], weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Meat', icon=constants['icons']['meat'], weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Skins', icon=constants['icons']['skins'], weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Salt', icon=constants['icons']['salt'], weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Rum', icon=constants['icons']['rum'], weight=0.1, volume=2, quantity=2))
+    cargo_component = Cargo(capacity=size_component.value * 10 + 5, manifest=manifest)
     view_component = View(view=size_component.value + 3)
     fighter_component = Fighter("hull", size_component.value * 10 + 10)
     weapons_component = WeaponList()
@@ -45,7 +60,7 @@ def main():
     player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
                     y=constants['board_height'] - 1, icon=player_icon, render_order=RenderOrder.PLAYER,
                     view=view_component, size=size_component, mast_sail=mast_component, mobile=mobile_component,
-                    weapons=weapons_component, fighter=fighter_component, crew=crew_component)
+                    weapons=weapons_component, fighter=fighter_component, crew=crew_component, cargo=cargo_component)
     
     entities = [player]
     
@@ -119,17 +134,33 @@ def main():
             sails_cancel = action.get('sails_cancel')
             if sails_change and player.mast_sail.masts:
                 game_state = GameStates.SAILS
-            if sails_cancel:
-                game_state = GameStates.CURRENT_TURN
             
             attack = action.get('attack')
             targeting = action.get('targeting')
             target_cancel = action.get('target_cancel')
             if targeting:
                 game_state = GameStates.TARGETING
-            if target_cancel:
-                game_state = GameStates.CURRENT_TURN
+
+            special = action.get('special')
+            special_cancel = action.get('special_cancel')
+            if special:
+                game_state = GameStates.SPECIAL
+                if special == 'inventory':
+                    game_state = GameStates.CARGO
+                elif special == 'crew':
+                    print(special)
+                    game_state = GameStates.CURRENT_TURN
+                elif special == 'ram':
+                    print(special)
+                    game_state = GameStates.CURRENT_TURN
+                elif special == 'mines':
+                    print(special)
+                    game_state = GameStates.CURRENT_TURN
+            inventory_cancel = action.get('inventory_cancel')
             
+            if sails_cancel or special_cancel or target_cancel or inventory_cancel:
+                game_state = GameStates.CURRENT_TURN
+
             # VERIFY PLAYER ACTION ------------------------------------------------------------------------------------
             
             if attack:
@@ -140,6 +171,7 @@ def main():
                 if (sails > 0 and player.mast_sail.current_sails == player.mast_sail.max_sails) \
                         or (sails < 0 and player.mast_sail.current_sails == 0):
                     sails = None
+            
             
             # PROCESS ACTION ------------------------------------------------------------------------------------------
             if (rowing or slowing or sails or attack or rotate or other_action) \
