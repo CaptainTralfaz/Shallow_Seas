@@ -1,4 +1,4 @@
-from src.map_objects.map_utils import get_target_hexes_at_location
+from src.map_objects.map_utils import get_target_hexes_at_location, get_hex_neighbors
 from src.death_functions import kill_monster
 
 max_weapons = {
