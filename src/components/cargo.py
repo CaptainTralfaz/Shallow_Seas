@@ -1,3 +1,6 @@
+from enum import Enum
+
+
 class Cargo:
     def __init__(self, capacity, manifest):
         self.capacity = capacity
@@ -16,11 +19,13 @@ class Cargo:
         return volume
     
     def add_item_to_manifest(self, item):
-        if item not in self.manifest:
+        manifest_names = [cargo.name for cargo in self.manifest]
+        if item.name not in manifest_names:
             self.manifest.append(item)
-            print("already carrying " + item.name)
         else:
-            print(item.name + " added")
+            for cargo in self.manifest:
+                if cargo.name == item.name:
+                    cargo.adjust_quantity(item.quantity)
     
     def remove_item_from_manifest(self, item):
         if item in self.manifest:
@@ -31,12 +36,13 @@ class Cargo:
 
 
 class Item:
-    def __init__(self, name, icon, weight, volume, quantity=0):
+    def __init__(self, name, icon, category, weight, volume, quantity=0):
         self.name = name
-        self.weight = weight
-        self.volume = volume
+        self.weight = weight / 1.0
+        self.volume = volume / 1.0
         self.quantity = quantity
         self.icon = icon
+        self.category = category
 
     def get_item_weight(self):
         return self.weight * self.quantity
@@ -48,3 +54,10 @@ class Item:
         self.quantity += amount
         # if self.quantity < 0:
 
+
+class ItemCategory(Enum):
+    MATERIALS = 0
+    GOODS = 1
+    SUPPLIES = 2
+    EXOTICS = 3
+    ARMAMENTS = 4

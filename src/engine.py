@@ -16,7 +16,8 @@ from src.loader_functions.initialize_new_game import get_constants
 from src.map_objects.game_map import make_map, change_wind
 from src.render_functions import render_display, RenderOrder
 from src.components.crew import Crew
-from src.components.cargo import Cargo, Item
+from src.components.cargo import Cargo, Item, ItemCategory
+
 
 def main():
     pygame.init()
@@ -34,21 +35,22 @@ def main():
     message_log = MessageLog(constants['log_size'], constants['message_panel_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.LARGE
+    size_component = Size.SMALL
     manifest = []
-    manifest.append(Item(name='Pearl', icon=constants['icons']['pearl'], weight=0.01, volume=0.01, quantity=3))
-    manifest.append(Item(name='Fish', icon=constants['icons']['fish'], weight=1, volume=1, quantity=3))
-    manifest.append(Item(name='Wood', icon=constants['icons']['wood'], weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Brick', icon=constants['icons']['brick'], weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Rope', icon=constants['icons']['rope'], weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Stone', icon=constants['icons']['stone'], weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Water', icon=constants['icons']['water'], weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Fruit', icon=constants['icons']['fruit'], weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Meat', icon=constants['icons']['meat'], weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Skins', icon=constants['icons']['skins'], weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Salt', icon=constants['icons']['salt'], weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Rum', icon=constants['icons']['rum'], weight=0.1, volume=2, quantity=2))
+    manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], category=ItemCategory.GOODS,
+                         weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Meat', icon=constants['icons']['meat'], category=ItemCategory.SUPPLIES,
+                         weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Pearl', icon=constants['icons']['pearl'], category=ItemCategory.EXOTICS,
+                         weight=0.01, volume=0.01, quantity=3))
+    manifest.append(Item(name='Rope', icon=constants['icons']['rope'], category=ItemCategory.GOODS,
+                         weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Rum', icon=constants['icons']['rum'], category=ItemCategory.EXOTICS,
+                         weight=0.1, volume=2, quantity=2))
+    manifest.append(Item(name='Water', icon=constants['icons']['water'], category=ItemCategory.SUPPLIES,
+                         weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Wood', icon=constants['icons']['wood'], category=ItemCategory.MATERIALS,
+                         weight=2, volume=2, quantity=2))
     cargo_component = Cargo(capacity=size_component.value * 10 + 5, manifest=manifest)
     view_component = View(view=size_component.value + 3)
     fighter_component = Fighter("hull", size_component.value * 10 + 10)
@@ -70,7 +72,8 @@ def main():
                         constants['max_entities'],
                         constants['icons'],
                         constants['island_size'],
-                        constants['island_seeds'])
+                        constants['island_seeds'],
+                        constants)
     
     player.view.set_fov(game_map)
     game_state = GameStates.CURRENT_TURN
@@ -148,13 +151,13 @@ def main():
                 if special == 'inventory':
                     game_state = GameStates.CARGO
                 elif special == 'crew':
-                    print(special)
+                    print(special + " not yet implemented")
                     game_state = GameStates.CURRENT_TURN
                 elif special == 'ram':
-                    print(special)
+                    print(special + " not yet implemented")
                     game_state = GameStates.CURRENT_TURN
                 elif special == 'mines':
-                    print(special)
+                    print(special + " not yet implemented")
                     game_state = GameStates.CURRENT_TURN
             inventory_cancel = action.get('inventory_cancel')
             
@@ -165,6 +168,7 @@ def main():
             
             if attack:
                 # make sure there is a target
+                # TODO: verify line of sight
                 if not player.weapons.verify_target_at_location(attack, entities):
                     attack = None
             if sails:
@@ -214,8 +218,13 @@ def main():
                                 (entity.x, entity.y) == (player.x, player.y):
                             message_log.add_message('You harvest the {}'.format(entity.name),
                                                     constants['colors']['aqua'])
+                            if entity.cargo:
+                                for cargo in entity.cargo.manifest:
+                                    player.cargo.add_item_to_manifest(cargo)
+                            
                             entity.name = ''
                             entity.icon = None
+                            entity.cargo = None
 
                     if game_map.in_bounds(player.x, player.y) \
                             and game_map.terrain[player.x][player.y].decoration \

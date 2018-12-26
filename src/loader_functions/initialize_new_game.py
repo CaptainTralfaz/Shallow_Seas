@@ -5,6 +5,7 @@ def get_constants():
     frames_per_second = 60  # frames per second, the general speed of the program
     
     margin = 5
+    tab = 75
     
     display_title = 'Shallow Seas'
     display_width = 800
@@ -110,17 +111,22 @@ def get_constants():
         'carcass': pygame.image.load('icons/entities/Carcass.png'),
         'sunken_ship': pygame.image.load('icons/entities/SunkenShip.png'),
         # inventory icons 16x16
+        'bat_wing': pygame.image.load('icons/inventory/BatWing.png'),
         'brick': pygame.image.load('icons/inventory/Brick.png'),
         'canvas': pygame.image.load('icons/inventory/Canvas.png'),
         'fish': pygame.image.load('icons/inventory/Fish.png'),
         'fruit': pygame.image.load('icons/inventory/Fruit.png'),
+        'leather': pygame.image.load('icons/inventory/Leather.png'),
         'meat': pygame.image.load('icons/inventory/Meat.png'),
+        'obsidian': pygame.image.load('icons/inventory/Obsidian.png'),
         'pearl': pygame.image.load('icons/inventory/Pearl.png'),
         'rope': pygame.image.load('icons/inventory/Rope.png'),
         'rum': pygame.image.load('icons/inventory/Rum.png'),
         'salt': pygame.image.load('icons/inventory/Salt.png'),
+        'serpent_scale': pygame.image.load('icons/inventory/SerpentScale.png'),
         'skins': pygame.image.load('icons/inventory/Skins.png'),
         'stone': pygame.image.load('icons/inventory/Stone.png'),
+        'turtle_shell': pygame.image.load('icons/inventory/TurtleShell.png'),
         'water': pygame.image.load('icons/inventory/Water.png'),
         'wood': pygame.image.load('icons/inventory/wood.png'),
     }
@@ -139,6 +145,7 @@ def get_constants():
         'message_panel_size': message_panel_size,
         'log_size': log_size,
         'margin': margin,
+        'tab': tab,
         'font': font,
         'board_width': board_width,
         'board_height': board_height,

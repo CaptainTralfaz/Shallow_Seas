@@ -9,7 +9,7 @@ from src.entity import Entity
 from src.map_objects.map_generator import generate_terrain
 from src.map_objects.map_utils import hex_directions
 from src.map_objects.tile import Decoration, Elevation
-from src.components.weapon import WeaponList, Weapon
+from src.components.cargo import Cargo, ItemCategory, Item
 from src.render_functions import RenderOrder
 
 
@@ -38,11 +38,12 @@ class GameMap:
         return False
 
 
-def make_map(width: int, height: int, entities: list, max_entities: int, icons: list, islands: int, seeds: int):
+def make_map(width: int, height: int, entities: list, max_entities: int, icons: dict, islands: int, seeds: int,
+             constants: dict):
     game_map = GameMap(width=width, height=height)
     generate_terrain(game_map, island_size=islands, max_seeds=seeds)
     decorate(game_map)
-    place_entities(game_map, entities=entities, max_entities=max_entities, icons=icons)
+    place_entities(game_map, entities=entities, max_entities=max_entities, icons=icons, constants=constants)
     return game_map
 
 
@@ -108,7 +109,7 @@ def decorate(game_map: GameMap):
                 #     game_map.terrain[x][y].decoration = Decoration('salvage')
 
 
-def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: dict):
+def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: dict, constants: dict):
     # Get a random number of entities
     number_of_monsters = randint(max_entities // 2, max_entities + 1)
     
@@ -128,6 +129,14 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                 random_val = randint(0, 100)
                 if random_val < 40:
                     size_component = Size.MEDIUM
+                    manifest = []
+                    manifest.append(Item(name='Turtle Meat', icon=constants['icons']['meat'],
+                                         category=ItemCategory.SUPPLIES, weight=.5, volume=.5,
+                                         quantity=size_component.value + 1))
+                    manifest.append(Item(name='Turtle Shell', icon=constants['icons']['turtle_shell'],
+                                         category=ItemCategory.SUPPLIES, weight=2*size_component.value,
+                                         volume=size_component.value, quantity=1))
+                    cargo_component = Cargo(capacity=size_component.value * 10 + 5, manifest=manifest)
                     view_component = View(size_component.value + 3)
                     mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
                     fighter_component = Fighter("body", size_component.value * 10 + 5)
@@ -140,11 +149,20 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                                  view=view_component,
                                  mobile=mobile_component,
                                  ai=ai_component,
-                                 fighter=fighter_component)
+                                 fighter=fighter_component,
+                                 cargo=cargo_component)
                     npc.view.set_fov(game_map)
                     print('{} placed at {}:{}'.format(npc.name, x, y))
                 elif random_val < 70:
                     size_component = Size.TINY
+                    manifest = []
+                    manifest.append(Item(name='Bat Meat', icon=constants['icons']['meat'],
+                                         category=ItemCategory.SUPPLIES, weight=.5, volume=.5,
+                                         quantity=size_component.value + 1))
+                    manifest.append(Item(name='Bat Wing', icon=constants['icons']['bat_wing'],
+                                         category=ItemCategory.EXOTICS, weight=.5, volume=.5,
+                                         quantity=(size_component.value + 1) * 2))
+                    cargo_component = Cargo(capacity=size_component.value * 10 + 5, manifest=manifest)
                     view_component = View(size_component.value + 5)
                     mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
                     fighter_component = Fighter("body", size_component.value * 10 + 5)
@@ -159,11 +177,20 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                                  mobile=mobile_component,
                                  ai=ai_component,
                                  wings=wing_component,
-                                 fighter=fighter_component)
+                                 fighter=fighter_component,
+                                 cargo=cargo_component)
                     npc.view.set_fov(game_map)
                     print('{} placed at {}:{}'.format(npc.name, x, y))
                 else:
                     size_component = Size.SMALL
+                    manifest = []
+                    manifest.append(Item(name='Serpent Meat', icon=constants['icons']['meat'],
+                                         category=ItemCategory.SUPPLIES, weight=.5, volume=.5,
+                                         quantity=size_component.value + 1))
+                    manifest.append(Item(name='Serpent Scale', icon=constants['icons']['serpent_scale'],
+                                         category=ItemCategory.EXOTICS, weight=.5, volume=.5,
+                                         quantity=size_component.value + 1))
+                    cargo_component = Cargo(capacity=size_component.value * 10 + 5, manifest=manifest)
                     view_component = View(size_component.value + 3)
                     mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
                     fighter_component = Fighter("body", size_component.value * 10 + 5)
@@ -176,7 +203,8 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                                  view=view_component,
                                  mobile=mobile_component,
                                  ai=ai_component,
-                                 fighter=fighter_component)
+                                 fighter=fighter_component,
+                                 cargo=cargo_component)
                     npc.view.set_fov(game_map)
                     print('{} placed at {}:{}'.format(npc.name, x, y))
                 entities.append(npc)
