@@ -12,14 +12,14 @@ class MessageLog:
         self.message_panel_size = panel_size
     
     def add_message(self, message, color=(200, 200, 200)):
-        # wordwrap later
+        # wordwrap later if needed
         self.messages.append(Message(message, color))
         if len(self.messages) > self.height:
             del self.messages[0]
         if self.message_panel_size < len(self.messages) <= self.height:
             self.adjust_view(1)
         
-        print('added message({} total), pointer now: {}'.format(len(self.messages), self.view_pointer))
+        # print('added message({} total), pointer now: {}'.format(len(self.messages), self.view_pointer))
 
     def adjust_view(self, amount):
         self.view_pointer += amount

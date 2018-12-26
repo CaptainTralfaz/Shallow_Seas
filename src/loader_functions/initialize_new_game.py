@@ -2,9 +2,10 @@ import pygame
 
 
 def get_constants():
-    frames_per_second = 30  # frames per second, the general speed of the program
+    frames_per_second = 60  # frames per second, the general speed of the program
     
     margin = 5
+    tab = 75
     
     display_title = 'Shallow Seas'
     display_width = 800
@@ -72,40 +73,62 @@ def get_constants():
     }
     
     icons = {
-        'game_icon': pygame.image.load('icons/Compass.png'),
-        'ship_0_mast': pygame.image.load('icons/Ship_0_mast.png'),
-        'ship_1_mast': pygame.image.load('icons/Ship_1_mast.png'),
-        'ship_2_mast': pygame.image.load('icons/Ship_2_mast.png'),
-        'ship_3_mast': pygame.image.load('icons/Ship_3_mast.png'),
-        'ship_4_mast': pygame.image.load('icons/Ship_4_mast.png'),
-        'shade': pygame.image.load('icons/Shade.png'),
-        'highlight': pygame.image.load('icons/Highlight.png'),
-        'deeps': pygame.image.load('icons/Deeps3d.png'),
-        'water': pygame.image.load('icons/Water3d.png'),
-        'shallows': pygame.image.load('icons/Shallows3d.png'),
-        'sand': pygame.image.load('icons/Sand3d.png'),
-        'swamp': pygame.image.load('icons/Swamp3d.png'),
-        'grass': pygame.image.load('icons/Grass3d.png'),
-        'jungle': pygame.image.load('icons/Jungle3d.png'),
-        'mountain': pygame.image.load('icons/Mountain3d.png'),
-        'volcano': pygame.image.load('icons/Volcano3d.png'),
-        'port': pygame.image.load('icons/Port.png'),
-        'seaweed': pygame.image.load('icons/Seaweed.png'),
-        'sandbar': pygame.image.load('icons/Sandbar.png'),
-        'rocks': pygame.image.load('icons/Rocks.png'),
-        'coral': pygame.image.load('icons/Coral.png'),
-        'fog': pygame.image.load('icons/Fog2.png'),
-        'salvage': pygame.image.load('icons/Salvage.png'),
-        'pointer': pygame.image.load('icons/Pointer.png'),
-        'compass': pygame.image.load('icons/Compass.png'),
-        'arrow': pygame.image.load('icons/Arrow.png'),
-        'sea_serpent': pygame.image.load('icons/SeaSerpent.png'),
-        'sea_turtle': pygame.image.load('icons/SeaTurtle.png'),
-        'red_dragon': pygame.image.load('icons/RedDragon.png'),
-        'wyvern': pygame.image.load('icons/Wyvern.png'),
-        'giant_bat': pygame.image.load('icons/GiantBat.png'),
-        'carcass': pygame.image.load('icons/Carcass.png'),
-        'sunken_ship': pygame.image.load('icons/SunkenShip.png'),
+        # misc game icons 32x32
+        'game_icon': pygame.image.load('icons/misc/Compass.png'),
+        'shade': pygame.image.load('icons/misc/Shade.png'),
+        'highlight': pygame.image.load('icons/misc/Highlight.png'),
+        'pointer': pygame.image.load('icons/misc/Pointer.png'),
+        'compass': pygame.image.load('icons/misc/Compass.png'),
+        'arrow': pygame.image.load('icons/misc/Arrow.png'),
+        # terrain icons 42x42
+        'deep_sea': pygame.image.load('icons/terrain/DeepSea.png'),
+        'sea': pygame.image.load('icons/terrain/Sea.png'),
+        'shallows': pygame.image.load('icons/terrain/Shallows.png'),
+        'dunes': pygame.image.load('icons/terrain/Dunes.png'),
+        'swamp': pygame.image.load('icons/terrain/Swamp.png'),
+        'grassland': pygame.image.load('icons/terrain/Grassland.png'),
+        'jungle': pygame.image.load('icons/terrain/Jungle.png'),
+        'mountain': pygame.image.load('icons/terrain/Mountain.png'),
+        'volcano': pygame.image.load('icons/terrain/Volcano.png'),
+        # entity icons 32x32
+        'ship_0_mast': pygame.image.load('icons/entities/Ship_0_mast.png'),
+        'ship_1_mast': pygame.image.load('icons/entities/Ship_1_mast.png'),
+        'ship_2_mast': pygame.image.load('icons/entities/Ship_2_mast.png'),
+        'ship_3_mast': pygame.image.load('icons/entities/Ship_3_mast.png'),
+        'ship_4_mast': pygame.image.load('icons/entities/Ship_4_mast.png'),
+        'port': pygame.image.load('icons/entities/Port.png'),
+        'seaweed': pygame.image.load('icons/entities/Seaweed.png'),
+        'sandbar': pygame.image.load('icons/entities/Sandbar.png'),
+        'rocks': pygame.image.load('icons/entities/Rocks.png'),
+        'coral': pygame.image.load('icons/entities/Coral.png'),
+        'fog': pygame.image.load('icons/entities/Fog2.png'),
+        'salvage': pygame.image.load('icons/entities/Salvage.png'),
+        'sea_serpent': pygame.image.load('icons/entities/SeaSerpent.png'),
+        'sea_turtle': pygame.image.load('icons/entities/SeaTurtle.png'),
+        'red_dragon': pygame.image.load('icons/entities/RedDragon.png'),
+        'wyvern': pygame.image.load('icons/entities/Wyvern.png'),
+        'giant_bat': pygame.image.load('icons/entities/GiantBat.png'),
+        'carcass': pygame.image.load('icons/entities/Carcass.png'),
+        'sunken_ship': pygame.image.load('icons/entities/SunkenShip.png'),
+        # inventory icons 16x16
+        'bat_wing': pygame.image.load('icons/inventory/BatWing.png'),
+        'brick': pygame.image.load('icons/inventory/Brick.png'),
+        'canvas': pygame.image.load('icons/inventory/Canvas.png'),
+        'fish': pygame.image.load('icons/inventory/Fish.png'),
+        'fruit': pygame.image.load('icons/inventory/Fruit.png'),
+        'leather': pygame.image.load('icons/inventory/Leather.png'),
+        'meat': pygame.image.load('icons/inventory/Meat.png'),
+        'obsidian': pygame.image.load('icons/inventory/Obsidian.png'),
+        'pearl': pygame.image.load('icons/inventory/Pearl.png'),
+        'rope': pygame.image.load('icons/inventory/Rope.png'),
+        'rum': pygame.image.load('icons/inventory/Rum.png'),
+        'salt': pygame.image.load('icons/inventory/Salt.png'),
+        'serpent_scale': pygame.image.load('icons/inventory/SerpentScale.png'),
+        'skins': pygame.image.load('icons/inventory/Skins.png'),
+        'stone': pygame.image.load('icons/inventory/Stone.png'),
+        'turtle_shell': pygame.image.load('icons/inventory/TurtleShell.png'),
+        'water': pygame.image.load('icons/inventory/Water.png'),
+        'wood': pygame.image.load('icons/inventory/wood.png'),
     }
     
     constants = {
@@ -122,6 +145,7 @@ def get_constants():
         'message_panel_size': message_panel_size,
         'log_size': log_size,
         'margin': margin,
+        'tab': tab,
         'font': font,
         'board_width': board_width,
         'board_height': board_height,

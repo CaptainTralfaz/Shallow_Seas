@@ -16,6 +16,7 @@ from src.loader_functions.initialize_new_game import get_constants
 from src.map_objects.game_map import make_map, change_wind
 from src.render_functions import render_display, RenderOrder
 from src.components.crew import Crew
+from src.components.cargo import Cargo, Item, ItemCategory
 
 
 def main():
@@ -34,7 +35,23 @@ def main():
     message_log = MessageLog(constants['log_size'], constants['message_panel_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.LARGE
+    size_component = Size.SMALL
+    manifest = []
+    manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], category=ItemCategory.GOODS,
+                         weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Meat', icon=constants['icons']['meat'], category=ItemCategory.SUPPLIES,
+                         weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Pearl', icon=constants['icons']['pearl'], category=ItemCategory.EXOTICS,
+                         weight=0.01, volume=0.01, quantity=3))
+    manifest.append(Item(name='Rope', icon=constants['icons']['rope'], category=ItemCategory.GOODS,
+                         weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Rum', icon=constants['icons']['rum'], category=ItemCategory.EXOTICS,
+                         weight=0.1, volume=2, quantity=2))
+    manifest.append(Item(name='Water', icon=constants['icons']['water'], category=ItemCategory.SUPPLIES,
+                         weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Wood', icon=constants['icons']['wood'], category=ItemCategory.MATERIALS,
+                         weight=2, volume=2, quantity=2))
+    cargo_component = Cargo(capacity=size_component.value * 10 + 5, manifest=manifest)
     view_component = View(view=size_component.value + 3)
     fighter_component = Fighter("hull", size_component.value * 10 + 10)
     weapons_component = WeaponList()
@@ -45,7 +62,7 @@ def main():
     player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
                     y=constants['board_height'] - 1, icon=player_icon, render_order=RenderOrder.PLAYER,
                     view=view_component, size=size_component, mast_sail=mast_component, mobile=mobile_component,
-                    weapons=weapons_component, fighter=fighter_component, crew=crew_component)
+                    weapons=weapons_component, fighter=fighter_component, crew=crew_component, cargo=cargo_component)
     
     entities = [player]
     
@@ -55,7 +72,8 @@ def main():
                         constants['max_entities'],
                         constants['icons'],
                         constants['island_size'],
-                        constants['island_seeds'])
+                        constants['island_seeds'],
+                        constants)
     
     player.view.set_fov(game_map)
     game_state = GameStates.CURRENT_TURN
@@ -119,27 +137,45 @@ def main():
             sails_cancel = action.get('sails_cancel')
             if sails_change and player.mast_sail.masts:
                 game_state = GameStates.SAILS
-            if sails_cancel:
-                game_state = GameStates.CURRENT_TURN
             
             attack = action.get('attack')
             targeting = action.get('targeting')
             target_cancel = action.get('target_cancel')
             if targeting:
                 game_state = GameStates.TARGETING
-            if target_cancel:
-                game_state = GameStates.CURRENT_TURN
+
+            special = action.get('special')
+            special_cancel = action.get('special_cancel')
+            if special:
+                game_state = GameStates.SPECIAL
+                if special == 'inventory':
+                    game_state = GameStates.CARGO
+                elif special == 'crew':
+                    print(special + " not yet implemented")
+                    game_state = GameStates.CURRENT_TURN
+                elif special == 'ram':
+                    print(special + " not yet implemented")
+                    game_state = GameStates.CURRENT_TURN
+                elif special == 'mines':
+                    print(special + " not yet implemented")
+                    game_state = GameStates.CURRENT_TURN
+            inventory_cancel = action.get('inventory_cancel')
             
+            if sails_cancel or special_cancel or target_cancel or inventory_cancel:
+                game_state = GameStates.CURRENT_TURN
+
             # VERIFY PLAYER ACTION ------------------------------------------------------------------------------------
             
             if attack:
                 # make sure there is a target
+                # TODO: verify line of sight
                 if not player.weapons.verify_target_at_location(attack, entities):
                     attack = None
             if sails:
                 if (sails > 0 and player.mast_sail.current_sails == player.mast_sail.max_sails) \
                         or (sails < 0 and player.mast_sail.current_sails == 0):
                     sails = None
+            
             
             # PROCESS ACTION ------------------------------------------------------------------------------------------
             if (rowing or slowing or sails or attack or rotate or other_action) \
@@ -182,8 +218,13 @@ def main():
                                 (entity.x, entity.y) == (player.x, player.y):
                             message_log.add_message('You harvest the {}'.format(entity.name),
                                                     constants['colors']['aqua'])
+                            if entity.cargo:
+                                for cargo in entity.cargo.manifest:
+                                    player.cargo.add_item_to_manifest(cargo)
+                            
                             entity.name = ''
                             entity.icon = None
+                            entity.cargo = None
 
                     if game_map.in_bounds(player.x, player.y) \
                             and game_map.terrain[player.x][player.y].decoration \
