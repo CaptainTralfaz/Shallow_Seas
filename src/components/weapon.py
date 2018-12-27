@@ -1,4 +1,4 @@
-from src.map_objects.map_utils import get_target_hexes_at_location
+from src.map_objects.map_utils import get_target_hexes_at_location, get_hex_neighbors
 from src.death_functions import kill_monster
 
 max_weapons = {
@@ -60,7 +60,8 @@ class WeaponList:
             target_hexes.extend(get_target_hexes_at_location(self.owner, location, weapon.max_range))
             total_damage += weapon.damage
             weapon.current_cd = weapon.cool_down
-        targeted_entities = [entity for entity in entities if (entity.x, entity.y) in target_hexes and entity.fighter]
+        targeted_entities = [entity for entity in entities if (entity.x, entity.y) in target_hexes
+                             and (entity.x, entity.y) in self.owner.view.fov and entity.fighter]
         for entity in targeted_entities:
             amount = total_damage // len(targeted_entities)
             message_log.add_message('{} {} takes {} damage!'.format(entity.name, entity.fighter.name, amount),
@@ -77,7 +78,9 @@ class WeaponList:
             target_hexes = get_target_hexes_at_location(self.owner, attack, attack_range)
             valid_target = False
             for entity in entities:
-                if entity.fighter and (entity.x, entity.y) in target_hexes:
+                if entity.fighter and (entity.x,
+                                       entity.y) in target_hexes and (entity.x,
+                                                                      entity.y) in self.owner.view.fov:
                     return True
             if not valid_target:  # no targets in range
                 return False

@@ -35,7 +35,7 @@ def main():
     message_log = MessageLog(constants['log_size'], constants['message_panel_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.SMALL
+    size_component = Size.MEDIUM
     manifest = []
     manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))
@@ -169,7 +169,8 @@ def main():
             if attack:
                 # make sure there is a target
                 # TODO: verify line of sight
-                if not player.weapons.verify_target_at_location(attack, entities):
+                if not (player.weapons.verify_target_at_location(attack, entities) or
+                        player.crew.verify_arrow_target(entities)):
                     attack = None
             if sails:
                 if (sails > 0 and player.mast_sail.current_sails == player.mast_sail.max_sails) \
@@ -204,8 +205,12 @@ def main():
                                 weapon.current_cd -= 1
                 
                 if attack:
-                    message_log.add_message('Player attacks to the {}!'.format(attack), constants['colors']['aqua'])
-                    player.weapons.attack(game_map.terrain, entities, attack, message_log, constants['icons'])
+                    if attack == 'Arrows':
+                        message_log.add_message('Player attacks with {}!'.format(attack), constants['colors']['aqua'])
+                        player.crew.arrow_attack(game_map.terrain, entities, message_log, constants['icons'])
+                    else:
+                        message_log.add_message('Player attacks to the {}!'.format(attack), constants['colors']['aqua'])
+                        player.weapons.attack(game_map.terrain, entities, attack, message_log, constants['icons'])
                 
                 if other_action:
                     # for decoration in game_map.decorations:

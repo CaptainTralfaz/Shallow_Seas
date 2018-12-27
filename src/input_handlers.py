@@ -76,8 +76,8 @@ def handle_keys_targeting(event):
                 return {'attack': 'Bow'}
             elif event.key == K_DOWN:
                 return {'attack': 'Stern'}
-            # elif event.key == K_SPACE:
-            #     return {'attack': 'arrows'}  # Arrow Attack
+            elif event.key == K_SPACE:
+                return {'attack': 'Arrows'}  # Arrow Attack
             elif event.key in [309, 310]:  # Mac command keys
                 return {'target_cancel': True}
     return {}

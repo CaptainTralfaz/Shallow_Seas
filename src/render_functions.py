@@ -4,7 +4,7 @@ from enum import Enum
 import pygame
 
 from src.game_states import GameStates
-from src.map_objects.map_utils import direction_angle, get_grid_from_coords, get_target_hexes
+from src.map_objects.map_utils import direction_angle, get_grid_from_coords, get_target_hexes, get_hex_neighbors
 from src.map_objects.tile import Elevation
 
 
@@ -166,7 +166,8 @@ def render_board(game_map, player, entities, constants, game_state):
     game_map_surf.fill(constants['colors']['dark_gray'])
     
     if game_state == GameStates.TARGETING:
-        targeted_hexes = []
+        targeted_hexes = get_hex_neighbors(player.x, player.y)
+        targeted_hexes.append((player.x, player.y))
         if game_map.in_bounds(player.x, player.y, -1):
             if game_map.terrain[player.x][player.y].decoration is None \
                     or (game_map.terrain[player.x][player.y].decoration
@@ -331,9 +332,11 @@ def render_control(game_map, player, entities, constants, game_state):
         for key in arrow_keys:
             vertical = make_arrow_button(control_panel, split, margin, key['rotation'],
                                          key['text'], constants, vertical)
-        text_keys = [#{'name': 'Space', 'text': 'Arrow Attack'},
-                     {'name': 'Cmd', 'text': 'Exit Targeting'},
-                     {'name': 'Esc', 'text': 'Exit Targeting'}]
+        text_keys = []
+        if player.crew.verify_arrow_target(entities):
+            text_keys.append({'name': 'Space', 'text': 'Arrow Attack'})
+        text_keys.append({'name': 'Cmd', 'text': 'Exit Targeting'})
+        text_keys.append({'name': 'Esc', 'text': 'Exit Targeting'})
         for key in text_keys:
             vertical = make_text_button(control_panel, split, margin, key['name'],
                                         key['text'], constants, vertical)
