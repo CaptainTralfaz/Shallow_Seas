@@ -335,8 +335,8 @@ def render_control(game_map, player, entities, constants, game_state):
         text_keys = []
         if player.crew.verify_arrow_target(entities):
             text_keys.append({'name': 'Space', 'text': 'Arrow Attack'})
-        text_keys = [{'name': 'Cmd', 'text': 'Exit Targeting'},
-                     {'name': 'Esc', 'text': 'Exit Targeting'}]
+        text_keys.append({'name': 'Cmd', 'text': 'Exit Targeting'})
+        text_keys.append({'name': 'Esc', 'text': 'Exit Targeting'})
         for key in text_keys:
             vertical = make_text_button(control_panel, split, margin, key['name'],
                                         key['text'], constants, vertical)
