@@ -1,6 +1,6 @@
 # Shallow_Seas
 Hobby project: Pirate-inspired RogueLite
- - 2018.11.20
+ - 2018.12.28
 
 #Key Commands
 
@@ -17,10 +17,12 @@ Hobby project: Pirate-inspired RogueLite
      - Arrow_Left : Attack Port
      - Arrow_Right : Attack Starboard
      - Space : Arrow Attack (Adjacent)
- - ALT : (Option for our Mac using friends)
+ - ALT : Special Action (Option for our Mac using friends)
      - Arrow_UP : Ram (not yet implemented)
      - Arrow_DN : Drop Mines (not yet implemented)
      - Arrow_Left : Assign Crew (not yet implemented)
      - Arrow_Right : Assign Crew (not yet implemented)
      - Space : Cargo Menu
- - Spacebar : Special Action (Rescue Salvage, Port menu, etc.)
+ - Spacebar : Other Action (Rescue Salvage, Port menu, etc.)
+
+Catching wind is the only way to increase speed over 1
