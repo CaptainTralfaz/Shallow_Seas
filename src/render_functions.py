@@ -2,7 +2,7 @@ import math
 from enum import Enum
 
 import pygame
-
+from random import randint
 from src.game_states import GameStates
 from src.map_objects.map_utils import direction_angle, get_grid_from_coords, get_target_hexes, get_hex_neighbors
 from src.map_objects.tile import Elevation
@@ -186,6 +186,7 @@ def render_board(game_map, player, entities, constants, game_state):
                                        (x * constants['tile_size'] - constants['margin'],
                                         y * constants['tile_size'] + (x % 2) * constants['half_tile']
                                         - constants['half_tile']))
+
                 # TODO: move this here eventually ??
                 # if (x, y) not in player.view.fov:
                 #     game_map_surf.blit(constants['icons']['shade'],
@@ -231,7 +232,15 @@ def render_board(game_map, player, entities, constants, game_state):
                                    (x * constants['tile_size'] - 2 * constants['margin'],
                                     y * constants['tile_size'] + x % 2 * constants['half_tile']
                                     - constants['half_tile'] - 2 * constants['margin']))  # -10 due to larger tile size
-    
+            if (0 <= x < game_map.width) \
+                    and (0 <= y < game_map.height) \
+                    and game_map.fog[x][y] \
+                    and (x, y) in player.view.fov:
+                game_map_surf.blit(constants['icons']['fog'],
+                                   (x * constants['tile_size'] - 2 * constants['margin'],
+                                    y * constants['tile_size'] + x % 2 * constants['half_tile']
+                                    - constants['half_tile'] - 2 * constants['margin']))
+
     view_surf = pygame.Surface((constants['view_width'] - 2 * constants['margin'],
                                 constants['view_height'] - 2 * constants['margin']))
     view_surf.blit(game_map_surf, (constants['view_width'] // 2

@@ -167,17 +167,20 @@ def main():
             # VERIFY PLAYER ACTION ------------------------------------------------------------------------------------
             
             if attack:
-                # make sure there is a target
-                # TODO: verify line of sight
-                if not (player.weapons.verify_target_at_location(attack, entities) or
-                        player.crew.verify_arrow_target(entities)):
+                target = False
+                # make sure there is a valid target
+                if attack == 'Arrows' and player.crew.verify_arrow_target(entities):
+                    target = True
+                elif player.weapons.verify_target_at_location(attack, entities):
+                    target = True
+                if not target:
                     attack = None
+                    
             if sails:
                 if (sails > 0 and player.mast_sail.current_sails == player.mast_sail.max_sails) \
                         or (sails < 0 and player.mast_sail.current_sails == 0):
                     sails = None
-            
-            
+                    
             # PROCESS ACTION ------------------------------------------------------------------------------------------
             if (rowing or slowing or sails or attack or rotate or other_action) \
                     and not game_state == GameStates.PLAYER_DEAD \
@@ -204,13 +207,12 @@ def main():
                             if weapon.current_cd > 0:
                                 weapon.current_cd -= 1
                 
-                if attack:
-                    if attack == 'Arrows':
+                if attack == 'Arrows':
                         message_log.add_message('Player attacks with {}!'.format(attack), constants['colors']['aqua'])
                         player.crew.arrow_attack(game_map.terrain, entities, message_log, constants['icons'])
-                    else:
-                        message_log.add_message('Player attacks to the {}!'.format(attack), constants['colors']['aqua'])
-                        player.weapons.attack(game_map.terrain, entities, attack, message_log, constants['icons'])
+                elif attack:
+                    message_log.add_message('Player attacks to the {}!'.format(attack), constants['colors']['aqua'])
+                    player.weapons.attack(game_map.terrain, entities, attack, message_log, constants['icons'])
                 
                 if other_action:
                     # for decoration in game_map.decorations:
@@ -308,6 +310,7 @@ def main():
                 if exit_screen:
                     game_quit = True
                 
+                game_map.roll_fog()
                 change_wind(game_map, message_log, constants['colors']['yellow'])
             
             elif scroll:
