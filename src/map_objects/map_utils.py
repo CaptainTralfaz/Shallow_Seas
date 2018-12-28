@@ -21,6 +21,7 @@ hex_directions = [(0, -1), (-1, -1), (-1, 0), (0, 1), (1, 0), (1, -1)]
 
 direction_angle = [0, 60, 120, 180, 240, 300]
 
+
 # compass_direction = {
 #     "N": 0,
 #     "NW": 1,
@@ -188,8 +189,8 @@ def get_fov(fighter, game_map):
                 if hx not in viewed_hexes[1:]:
                     viewed_hexes.append(hx)
                 if game_map.in_bounds(hx.col, hx.row) \
-                        and Elevation.SHALLOWS < game_map.terrain[hx.col][hx.row].elevation\
-                        and not fighter.owner.wings:
+                        and (Elevation.SHALLOWS < game_map.terrain[hx.col][hx.row].elevation
+                             or game_map.fog[hx.col][hx.row]) and not fighter.owner.wings:
                     break
             
             current = cube_neighbor(current, i)
@@ -214,19 +215,19 @@ def get_target_hexes(player):
     target_hexes = []
     p_cube = hex_to_cube(Hex(player.x, player.y))
     if player.weapons and player.weapons.weapon_list:
-            for weapon in player.weapons.weapon_list:
-                if weapon.location == "Bow" and weapon.current_cd == 0:
-                    target_hexes.extend(get_axis_target_cubes(weapon.max_range, p_cube,
-                                                              player.mobile.direction))
-                if weapon.location == "Stern" and weapon.current_cd == 0:
-                    target_hexes.extend(get_axis_target_cubes(weapon.max_range, p_cube,
-                                                              reverse_direction(player.mobile.direction)))
-                if weapon.location == "Port" and weapon.current_cd == 0:
-                    target_hexes.extend(get_cone_target_cubes(weapon.max_range, p_cube,
-                                                              player.mobile.direction))
-                if weapon.location == "Starboard" and weapon.current_cd == 0:
-                    target_hexes.extend(get_cone_target_cubes(weapon.max_range, p_cube,
-                                                              reverse_direction(player.mobile.direction)))
+        for weapon in player.weapons.weapon_list:
+            if weapon.location == "Bow" and weapon.current_cd == 0:
+                target_hexes.extend(get_axis_target_cubes(weapon.max_range, p_cube,
+                                                          player.mobile.direction))
+            if weapon.location == "Stern" and weapon.current_cd == 0:
+                target_hexes.extend(get_axis_target_cubes(weapon.max_range, p_cube,
+                                                          reverse_direction(player.mobile.direction)))
+            if weapon.location == "Port" and weapon.current_cd == 0:
+                target_hexes.extend(get_cone_target_cubes(weapon.max_range, p_cube,
+                                                          player.mobile.direction))
+            if weapon.location == "Starboard" and weapon.current_cd == 0:
+                target_hexes.extend(get_cone_target_cubes(weapon.max_range, p_cube,
+                                                          reverse_direction(player.mobile.direction)))
     return target_hexes
 
 
@@ -267,7 +268,7 @@ def get_cone_target_cubes(max_range, p_cube, p_direction):
     target_cubes = []
     for x in range(1, max_range + 1):
         for y in range(0, x + 1):
-            target_cubes.append(Cube(-x, y, x-y))
+            target_cubes.append(Cube(-x, y, x - y))
     # rotate and translate, then convert to (x, y)
     target_hexes = []
     for cube in target_cubes:

@@ -308,6 +308,7 @@ def main():
                 if exit_screen:
                     game_quit = True
                 
+                game_map.roll_fog()
                 change_wind(game_map, message_log, constants['colors']['yellow'])
             
             elif scroll:

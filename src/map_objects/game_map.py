@@ -21,8 +21,7 @@ class GameMap:
         self.wind_turn_count = 0
         self.max_wind_count = 50
         self.terrain = [[None for y in range(height)] for x in range(width)]
-        
-        # TODO: add fog as another cellular automata layer that changes (grows or shrinks) every turn
+        self.fog = [[randint(0, 1) for y in range(height)] for x in range(width)]
     
     @property
     def starting_wind(self):
@@ -31,6 +30,10 @@ class GameMap:
             return None
         else:
             return wind
+        
+    def roll_fog(self):
+        
+        pass
     
     def in_bounds(self, x: int, y: int, margin=0):
         if (0 + margin <= x < self.width - 1 - margin) and (0 + margin <= y < self.height - 1 - margin):
