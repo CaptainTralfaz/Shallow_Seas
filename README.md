@@ -8,8 +8,19 @@ Hobby project: Pirate-inspired RogueLite
  - Arrow_DN : Drag
  - Arrow_Left : Rotate Port
  - Arrow_Right : Rotate Starboard
- - Shift-Arrow_UP : Raise Sails
- - Shift-Arrow_DN : Lower Sails
- - CTRL-Arrow_ANY : Weapons fire in selected direction
- - Command-Arrow_ANY : as above, for our Mac using friends
- - Spacebar : Action (rescue salvage, town menu, etc.)
+ - Shift : Sails Menu
+     - Arrow_UP : Raise Sails
+     - Arrow_DN : Lower Sails
+ - CTRL : Attack Menu (Command for our Mac using friends)
+     - Arrow_UP : Attack Bow
+     - Arrow_DN : Attack Stern
+     - Arrow_Left : Attack Port
+     - Arrow_Right : Attack Starboard
+     - Space : Arrow Attack (Adjacent)
+ - ALT : (Option for our Mac using friends)
+     - Arrow_UP : Ram (not yet implemented)
+     - Arrow_DN : Drop Mines (not yet implemented)
+     - Arrow_Left : Assign Crew (not yet implemented)
+     - Arrow_Right : Assign Crew (not yet implemented)
+     - Space : Cargo Menu
+ - Spacebar : Special Action (Rescue Salvage, Port menu, etc.)
