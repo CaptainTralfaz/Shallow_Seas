@@ -227,7 +227,7 @@ def main():
                                                     constants['colors']['aqua'])
                             if entity.cargo:
                                 for cargo in entity.cargo.manifest:
-                                    player.cargo.add_item_to_manifest(cargo)
+                                    player.cargo.add_item_to_manifest(cargo, message_log)
                             
                             entity.name = ''
                             entity.icon = None

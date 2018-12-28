@@ -620,6 +620,7 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
     info_surf = None
     terrain_surf = None
     decor_surf = None
+    fog_surf = None
     location_surf = None
     if (0 <= grid_x < game_map.width) \
             and (0 <= grid_y < game_map.height) \
@@ -658,7 +659,18 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
                 decor_surf = pygame.Surface((w, h))
                 decor_surf.fill(constants['colors']['dark_gray'])
                 decor_surf.blit(decor_text, (0, 0))
-        
+            
+            if game_map.fog[grid_x][grid_y] and (grid_x, grid_y) in player.view.fov:
+                fog_name = 'Fog'
+                fog_text = constants['font'].render('Fog', True, constants['colors']['text'])
+                w, h = constants['font'].size(fog_name)
+                if w > width:
+                    width = w
+                vertical += h
+                fog_surf = pygame.Surface((w, h))
+                fog_surf.fill(constants['colors']['dark_gray'])
+                fog_surf.blit(fog_text, (0, 0))
+
         entities_under_mouse = []
         for entity in entities:
             if entity.name is not 'player' \
@@ -716,9 +728,12 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
         if decor_surf:
             info_surf.blit(decor_surf, (constants['margin'], vert))
             vert += constants['font'].get_height()
+        if fog_surf:
+            info_surf.blit(fog_surf,(constants['margin'], vert))
+            vert += constants['font'].get_height()
         if entity_surf:
             info_surf.blit(entity_surf, (constants['margin'], vert))
-    
+        
     if info_surf:
         render_border(info_surf, constants['colors']['text'])
     return info_surf

@@ -18,14 +18,15 @@ class Cargo:
             volume += item.volume * item.quantity
         return volume
     
-    def add_item_to_manifest(self, item):
+    def add_item_to_manifest(self, item, message_log):
         manifest_names = [cargo.name for cargo in self.manifest]
         if item.name not in manifest_names:
+            message_log.add_message('{} of {} added to cargo'.format(item.quantity, item.name))
             self.manifest.append(item)
         else:
             for cargo in self.manifest:
                 if cargo.name == item.name:
-                    cargo.adjust_quantity(item.quantity)
+                    cargo.adjust_quantity(item.quantity, message_log)
     
     def remove_item_from_manifest(self, item):
         if item in self.manifest:
@@ -50,8 +51,13 @@ class Item:
     def get_item_volume(self):
         return self.volume * self.quantity
 
-    def adjust_quantity(self, amount):
+    def adjust_quantity(self, amount, message_log):
         self.quantity += amount
+        if amount > 0:
+            message_log.add_message('{} of {} added to cargo'.format(amount, self.name))
+        elif amount < 0:
+            message_log.add_message('{} of {} removed from cargo'.format(abs(amount), self.name))
+            
         # if self.quantity < 0:
 
 
