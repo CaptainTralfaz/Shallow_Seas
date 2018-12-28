@@ -21,7 +21,7 @@ class GameMap:
         self.wind_turn_count = 0
         self.max_wind_count = 50
         self.terrain = [[None for y in range(height)] for x in range(width)]
-        self.fog = [[randint(0, 1) for y in range(height)] for x in range(width)]
+        self.fog = self.starting_fog
     
     @property
     def starting_wind(self):
@@ -30,9 +30,18 @@ class GameMap:
             return None
         else:
             return wind
+    
+    @property
+    def starting_fog(self):
+        grid = [[False for y in range(self.height)] for x in range(self.width)]
+        for xx in range(self.width):
+            for yy in range(self.height):
+                fog_chance = randint(0, 10)
+                if fog_chance == 0:
+                    grid[xx][yy] = True
+        return grid
         
     def roll_fog(self):
-        
         pass
     
     def in_bounds(self, x: int, y: int, margin=0):

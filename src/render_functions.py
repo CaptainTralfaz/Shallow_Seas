@@ -186,20 +186,6 @@ def render_board(game_map, player, entities, constants, game_state):
                                        (x * constants['tile_size'] - constants['margin'],
                                         y * constants['tile_size'] + (x % 2) * constants['half_tile']
                                         - constants['half_tile']))
-                # if game_map.fog[x][y]:
-                #     width = 42
-                #     height = 42
-                #     fog_surf = pygame.Surface((width, height))
-                #     fog_surf.fill(constants['colors']['black'])
-                #     fog_surf.set_colorkey(constants['colors']['black'])
-                #     for count in range(randint(30, 50)):
-                #         dy = randint(10, height - 5)
-                #         dx = randint(-10, width + 10)
-                #         fog_surf.blit(constants['icons']['fog'], (dx, dy))
-                #     game_map_surf.blit(fog_surf,
-                #                        (x * constants['tile_size'] - 2 * constants['margin'],
-                #                         y * constants['tile_size'] + x % 2 * constants['half_tile']
-                #                         - constants['half_tile'] - 2 * constants['margin']))
 
                 # TODO: move this here eventually ??
                 # if (x, y) not in player.view.fov:
@@ -246,7 +232,15 @@ def render_board(game_map, player, entities, constants, game_state):
                                    (x * constants['tile_size'] - 2 * constants['margin'],
                                     y * constants['tile_size'] + x % 2 * constants['half_tile']
                                     - constants['half_tile'] - 2 * constants['margin']))  # -10 due to larger tile size
-    
+            if (0 <= x < game_map.width) \
+                    and (0 <= y < game_map.height) \
+                    and game_map.fog[x][y] \
+                    and (x, y) in player.view.fov:
+                game_map_surf.blit(constants['icons']['fog'],
+                                   (x * constants['tile_size'] - 2 * constants['margin'],
+                                    y * constants['tile_size'] + x % 2 * constants['half_tile']
+                                    - constants['half_tile'] - 2 * constants['margin']))
+
     view_surf = pygame.Surface((constants['view_width'] - 2 * constants['margin'],
                                 constants['view_height'] - 2 * constants['margin']))
     view_surf.blit(game_map_surf, (constants['view_width'] // 2
