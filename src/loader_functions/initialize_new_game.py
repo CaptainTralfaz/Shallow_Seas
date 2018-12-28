@@ -80,6 +80,7 @@ def get_constants():
         'pointer': pygame.image.load('icons/misc/Pointer.png'),
         'compass': pygame.image.load('icons/misc/Compass.png'),
         'arrow': pygame.image.load('icons/misc/Arrow.png'),
+        'fog': pygame.image.load('icons/misc/Fog.png'),  # 10x5
         # terrain icons 42x42
         'deep_sea': pygame.image.load('icons/terrain/DeepSea.png'),
         'sea': pygame.image.load('icons/terrain/Sea.png'),
@@ -101,7 +102,6 @@ def get_constants():
         'sandbar': pygame.image.load('icons/entities/Sandbar.png'),
         'rocks': pygame.image.load('icons/entities/Rocks.png'),
         'coral': pygame.image.load('icons/entities/Coral.png'),
-        'fog': pygame.image.load('icons/entities/Fog2.png'),
         'salvage': pygame.image.load('icons/entities/Salvage.png'),
         'sea_serpent': pygame.image.load('icons/entities/SeaSerpent.png'),
         'sea_turtle': pygame.image.load('icons/entities/SeaTurtle.png'),
