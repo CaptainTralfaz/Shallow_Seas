@@ -21,7 +21,7 @@ class Cargo:
     def add_item_to_manifest(self, item, message_log):
         manifest_names = [cargo.name for cargo in self.manifest]
         if item.name not in manifest_names:
-            message_log.add_message('{} of {} added to cargo'.format(item.quantity, item.name))
+            message_log.add_message('{} {} added to cargo'.format(item.quantity, item.name))
             self.manifest.append(item)
         else:
             for cargo in self.manifest:
@@ -58,8 +58,6 @@ class Item:
         elif amount < 0:
             message_log.add_message('{} of {} removed from cargo'.format(abs(amount), self.name))
             
-        # if self.quantity < 0:
-
 
 class ItemCategory(Enum):
     MATERIALS = 0

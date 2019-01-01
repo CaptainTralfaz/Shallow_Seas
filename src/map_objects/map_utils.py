@@ -184,13 +184,15 @@ def get_fov(fighter, game_map):
     for i in range(0, 6):
         for j in range(0, view):
             cube_line = cube_line_draw(center_coords, current)
+            fog = 0
             for cube in cube_line:
                 hx = cube_to_hex(cube)
+                if game_map.in_bounds(hx.col, hx.row) and game_map.fog[hx.col][hx.row]:
+                    fog += 1
                 if hx not in viewed_hexes[1:]:
                     viewed_hexes.append(hx)
                 if game_map.in_bounds(hx.col, hx.row) \
-                        and (Elevation.SHALLOWS < game_map.terrain[hx.col][hx.row].elevation
-                             or game_map.fog[hx.col][hx.row]) and not fighter.owner.wings:
+                        and (Elevation.SHALLOWS < game_map.terrain[hx.col][hx.row].elevation or fog > 0):
                     break
             
             current = cube_neighbor(current, i)

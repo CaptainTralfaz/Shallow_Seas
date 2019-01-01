@@ -2,7 +2,7 @@ import math
 from enum import Enum
 
 import pygame
-from random import randint
+
 from src.game_states import GameStates
 from src.map_objects.map_utils import direction_angle, get_grid_from_coords, get_target_hexes, get_hex_neighbors
 from src.map_objects.tile import Elevation
@@ -19,7 +19,8 @@ class RenderOrder(Enum):
     FOG = 7
 
 
-def render_display(display, game_map, player, entities, constants, mouse_x, mouse_y, message_log, game_state):
+def render_display(display, game_map, player, entities,
+                   constants, mouse_x, mouse_y, message_log, game_state, game_time):
     display.fill(constants['colors']['black'])
     
     # draw and blit mini-map
@@ -27,7 +28,7 @@ def render_display(display, game_map, player, entities, constants, mouse_x, mous
     display.blit(map_surf, (0, 0))
     
     # draw and blit status panel
-    status_surf = render_status(game_map, player, entities, constants, mouse_x, mouse_y, game_state)
+    status_surf = render_status(game_map, player, constants)
     display.blit(status_surf, (0, constants['map_height'] + constants['control_height']))
     
     # draw and blit available controls
@@ -37,15 +38,15 @@ def render_display(display, game_map, player, entities, constants, mouse_x, mous
     # draw and blit game messages
     message_surf = render_messages(message_log, constants)
     display.blit(message_surf, (constants['status_width'], constants['view_height']))
-
+    
     if game_state == GameStates.CARGO:
         inventory_surf = render_manifest(player.cargo, constants)
         display.blit(inventory_surf, (constants['map_width'], 0))
     else:
         # draw and blit game play area
-        board_surf = render_board(game_map, player, entities, constants, game_state)
+        board_surf = render_board(game_map, player, entities, constants, game_state, game_time)
         display.blit(board_surf, (constants['map_width'], 0))
-    
+        
         # Draw and blit info under mouse, but now out of bounds
         info_surf = get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants)
         if info_surf:
@@ -69,10 +70,10 @@ def render_manifest(cargo, constants):
     vertical = render_cargo_header(inventory_surf, vertical, constants)
     vertical = render_cargo(inventory_surf, cargo, vertical, constants)
     vertical = render_cargo_totals(inventory_surf, cargo, vertical, constants)
-
+    
     border_panel = pygame.Surface((constants['view_width'], constants['view_height']))
     render_border(border_panel, constants['colors']['text'])
-
+    
     border_panel.blit(inventory_surf, (constants['margin'], constants['margin']))
     return border_panel
 
@@ -91,7 +92,7 @@ def render_cargo_header(inventory_surf, vertical, constants):
         inventory_surf.blit(text, text_rect)
         horizontal += constants['tab']
     constants['font'].set_underline(False)
-
+    
     vertical += constants['font'].get_height() + constants['margin']
     return vertical
 
@@ -101,7 +102,7 @@ def render_cargo_totals(inventory_surf, cargo, vertical, constants):
     text = constants['font'].render('Totals:', True, constants['colors']['text'])
     text_rect = text.get_rect(topright=(horizontal, vertical))
     inventory_surf.blit(text, text_rect)
-
+    
     for field in [cargo.get_manifest_weight(), cargo.get_manifest_volume()]:
         horizontal += constants['tab']
         render_cargo_info(inventory_surf, field, constants['font'], constants['colors']['text'],
@@ -122,13 +123,13 @@ def render_cargo(inventory_surf, cargo, vertical, constants):
         item_qty = constants['font'].render(str(item.quantity), True, constants['colors']['text'])
         text_rect = item_qty.get_rect(topright=(horizontal, vertical))
         inventory_surf.blit(item_qty, text_rect)
-
+        
         for field in [item.weight, item.volume, item.get_item_weight(), item.get_item_volume()]:
             horizontal += constants['tab']
             # print(item.name, field)
             render_cargo_info(inventory_surf, field, constants['font'], constants['colors']['text'],
                               horizontal, vertical)
-            
+        
         vertical += constants['font'].get_height() + constants['margin']
     return vertical
 
@@ -144,14 +145,14 @@ def render_messages(message_log, constants):
     message_surf = pygame.Surface((constants['message_width'] - 2 * constants['margin'],
                                    constants['message_height'] - 2 * constants['margin']))
     message_surf.fill(constants['colors']['dark_gray'])
-
+    
     y = constants['margin'] // 2
     for message in message_log.messages[message_log.view_pointer:message_log.view_pointer
-                                        + constants['message_panel_size']]:
+                                                                 + constants['message_panel_size']]:
         message_text = constants['font'].render(str(message.text), True, message.color)
         message_surf.blit(message_text, (0, y))
         y += constants['font'].get_height() + constants['margin'] // 2
-
+    
     border_panel = pygame.Surface((constants['message_width'], constants['message_height']))
     
     render_border(border_panel, constants['colors']['text'])
@@ -160,14 +161,17 @@ def render_messages(message_log, constants):
     return border_panel
 
 
-def render_board(game_map, player, entities, constants, game_state):
+def render_board(game_map, player, entities, constants, game_state, game_time):
     game_map_surf = pygame.Surface((constants['board_width'] * constants['tile_size'] - 2 * constants['margin'],
                                     constants['board_height'] * constants['tile_size'] - constants['half_tile']))
     game_map_surf.fill(constants['colors']['dark_gray'])
     
     if game_state == GameStates.TARGETING:
-        targeted_hexes = get_hex_neighbors(player.x, player.y)
-        targeted_hexes.append((player.x, player.y))
+        targeted_hexes = []
+        if not (game_map.terrain[player.x][player.y].decoration
+                and game_map.terrain[player.x][player.y].decoration.name == "Port"):
+            targeted_hexes = get_hex_neighbors(player.x, player.y)
+            targeted_hexes.append((player.x, player.y))
         if game_map.in_bounds(player.x, player.y, -1):
             if game_map.terrain[player.x][player.y].decoration is None \
                     or (game_map.terrain[player.x][player.y].decoration
@@ -186,7 +190,7 @@ def render_board(game_map, player, entities, constants, game_state):
                                        (x * constants['tile_size'] - constants['margin'],
                                         y * constants['tile_size'] + (x % 2) * constants['half_tile']
                                         - constants['half_tile']))
-
+                
                 # TODO: move this here eventually ??
                 # if (x, y) not in player.view.fov:
                 #     game_map_surf.blit(constants['icons']['shade'],
@@ -240,7 +244,7 @@ def render_board(game_map, player, entities, constants, game_state):
                                    (x * constants['tile_size'] - 2 * constants['margin'],
                                     y * constants['tile_size'] + x % 2 * constants['half_tile']
                                     - constants['half_tile'] - 2 * constants['margin']))
-
+    
     view_surf = pygame.Surface((constants['view_width'] - 2 * constants['margin'],
                                 constants['view_height'] - 2 * constants['margin']))
     view_surf.blit(game_map_surf, (constants['view_width'] // 2
@@ -252,6 +256,8 @@ def render_board(game_map, player, entities, constants, game_state):
                                    - constants['half_tile']
                                    - constants['margin']))
     
+    render_time(game_time, view_surf, constants)
+    
     border_panel = pygame.Surface((constants['view_width'],
                                    constants['view_height']))
     render_border(border_panel, constants['colors']['text'])
@@ -260,7 +266,24 @@ def render_board(game_map, player, entities, constants, game_state):
     return border_panel
 
 
-def render_status(game_map, player, entities, constants, mouse_x, mouse_y, state):
+def render_time(game_time, view_surf, constants):
+    text = '{}.{:02d}.{} {:02d}:{:02d}:00'.format(game_time.day, game_time.month, game_time.year, game_time.hrs,
+                                                  game_time.min)
+    (width, height) = constants['font'].size(text)
+    time_text = constants['font'].render(text, True, constants['colors'].get('text'))
+    time_surf = pygame.Surface((width, height))
+    time_surf.fill(constants['colors']['dark_gray'])
+    time_surf.blit(time_text, (0, 1))
+    
+    border_panel = pygame.Surface((width + 2 * constants['margin'],
+                                   height + 2 * constants['margin'] + 1))
+    border_panel.blit(time_surf, (constants['margin'], constants['margin']))
+    render_border(border_panel, constants['colors']['text'])
+    
+    view_surf.blit(border_panel, (0, 0))
+
+
+def render_status(game_map, player, constants):
     # Status Panel
     status_panel = pygame.Surface((constants['status_width'] - 2 * constants['margin'],
                                    constants['status_height'] - 2 * constants['margin']))
@@ -395,7 +418,7 @@ def render_control(game_map, player, entities, constants, game_state):
                      {'name': 'Esc', 'text': 'Exit Cargo'}]
         for key in text_keys:
             vertical = make_text_button(control_panel, split, margin, key['name'],
-                                            key['text'], constants, vertical)
+                                        key['text'], constants, vertical)
     else:  # Dead
         split = 58
         text_keys = [{'name': 'Esc', 'text': 'Quit'}]
@@ -495,7 +518,7 @@ def render_entity_info(panel, entity, constants, vertical):
                             constants['colors']['light_red'], constants['colors']['dark_red'],
                             panel.get_width()), (0, vertical))
         vertical += font.get_height() + constants['margin'] // 2
-
+    
     if entity.weapons:
         vertical = render_weapons(panel, entity, constants, vertical)
     
@@ -571,7 +594,7 @@ def render_map(game_map, player, entities, constants):
                     else:
                         small_block.fill(constants['colors'][game_map.terrain[x][y].decoration.color])
                         map_surf.blit(small_block, (x * constants['block_size']
-                                                    +1,
+                                                    + 1,
                                                     y * constants['block_size']
                                                     + (x % 2) * (constants['block_size'] // 2)
                                                     - constants['block_size'] // 2
@@ -590,7 +613,7 @@ def render_map(game_map, player, entities, constants):
                               y * constants['block_size']
                               + (x % 2) * (constants['block_size'] // 2)
                               - constants['block_size'] // 2))
- 
+    
     for entity in entities:
         if (0 <= entity.x < game_map.width) and (0 <= entity.y < game_map.height) \
                 and (entity.x, entity.y) in player.view.fov \
@@ -670,7 +693,7 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
                 fog_surf = pygame.Surface((w, h))
                 fog_surf.fill(constants['colors']['dark_gray'])
                 fog_surf.blit(fog_text, (0, 0))
-
+        
         entities_under_mouse = []
         for entity in entities:
             if entity.name is not 'player' \
@@ -719,7 +742,7 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
         info_surf = pygame.Surface((width + 2 * constants['margin'],
                                     vertical + 2 * constants['margin']))
         info_surf.fill(constants['colors']['dark_gray'])
-
+        
         info_surf.blit(location_surf, (constants['margin'], vert))
         vert += constants['font'].get_height()
         if terrain_surf:
@@ -729,11 +752,11 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
             info_surf.blit(decor_surf, (constants['margin'], vert))
             vert += constants['font'].get_height()
         if fog_surf:
-            info_surf.blit(fog_surf,(constants['margin'], vert))
+            info_surf.blit(fog_surf, (constants['margin'], vert))
             vert += constants['font'].get_height()
         if entity_surf:
             info_surf.blit(entity_surf, (constants['margin'], vert))
-        
+    
     if info_surf:
         render_border(info_surf, constants['colors']['text'])
     return info_surf
