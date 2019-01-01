@@ -1,6 +1,8 @@
 from random import randint
-from src.components.fighter import Fighter
+
 from src.components.ai import PeacefulMonster, MeleeMonster
+from src.components.cargo import Cargo, ItemCategory, Item
+from src.components.fighter import Fighter
 from src.components.mobile import Mobile
 from src.components.size import Size
 from src.components.view import View
@@ -9,7 +11,6 @@ from src.entity import Entity
 from src.map_objects.map_generator import generate_terrain
 from src.map_objects.map_utils import hex_directions
 from src.map_objects.tile import Decoration, Elevation
-from src.components.cargo import Cargo, ItemCategory, Item
 from src.render_functions import RenderOrder
 
 
@@ -21,7 +22,7 @@ class GameMap:
         self.wind_turn_count = 0
         self.max_wind_count = 50
         self.terrain = [[None for y in range(height)] for x in range(width)]
-        self.fog = self.starting_fog
+        self.fog = self.starting_fog  # Two fogs obscure line of sight
     
     @property
     def starting_wind(self):
@@ -40,9 +41,55 @@ class GameMap:
                 if fog_chance == 0:
                     grid[xx][yy] = True
         return grid
-        
+    
     def roll_fog(self):
-        pass
+        # move fog with wind direction:
+        grid = [[False for y in range(self.height)] for x in range(self.width)]
+        if self.wind_direction is not None:
+            for x in range(self.width):
+                for y in range(self.height):
+                    if self.fog[x][y]:
+                        dx, dy = hex_directions[self.wind_direction]
+                        if self.in_bounds(dx + x, dy + y + (x % 2) * (dx % 2), margin=-1):
+                            grid[dx + x][dy + y + (x % 2) * (dx % 2)] = True
+            self.fog = grid
+            self.add_fog_at_border()
+    
+    def add_fog_at_border(self):
+        north = False
+        south = False
+        west = False
+        east = False
+        if self.wind_direction in [0, 1, 5]:  # wind blowing north, add fog to bottom border
+            north = True
+        if self.wind_direction in [2, 3, 4]:  # wind blowing south, add fog to top border
+            south = True
+        if self.wind_direction in [1, 2]:
+            west = True
+        if self.wind_direction in [4, 5]:
+            east = True
+        if north:
+            for x in range(self.width):
+                fog_chance = randint(0, 10)
+                if fog_chance == 0:
+                    self.fog[x][self.height - 1] = True
+        if south:
+            for x in range(self.width):
+                fog_chance = randint(0, 10)
+                if fog_chance == 0:
+                    self.fog[x][0] = True
+        if west:
+            for y in range(self.height):
+                fog_chance = randint(0, 10)
+                if fog_chance == 0:
+                    self.fog[self.width - 1][y] = True
+        if east:
+            for y in range(self.height):
+                fog_chance = randint(0, 10)
+                if fog_chance == 0:
+                    self.fog[0][y] = True
+        
+        # grow fog / shrink fog due to weather / time of day
     
     def in_bounds(self, x: int, y: int, margin=0):
         if (0 + margin <= x < self.width - 1 - margin) and (0 + margin <= y < self.height - 1 - margin):
@@ -146,7 +193,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                                          category=ItemCategory.SUPPLIES, weight=.5, volume=.5,
                                          quantity=size_component.value + 1))
                     manifest.append(Item(name='Turtle Shell', icon=constants['icons']['turtle_shell'],
-                                         category=ItemCategory.SUPPLIES, weight=2*size_component.value,
+                                         category=ItemCategory.SUPPLIES, weight=2 * size_component.value,
                                          volume=size_component.value, quantity=1))
                     cargo_component = Cargo(capacity=size_component.value * 10 + 5, manifest=manifest)
                     view_component = View(size_component.value + 3)

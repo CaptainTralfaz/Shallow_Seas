@@ -2,6 +2,8 @@ from random import randint
 
 import pygame
 
+from src.components.cargo import Cargo, Item, ItemCategory
+from src.components.crew import Crew
 from src.components.fighter import Fighter
 from src.components.masts import Masts
 from src.components.mobile import Mobile
@@ -15,8 +17,7 @@ from src.input_handlers import handle_keys
 from src.loader_functions.initialize_new_game import get_constants
 from src.map_objects.game_map import make_map, change_wind
 from src.render_functions import render_display, RenderOrder
-from src.components.crew import Crew
-from src.components.cargo import Cargo, Item, ItemCategory
+from src.time import Time
 
 
 def main():
@@ -25,6 +26,8 @@ def main():
     pygame.key.set_repeat(2, 300)
     global fps_clock
     fps_clock = pygame.time.Clock()
+    
+    game_time = Time()
     
     display_surface = pygame.display.set_mode((constants['display_width'], constants['display_height']))
     pygame.display.set_caption("Shallow Seas")
@@ -35,7 +38,7 @@ def main():
     message_log = MessageLog(constants['log_size'], constants['message_panel_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.MEDIUM
+    size_component = Size.SMALL
     manifest = []
     manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))
@@ -89,7 +92,8 @@ def main():
                    mouse_x=mouse_x,
                    mouse_y=mouse_y,
                    message_log=message_log,
-                   game_state=game_state)
+                   game_state=game_state,
+                   game_time=game_time)
     
     pygame.display.flip()
     
@@ -143,7 +147,7 @@ def main():
             target_cancel = action.get('target_cancel')
             if targeting:
                 game_state = GameStates.TARGETING
-
+            
             special = action.get('special')
             special_cancel = action.get('special_cancel')
             if special:
@@ -163,7 +167,7 @@ def main():
             
             if sails_cancel or special_cancel or target_cancel or inventory_cancel:
                 game_state = GameStates.CURRENT_TURN
-
+            
             # VERIFY PLAYER ACTION ------------------------------------------------------------------------------------
             
             if attack:
@@ -175,12 +179,12 @@ def main():
                     target = True
                 if not target:
                     attack = None
-                    
+            
             if sails:
                 if (sails > 0 and player.mast_sail.current_sails == player.mast_sail.max_sails) \
                         or (sails < 0 and player.mast_sail.current_sails == 0):
                     sails = None
-                    
+            
             # PROCESS ACTION ------------------------------------------------------------------------------------------
             if (rowing or slowing or sails or attack or rotate or other_action) \
                     and not game_state == GameStates.PLAYER_DEAD \
@@ -208,11 +212,14 @@ def main():
                                 weapon.current_cd -= 1
                 
                 if attack == 'Arrows':
-                        message_log.add_message('Player attacks with {}!'.format(attack), constants['colors']['aqua'])
-                        player.crew.arrow_attack(game_map.terrain, entities, message_log, constants['icons'])
+                    message_log.add_message('Player attacks with {}!'.format(attack), constants['colors']['aqua'])
+                    player.crew.arrow_attack(game_map.terrain, entities, message_log, constants['icons'])
                 elif attack:
                     message_log.add_message('Player attacks to the {}!'.format(attack), constants['colors']['aqua'])
                     player.weapons.attack(game_map.terrain, entities, attack, message_log, constants['icons'])
+                
+                # after attacks made, update fog (not before, due to FOV changes)
+                game_map.roll_fog()
                 
                 if other_action:
                     # for decoration in game_map.decorations:
@@ -227,12 +234,12 @@ def main():
                                                     constants['colors']['aqua'])
                             if entity.cargo:
                                 for cargo in entity.cargo.manifest:
-                                    player.cargo.add_item_to_manifest(cargo)
+                                    player.cargo.add_item_to_manifest(cargo, message_log)
                             
                             entity.name = ''
                             entity.icon = None
                             entity.cargo = None
-
+                    
                     if game_map.in_bounds(player.x, player.y) \
                             and game_map.terrain[player.x][player.y].decoration \
                             and game_map.terrain[player.x][player.y].decoration.name == 'Port':
@@ -292,7 +299,8 @@ def main():
                         old_x = entity.x
                         old_y = entity.y
                         entity.mobile.move(game_map=game_map)
-                        if not (entity.x == old_x and entity.y == old_y):  # recalculate fov if entity moved
+                        if not (entity.x == old_x and entity.y == old_y) \
+                                or game_map.wind_direction is not None:  # recalculate fov if entity moved
                             entity.view.set_fov(game_map)
                             # print("{} moved to {}:{}".format(entity.name, entity.x, entity.y))
                 
@@ -310,14 +318,15 @@ def main():
                 if exit_screen:
                     game_quit = True
                 
-                game_map.roll_fog()
                 change_wind(game_map, message_log, constants['colors']['yellow'])
+                
+                game_time.roll_min()
             
             elif scroll:
                 if constants['map_width'] <= mouse_x < constants['display_width'] \
                         and constants['view_height'] <= mouse_y < constants['display_height']:
                     message_log.adjust_view(scroll)
-                
+            
             render_display(display=display_surface,
                            game_map=game_map,
                            player=player,
@@ -326,6 +335,7 @@ def main():
                            mouse_x=mouse_x,
                            mouse_y=mouse_y,
                            game_state=game_state,
+                           game_time=game_time,
                            message_log=message_log)
             pygame.display.flip()
         
