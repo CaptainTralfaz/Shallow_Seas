@@ -169,7 +169,7 @@ def cube_rotate_cc(cube):
     return Cube(new_x, new_y, new_z)
 
 
-def get_fov(fighter, game_map):
+def get_fov(fighter, game_map, fog_view = 0):
     view = fighter.view
     if fighter.owner.wings:
         view += 1
@@ -192,7 +192,7 @@ def get_fov(fighter, game_map):
                 if hx not in viewed_hexes[1:]:
                     viewed_hexes.append(hx)
                 if game_map.in_bounds(hx.col, hx.row) \
-                        and (Elevation.SHALLOWS < game_map.terrain[hx.col][hx.row].elevation or fog > 0):
+                        and (Elevation.SHALLOWS < game_map.terrain[hx.col][hx.row].elevation or fog > fog_view):
                     break
             
             current = cube_neighbor(current, i)

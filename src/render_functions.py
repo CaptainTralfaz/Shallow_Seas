@@ -20,7 +20,7 @@ class RenderOrder(Enum):
 
 
 def render_display(display, game_map, player, entities,
-                   constants, mouse_x, mouse_y, message_log, game_state, game_time):
+                   constants, mouse_x, mouse_y, message_log, game_state, game_time, game_weather):
     display.fill(constants['colors']['black'])
     
     # draw and blit mini-map
@@ -28,7 +28,7 @@ def render_display(display, game_map, player, entities,
     display.blit(map_surf, (0, 0))
     
     # draw and blit status panel
-    status_surf = render_status(game_map, player, constants)
+    status_surf = render_status(player, constants)
     display.blit(status_surf, (0, constants['map_height'] + constants['control_height']))
     
     # draw and blit available controls
@@ -44,7 +44,7 @@ def render_display(display, game_map, player, entities,
         display.blit(inventory_surf, (constants['map_width'], 0))
     else:
         # draw and blit game play area
-        board_surf = render_board(game_map, player, entities, constants, game_state, game_time)
+        board_surf = render_board(game_map, player, entities, constants, game_state, game_time, game_weather)
         display.blit(board_surf, (constants['map_width'], 0))
         
         # Draw and blit info under mouse, but now out of bounds
@@ -161,7 +161,7 @@ def render_messages(message_log, constants):
     return border_panel
 
 
-def render_board(game_map, player, entities, constants, game_state, game_time):
+def render_board(game_map, player, entities, constants, game_state, game_time, game_weather):
     game_map_surf = pygame.Surface((constants['board_width'] * constants['tile_size'] - 2 * constants['margin'],
                                     constants['board_height'] * constants['tile_size'] - constants['half_tile']))
     game_map_surf.fill(constants['colors']['dark_gray'])
@@ -257,6 +257,8 @@ def render_board(game_map, player, entities, constants, game_state, game_time):
                                    - constants['margin']))
     
     render_time(game_time, view_surf, constants)
+    render_weather(game_time, game_weather, view_surf, constants)
+    render_wind(game_map, view_surf, constants)
     
     border_panel = pygame.Surface((constants['view_width'],
                                    constants['view_height']))
@@ -266,9 +268,54 @@ def render_board(game_map, player, entities, constants, game_state, game_time):
     return border_panel
 
 
+    # # wind direction
+    # direction_text = constants['font'].render('Wind Direction:', True, constants['colors'].get('text'))
+    # status_panel.blit(direction_text, (constants['half_tile'], constants['half_tile']))
+    # status_panel.blit(constants['icons']['compass'],
+    #                   (constants['status_width'] - 2 * constants['tile_size'] + constants['margin'],
+    #                    2 * constants['margin']))
+    # if game_map.wind_direction is not None:
+    #     status_panel.blit(rot_center(constants['icons']['pointer'], direction_angle[game_map.wind_direction]),
+    #                       (constants['status_width'] - 2 * constants['tile_size'] + constants['margin'],
+    #                        2 * constants['margin']))
+    # vertical = constants['tile_size'] + constants['margin']
+
+
+def render_wind(game_map, view_surf, constants):
+    wind_dir = {0: 'North',
+                1: 'Northwest',
+                2: 'Southwest',
+                3: 'South',
+                4: 'Southeast',
+                5: 'Northeast'}
+    if game_map.wind_direction is not None:
+        text = 'Wind to {}'.format(wind_dir[game_map.wind_direction])
+    else:
+        text = 'No Wind'
+    (width, height) = constants['font'].size(text)
+    wind_text = constants['font'].render(text, True, constants['colors'].get('text'))
+    compass = constants['icons']['compass']
+    
+    wind_surf = pygame.Surface((width + constants['margin'] + compass.get_width(), compass.get_height()))
+    wind_surf.fill(constants['colors']['dark_gray'])
+    wind_surf.blit(wind_text, (0, (wind_surf.get_height() - constants['font'].get_height()) // 2))
+    wind_surf.blit(compass, (wind_surf.get_width() - compass.get_width(), 0))
+    
+    if game_map.wind_direction is not None:
+        wind_surf.blit(rot_center(constants['icons']['pointer'], direction_angle[game_map.wind_direction]),
+                       (wind_surf.get_width() - compass.get_width(), 0))
+
+    border_panel = pygame.Surface((wind_surf.get_width() + 2 * constants['margin'],
+                                   wind_surf.get_height() + 2 * constants['margin']))
+    border_panel.blit(wind_surf, (constants['margin'], constants['margin']))
+    render_border(border_panel, constants['colors']['text'])
+    
+    view_surf.blit(border_panel, (view_surf.get_width() - border_panel.get_width(), 0))
+
+
 def render_time(game_time, view_surf, constants):
-    text = '{}.{:02d}.{} {:02d}:{:02d}:00'.format(game_time.day, game_time.month, game_time.year, game_time.hrs,
-                                                  game_time.min)
+    text = '{}.{:02d}.{} {:02d}:{:02d} {}'.format(game_time.day, game_time.month, game_time.year, game_time.hrs,
+                                                  game_time.min, game_time.get_time_of_day_info['name'])
     (width, height) = constants['font'].size(text)
     time_text = constants['font'].render(text, True, constants['colors'].get('text'))
     time_surf = pygame.Surface((width, height))
@@ -276,30 +323,98 @@ def render_time(game_time, view_surf, constants):
     time_surf.blit(time_text, (0, 1))
     
     border_panel = pygame.Surface((width + 2 * constants['margin'],
-                                   height + 2 * constants['margin'] + 1))
+                                   height + 2 * constants['margin']))
     border_panel.blit(time_surf, (constants['margin'], constants['margin']))
     render_border(border_panel, constants['colors']['text'])
     
     view_surf.blit(border_panel, (0, 0))
+    
+
+def render_weather(game_time, game_weather, view_surf, constants):
+    weather_dict = game_weather.get_weather_info
+    time_dict = game_time.get_time_of_day_info
+    
+    text = '{}'.format(weather_dict['name'].capitalize())
+    (width, height) = constants['font'].size(text)
+    weather_text = constants['font'].render(text, True, constants['colors'].get('text'))
+    
+    if 6 <= game_time.hrs < 18:
+        icon = constants['icons']['sun']
+    else:
+        icon = constants['icons']['moon']
+    
+    numeric_time = 100 * game_time.hrs + 100 * game_time.min // 60  # Eample: 6:45 = 675, 21:30 = 2150
+    if numeric_time < 600:
+        relative_time = 600 + numeric_time
+    elif 600 <= numeric_time < 1800:
+        relative_time = numeric_time - 600
+    elif numeric_time >= 1800:
+        relative_time = numeric_time - 1800
+    icon_x = relative_time * 4 // 75
+    
+    if relative_time < 300:
+        icon_y = 16 - icon_x
+    elif relative_time > 900:
+        icon_y = icon_x - (icon.get_width() * 3)
+    else:
+        icon_y = 0
+
+    sky_surf = pygame.Surface((5 * icon.get_width(), icon.get_height()))
+    sky_surf.fill(constants['colors'][time_dict['sky']])
+    sky_surf.blit(icon, (icon_x, icon_y))
+    
+    if not (6 <= game_time.hrs < 18):
+        moon_shadow_icon = constants['icons']['moon_shadow']
+        moon_shadow_icon = colorize(moon_shadow_icon, constants['colors'][time_dict['sky']])
+        
+        if game_time.hrs >= 18:  # account for day change in middle of night
+            offset = 0
+        else:
+            offset = 1
+        sky_surf.blit(moon_shadow_icon, (icon_x - abs(game_time.day - 15 - offset), icon_y))
+    
+    icon = constants['icons'][weather_dict['name'].lower()]
+    for x in range(sky_surf.get_width() // icon.get_width()):
+        sky_surf.blit(icon, (x * icon.get_width(), (x + 1) % 2))
+
+    weather_surf = pygame.Surface((width + constants['margin'] + sky_surf.get_width(), height))
+    weather_surf.fill(constants['colors']['dark_gray'])
+    weather_surf.blit(weather_text, (0, 1))
+    weather_surf.blit(sky_surf, (width + constants['margin'] - 1, 1))
+
+    border_panel = pygame.Surface((weather_surf.get_width() + 2 * constants['margin'],
+                                   weather_surf.get_height() + 2 * constants['margin']))
+    border_panel.blit(weather_surf, (constants['margin'], constants['margin']))
+    render_border(border_panel, constants['colors']['text'])
+
+    view_surf.blit(border_panel, ((view_surf.get_width() - border_panel.get_width()) // 2, 0))
 
 
-def render_status(game_map, player, constants):
+def colorize(image, new_color):
+    """
+    Create a "colorized" copy of a surface (replaces RGB values with the given color, preserving the per-pixel alphas of
+    original).
+    :param image: Surface to create a colorized copy of
+    :param new_color: RGB color to use (original alpha values are preserved)
+    :return: New colorized Surface instance
+    """
+    image = image.copy()
+
+    # zero out RGB values
+    image.fill((0, 0, 0, 255), None, pygame.BLEND_RGBA_MULT)
+    # add in new RGB values
+    image.fill(new_color[0:3] + (0,), None, pygame.BLEND_RGBA_ADD)
+
+    return image
+
+
+def render_status(player, constants):
     # Status Panel
     status_panel = pygame.Surface((constants['status_width'] - 2 * constants['margin'],
                                    constants['status_height'] - 2 * constants['margin']))
     status_panel.fill(constants['colors']['dark_gray'])
     
-    # wind direction
-    direction_text = constants['font'].render('Wind Direction:', True, constants['colors'].get('text'))
-    status_panel.blit(direction_text, (constants['half_tile'], constants['half_tile']))
-    status_panel.blit(constants['icons']['compass'],
-                      (constants['status_width'] - 2 * constants['tile_size'] + constants['margin'],
-                       2 * constants['margin']))
-    if game_map.wind_direction is not None:
-        status_panel.blit(rot_center(constants['icons']['pointer'], direction_angle[game_map.wind_direction]),
-                          (constants['status_width'] - 2 * constants['tile_size'] + constants['margin'],
-                           2 * constants['margin']))
-    vertical = constants['tile_size'] + constants['margin']
+    vertical = 0
     
     vertical = render_entity_info(status_panel, player, constants, vertical)
     
