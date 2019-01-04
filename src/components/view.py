@@ -6,14 +6,14 @@ class View:
         self.view = view
         self.fov = {}
     
-    def set_fov(self, game_map):
+    def set_fov(self, game_map, game_time, game_weather):
         """
         :param game_map: the current map being played on
         :return: Nothing - modify current map
         """
         # get list of visible tiles
         port = None
-        visible_tiles = get_fov(self, game_map)
+        visible_tiles = get_fov(self, game_map, game_time, game_weather)
         if self.owner.name == 'player':
             for (x, y) in visible_tiles:
                 if (0 <= x < game_map.width) and (0 <= y < game_map.height) and not game_map.terrain[x][y].seen:

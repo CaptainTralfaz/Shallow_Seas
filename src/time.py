@@ -97,6 +97,7 @@ time_of_day_info = {TimeOfDay.DAWN: {'name': 'Dawn', 'begin': 5, 'view': 0, 'fog
                     TimeOfDay.WEEHOURS: {'name': 'Wee Hours', 'begin': 3, 'view': -1, 'fog': 15, 'sky': 'violet'}
                     }
 
+
 # Dawn	5:30 - 7:25 A		10%
 # Morning	7:30 - 9:25 A		5%
 # Late Morning	9:30 - 11:25 A
