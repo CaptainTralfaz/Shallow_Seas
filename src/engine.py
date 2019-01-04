@@ -15,9 +15,10 @@ from src.game_messages import MessageLog
 from src.game_states import GameStates
 from src.input_handlers import handle_keys
 from src.loader_functions.initialize_new_game import get_constants
-from src.map_objects.game_map import make_map, change_wind
+from src.map_objects.game_map import make_map, change_wind, adjust_fog
 from src.render_functions import render_display, RenderOrder
 from src.time import Time
+from src.weather import Weather, change_weather
 
 
 def main():
@@ -28,6 +29,7 @@ def main():
     fps_clock = pygame.time.Clock()
     
     game_time = Time()
+    game_weather = Weather()
     
     display_surface = pygame.display.set_mode((constants['display_width'], constants['display_height']))
     pygame.display.set_caption("Shallow Seas")
@@ -38,7 +40,7 @@ def main():
     message_log = MessageLog(constants['log_size'], constants['message_panel_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.SMALL
+    size_component = Size.MEDIUM
     manifest = []
     manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))
@@ -93,7 +95,8 @@ def main():
                    mouse_y=mouse_y,
                    message_log=message_log,
                    game_state=game_state,
-                   game_time=game_time)
+                   game_time=game_time,
+                   game_weather=game_weather)
     
     pygame.display.flip()
     
@@ -219,7 +222,7 @@ def main():
                     player.weapons.attack(game_map.terrain, entities, attack, message_log, constants['icons'])
                 
                 # after attacks made, update fog (not before, due to FOV changes)
-                game_map.roll_fog()
+                game_map.roll_fog(game_time, game_weather)
                 
                 if other_action:
                     # for decoration in game_map.decorations:
@@ -319,8 +322,10 @@ def main():
                     game_quit = True
                 
                 change_wind(game_map, message_log, constants['colors']['yellow'])
-                
                 game_time.roll_min()
+                change_weather(game_weather, message_log, constants['colors']['yellow'])
+                adjust_fog(fog=game_map.fog, width=game_map.width, height=game_map.height,
+                           game_time=game_time, weather=game_weather)
             
             elif scroll:
                 if constants['map_width'] <= mouse_x < constants['display_width'] \
@@ -336,7 +341,8 @@ def main():
                            mouse_y=mouse_y,
                            game_state=game_state,
                            game_time=game_time,
-                           message_log=message_log)
+                           message_log=message_log,
+                           game_weather=game_weather)
             pygame.display.flip()
         
         fps_clock.tick(constants['FPS'])

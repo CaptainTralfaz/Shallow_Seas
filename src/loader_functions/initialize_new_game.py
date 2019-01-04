@@ -13,7 +13,7 @@ def get_constants():
     
     map_width = 202  # includes margins
     map_height = 200  # includes margins
-    block_size = 3
+    block_size = 4
     map_block = (block_size, block_size)
     
     view_width = display_width - map_width  # includes margins
@@ -30,8 +30,8 @@ def get_constants():
     message_panel_size = 9
     log_size = 50
 
-    board_width = 64
-    board_height = 64
+    board_width = 48
+    board_height = 48
     island_size = board_height // 2
     island_seeds = board_height
     
@@ -46,7 +46,6 @@ def get_constants():
     colors = {
         'text': (200, 200, 200),
         'black': (0, 0, 0),
-        
         'dark_gray': (25, 25, 25),
         'gray': (150, 150, 150),
         'white': (255, 255, 255),
@@ -80,7 +79,17 @@ def get_constants():
         'pointer': pygame.image.load('icons/misc/Pointer.png'),
         'compass': pygame.image.load('icons/misc/Compass.png'),
         'arrow': pygame.image.load('icons/misc/Arrow.png'),
-        'fog': pygame.image.load('icons/misc/Fog.png'),  # 10x5
+        'fog': pygame.image.load('icons/misc/Fog.png'),
+        # misc game icons 16x16
+        'sun': pygame.image.load('icons/misc/Sun.png'),
+        'moon': pygame.image.load('icons/misc/Moon.png'),
+        'moon_shadow': pygame.image.load('icons/misc/MoonShadow.png'),
+        'sky': pygame.image.load('icons/misc/Sky.png'),
+        'calm': pygame.image.load('icons/misc/Sky.png'),
+        'hazy': pygame.image.load('icons/misc/Haze.png'),
+        'cloudy': pygame.image.load('icons/misc/Cloud.png'),
+        'rainy': pygame.image.load('icons/misc/Rain.png'),
+        'stormy': pygame.image.load('icons/misc/Storm.png'),
         # terrain icons 42x42
         'deep_sea': pygame.image.load('icons/terrain/DeepSea.png'),
         'sea': pygame.image.load('icons/terrain/Sea.png'),

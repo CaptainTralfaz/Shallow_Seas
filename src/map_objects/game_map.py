@@ -12,6 +12,7 @@ from src.map_objects.map_generator import generate_terrain
 from src.map_objects.map_utils import hex_directions
 from src.map_objects.tile import Decoration, Elevation
 from src.render_functions import RenderOrder
+from src.weather import Conditions, weather_effects
 
 
 class GameMap:
@@ -33,16 +34,17 @@ class GameMap:
             return wind
     
     @property
-    def starting_fog(self):
+    def starting_fog(self):  # start with 5 % fog
         grid = [[False for y in range(self.height)] for x in range(self.width)]
+        base_fog = 5
         for xx in range(self.width):
             for yy in range(self.height):
-                fog_chance = randint(0, 10)
-                if fog_chance == 0:
+                fog_chance = randint(0, 99)
+                if fog_chance < base_fog:
                     grid[xx][yy] = True
         return grid
     
-    def roll_fog(self):
+    def roll_fog(self, game_time, game_weather):
         # move fog with wind direction:
         grid = [[False for y in range(self.height)] for x in range(self.width)]
         if self.wind_direction is not None:
@@ -53,13 +55,15 @@ class GameMap:
                         if self.in_bounds(dx + x, dy + y + (x % 2) * (dx % 2), margin=-1):
                             grid[dx + x][dy + y + (x % 2) * (dx % 2)] = True
             self.fog = grid
-            self.add_fog_at_border()
+            self.add_fog_at_border(game_time, game_weather)
     
-    def add_fog_at_border(self):
+    def add_fog_at_border(self, game_time, game_weather):
         north = False
         south = False
         west = False
         east = False
+        base_fog = get_base_fog(game_time, game_weather)
+        
         if self.wind_direction in [0, 1, 5]:  # wind blowing north, add fog to bottom border
             north = True
         if self.wind_direction in [2, 3, 4]:  # wind blowing south, add fog to top border
@@ -70,23 +74,23 @@ class GameMap:
             east = True
         if north:
             for x in range(self.width):
-                fog_chance = randint(0, 10)
-                if fog_chance == 0:
+                fog_chance = randint(0, 99)
+                if fog_chance < base_fog:
                     self.fog[x][self.height - 1] = True
         if south:
             for x in range(self.width):
-                fog_chance = randint(0, 10)
-                if fog_chance == 0:
+                fog_chance = randint(0, 99)
+                if fog_chance < base_fog:
                     self.fog[x][0] = True
         if west:
             for y in range(self.height):
-                fog_chance = randint(0, 10)
-                if fog_chance == 0:
+                fog_chance = randint(0, 99)
+                if fog_chance < base_fog:
                     self.fog[self.width - 1][y] = True
         if east:
             for y in range(self.height):
-                fog_chance = randint(0, 10)
-                if fog_chance == 0:
+                fog_chance = randint(0, 99)
+                if fog_chance < base_fog:
                     self.fog[0][y] = True
         
         # grow fog / shrink fog due to weather / time of day
@@ -106,6 +110,50 @@ def make_map(width: int, height: int, entities: list, max_entities: int, icons: 
     return game_map
 
 
+def remove_fog(fog, fog_list, width, height):
+    # randomly remove ~ .5 % of fog_list from fog param
+    removal_list = []
+    removal_count = (width * height) // 200
+    for count in range(removal_count):
+        target = randint(0, len(fog_list) - 1)
+        removal_list.append(fog_list[target])
+    for (x, y) in removal_list:
+        fog[x][y] = False
+        # print("removed fog at {}:{}".format(x, y))
+    # print("removed fog count: {}".format(len(removal_list)))
+
+
+def add_fog(fog, width, height):
+    # randomly add ~ .5 % fog to map
+    fog_add_list = []
+    fog_add_count = (width * height) // 200
+    for count in range(fog_add_count):
+        fog_add_list.append((randint(0, width - 1), randint(0, height - 1)))
+    for (x, y) in fog_add_list:
+        fog[x][y] = True
+        # print("adding fog at {}:{}".format(x, y))
+    # print("added fog count: {}".format(len(fog_add_list)))
+
+
+def adjust_fog(fog, width, height, game_time, weather):
+    target_fog_pct = get_base_fog(game_time=game_time, weather=weather)
+    # print("target fog_pct: {}".format(target_fog_pct))
+    fog_list = [(x, y) for x in range(width) for y in range(height) if fog[x][y]]
+    fog_pct = 100 * len(fog_list) // (width * height)
+    # print("current fog_pct: {} (count {}/{})".format(fog_pct, len(fog_list), width * height))
+    if target_fog_pct < fog_pct:
+        remove_fog(fog, fog_list, width, height)
+    elif target_fog_pct > fog_pct:
+        add_fog(fog, width, height)
+
+
+def get_base_fog(game_time, weather):
+    base_fog = 0
+    base_fog += weather_effects[weather.conditions]['fog']
+    base_fog += game_time.get_time_of_day_info['fog']
+    return base_fog
+
+
 def change_wind(game_map: GameMap, message_log, color):
     """
     wind bucket fills up, one per turn.
@@ -114,6 +162,8 @@ def change_wind(game_map: GameMap, message_log, color):
         if wind not blowing, starts in random direction
         if blowing, can stop, rotate right, or rotate left
     :param game_map: the current map being played on
+    :param message_log: list of game messages
+    :param color: color of the message
     :return: None
     """
     delay = 10  # leave wind for at least this many turns
@@ -170,7 +220,7 @@ def decorate(game_map: GameMap):
 
 def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: dict, constants: dict):
     # Get a random number of entities
-    number_of_monsters = randint(max_entities // 2, max_entities + 1)
+    number_of_monsters = randint(2 * max_entities // 3, max_entities + 1)
     
     # This should be
     # 1 choose monster
