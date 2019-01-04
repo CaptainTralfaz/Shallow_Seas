@@ -102,11 +102,12 @@ class GameMap:
 
 
 def make_map(width: int, height: int, entities: list, max_entities: int, icons: dict, islands: int, seeds: int,
-             constants: dict):
+             constants: dict, game_time, game_weather):
     game_map = GameMap(width=width, height=height)
     generate_terrain(game_map, island_size=islands, max_seeds=seeds)
     decorate(game_map)
-    place_entities(game_map, entities=entities, max_entities=max_entities, icons=icons, constants=constants)
+    place_entities(game_map, entities=entities, max_entities=max_entities, icons=icons, constants=constants,
+                   game_time=game_time, game_weather=game_weather)
     return game_map
 
 
@@ -218,7 +219,8 @@ def decorate(game_map: GameMap):
                 #     game_map.terrain[x][y].decoration = Decoration('salvage')
 
 
-def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: dict, constants: dict):
+def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: dict, constants: dict,
+                   game_time, game_weather):
     # Get a random number of entities
     number_of_monsters = randint(2 * max_entities // 3, max_entities + 1)
     
@@ -260,7 +262,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                                  ai=ai_component,
                                  fighter=fighter_component,
                                  cargo=cargo_component)
-                    npc.view.set_fov(game_map)
+                    npc.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
                     print('{} placed at {}:{}'.format(npc.name, x, y))
                 elif random_val < 70:
                     size_component = Size.TINY
@@ -288,7 +290,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                                  wings=wing_component,
                                  fighter=fighter_component,
                                  cargo=cargo_component)
-                    npc.view.set_fov(game_map)
+                    npc.view.set_fov(game_map, game_time, game_weather)
                     print('{} placed at {}:{}'.format(npc.name, x, y))
                 else:
                     size_component = Size.SMALL
@@ -314,6 +316,6 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                                  ai=ai_component,
                                  fighter=fighter_component,
                                  cargo=cargo_component)
-                    npc.view.set_fov(game_map)
+                    npc.view.set_fov(game_map, game_time, game_weather)
                     print('{} placed at {}:{}'.format(npc.name, x, y))
                 entities.append(npc)

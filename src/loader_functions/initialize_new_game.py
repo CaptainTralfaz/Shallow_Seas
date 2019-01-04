@@ -13,7 +13,7 @@ def get_constants():
     
     map_width = 202  # includes margins
     map_height = 200  # includes margins
-    block_size = 4
+    block_size = 3
     map_block = (block_size, block_size)
     
     view_width = display_width - map_width  # includes margins
@@ -30,8 +30,8 @@ def get_constants():
     message_panel_size = 9
     log_size = 50
 
-    board_width = 48
-    board_height = 48
+    board_width = 64
+    board_height = board_width
     island_size = board_height // 2
     island_seeds = board_height
     

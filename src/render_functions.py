@@ -298,7 +298,7 @@ def render_wind(game_map, view_surf, constants):
     
     wind_surf = pygame.Surface((width + constants['margin'] + compass.get_width(), compass.get_height()))
     wind_surf.fill(constants['colors']['dark_gray'])
-    wind_surf.blit(wind_text, (0, (wind_surf.get_height() - constants['font'].get_height()) // 2))
+    wind_surf.blit(wind_text, (0, (wind_surf.get_height() - constants['font'].get_height()) // 2 + 1))
     wind_surf.blit(compass, (wind_surf.get_width() - compass.get_width(), 0))
     
     if game_map.wind_direction is not None:

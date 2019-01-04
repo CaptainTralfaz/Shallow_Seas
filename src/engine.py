@@ -71,16 +71,18 @@ def main():
     
     entities = [player]
     
-    game_map = make_map(constants['board_width'],
-                        constants['board_height'],
-                        entities,
-                        constants['max_entities'],
-                        constants['icons'],
-                        constants['island_size'],
-                        constants['island_seeds'],
-                        constants)
+    game_map = make_map(width=constants['board_width'],
+                        height=constants['board_height'],
+                        entities=entities,
+                        max_entities=constants['max_entities'],
+                        icons=constants['icons'],
+                        islands=constants['island_size'],
+                        seeds=constants['island_seeds'],
+                        constants=constants,
+                        game_time=game_time,
+                        game_weather=game_weather)
     
-    player.view.set_fov(game_map)
+    player.view.set_fov(game_map, game_time, game_weather)
     game_state = GameStates.CURRENT_TURN
     
     mouse_x = 0
@@ -304,7 +306,7 @@ def main():
                         entity.mobile.move(game_map=game_map)
                         if not (entity.x == old_x and entity.y == old_y) \
                                 or game_map.wind_direction is not None:  # recalculate fov if entity moved
-                            entity.view.set_fov(game_map)
+                            entity.view.set_fov(game_map, game_time, game_weather)
                             # print("{} moved to {}:{}".format(entity.name, entity.x, entity.y))
                 
                 # SAILS / ROTATE --------------------------------------------------------------------------------------

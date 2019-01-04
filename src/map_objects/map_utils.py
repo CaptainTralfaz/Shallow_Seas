@@ -169,10 +169,24 @@ def cube_rotate_cc(cube):
     return Cube(new_x, new_y, new_z)
 
 
-def get_fov(fighter, game_map, fog_view = 0):
+def get_fov(fighter, game_map, game_time, game_weather, fog_view=0):
     view = fighter.view
+    view += game_time.get_time_of_day_info['view']
+    view += game_weather.get_weather_info['view']
     if fighter.owner.wings:
         view += 1
+    if not (6 <= game_time.hrs < 18):
+        if (13 < game_time.day < 18) \
+                or (game_time.day == 13 and game_time.hrs >= 18) \
+                or (game_time.day == 18 and game_time.hrs < 6):
+            view -= 1
+        elif (game_time.day > 28 or game_time.day < 3)\
+                or (game_time.day == 28 and game_time.hrs >= 18) \
+                or (game_time.day == 3 and game_time.hrs < 6):
+            view += 1
+    if view < 1:
+        view = 1
+
     viewed_hexes = []
     center_coords = hex_to_cube(Hex(fighter.owner.x, fighter.owner.y))
     viewed_hexes.append(Hex(fighter.owner.x, fighter.owner.y))
