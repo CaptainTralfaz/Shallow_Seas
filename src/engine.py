@@ -40,7 +40,7 @@ def main():
     message_log = MessageLog(constants['log_size'], constants['message_panel_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.MEDIUM
+    size_component = Size.SMALL
     manifest = []
     manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))
@@ -82,7 +82,7 @@ def main():
                         game_time=game_time,
                         game_weather=game_weather)
     
-    player.view.set_fov(game_map, game_time, game_weather)
+    player.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
     game_state = GameStates.CURRENT_TURN
     
     mouse_x = 0
@@ -95,13 +95,12 @@ def main():
                    constants=constants,
                    mouse_x=mouse_x,
                    mouse_y=mouse_y,
-                   message_log=message_log,
                    game_state=game_state,
                    game_time=game_time,
+                   message_log=message_log,
                    game_weather=game_weather)
-    
     pygame.display.flip()
-    
+
     # Main Loop -------------------------------------------------------------------------------------------------------
     while not game_quit:
         user_input = None
@@ -178,10 +177,16 @@ def main():
             if attack:
                 target = False
                 # make sure there is a valid target
-                if attack == 'Arrows' and player.crew.verify_arrow_target(entities):
-                    target = True
-                elif player.weapons.verify_target_at_location(attack, entities):
-                    target = True
+                if game_map.in_bounds(x=player.x, y=player.y, margin=-1):
+                    if game_map.terrain[player.x][player.y].decoration \
+                            and game_map.terrain[player.x][player.y].decoration.name == 'Port':
+                        target = False
+                    elif attack == 'Arrows' and player.crew.verify_arrow_target(entities):
+                        target = True
+                    elif player.weapons.verify_target_at_location(attack, entities):
+                        target = True
+                    else:
+                        target = None
                 if not target:
                     attack = None
             
@@ -305,7 +310,7 @@ def main():
                         old_y = entity.y
                         entity.mobile.move(game_map=game_map)
                         if not (entity.x == old_x and entity.y == old_y) \
-                                or game_map.wind_direction is not None:  # recalculate fov if entity moved
+                                or game_map.wind_direction is not None:  # recalculate fov if entity moved and wind
                             entity.view.set_fov(game_map, game_time, game_weather)
                             # print("{} moved to {}:{}".format(entity.name, entity.x, entity.y))
                 

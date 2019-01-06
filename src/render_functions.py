@@ -168,11 +168,12 @@ def render_board(game_map, player, entities, constants, game_state, game_time, g
     
     if game_state == GameStates.TARGETING:
         targeted_hexes = []
-        if not (game_map.terrain[player.x][player.y].decoration
-                and game_map.terrain[player.x][player.y].decoration.name == "Port"):
+        if game_map.in_bounds(x=player.x, y=player.y, margin=-1) \
+                and not (game_map.terrain[player.x][player.y].decoration
+                         and game_map.terrain[player.x][player.y].decoration.name == "Port"):
             targeted_hexes = get_hex_neighbors(player.x, player.y)
             targeted_hexes.append((player.x, player.y))
-        if game_map.in_bounds(player.x, player.y, -1):
+        if game_map.in_bounds(x=player.x, y=player.y, margin=-1):
             if game_map.terrain[player.x][player.y].decoration is None \
                     or (game_map.terrain[player.x][player.y].decoration
                         and game_map.terrain[player.x][player.y].decoration.name != "Port"):
@@ -473,20 +474,23 @@ def render_control(game_map, player, entities, constants, game_state):
     elif game_state == GameStates.TARGETING:
         split = 58
         arrow_keys = []
-        if player.weapons.verify_target_at_location('Bow', entities):
-            arrow_keys.append({'rotation': 0, 'text': 'Attack Fore'})
-        if player.weapons.verify_target_at_location('Stern', entities):
-            arrow_keys.append({'rotation': 180, 'text': 'Attack Aft'})
-        if player.weapons.verify_target_at_location('Port', entities):
-            arrow_keys.append({'rotation': 90, 'text': 'Attack Port'})
-        if player.weapons.verify_target_at_location('Starboard', entities):
-            arrow_keys.append({'rotation': 270, 'text': 'Attack Starboard'})
+        text_keys = []
+        if game_map.in_bounds(player.x, player.y, -1) \
+                and not (game_map.terrain[player.x][player.y].decoration
+                         and game_map.terrain[player.x][player.y].decoration.name == 'Port'):
+            if player.weapons.verify_target_at_location('Bow', entities):
+                arrow_keys.append({'rotation': 0, 'text': 'Attack Fore'})
+            if player.weapons.verify_target_at_location('Stern', entities):
+                arrow_keys.append({'rotation': 180, 'text': 'Attack Aft'})
+            if player.weapons.verify_target_at_location('Port', entities):
+                arrow_keys.append({'rotation': 90, 'text': 'Attack Port'})
+            if player.weapons.verify_target_at_location('Starboard', entities):
+                arrow_keys.append({'rotation': 270, 'text': 'Attack Starboard'})
+            if player.crew.verify_arrow_target(entities):
+                text_keys.append({'name': 'Space', 'text': 'Arrow Attack'})
         for key in arrow_keys:
             vertical = make_arrow_button(control_panel, split, margin, key['rotation'],
                                          key['text'], constants, vertical)
-        text_keys = []
-        if player.crew.verify_arrow_target(entities):
-            text_keys.append({'name': 'Space', 'text': 'Arrow Attack'})
         text_keys.append({'name': 'Cmd', 'text': 'Exit Targeting'})
         text_keys.append({'name': 'Esc', 'text': 'Exit Targeting'})
         for key in text_keys:
