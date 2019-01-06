@@ -64,12 +64,11 @@ class WeaponList:
                              and (entity.x, entity.y) in self.owner.view.fov and entity.fighter]
         for entity in targeted_entities:
             amount = total_damage // len(targeted_entities)
-            message_log.add_message('{} {} takes {} damage!'.format(entity.name, entity.fighter.name, amount),
-                                    (200, 150, 40))
-            message, dead_result = entity.fighter.take_damage(amount)
+            # message_log.add_message('{} {} takes {} damage!'.format(entity.name, entity.fighter.name, amount),
+            #                         (200, 150, 40))
+            dead_result = entity.fighter.take_damage(amount, message_log)
             if dead_result:  # entity is dead
                 kill_monster(terrain[entity.x][entity.y].elevation.value, entity, icons)
-            message_log.add_message(message)
 
     def verify_target_at_location(self, attack, entities):
         weapon_list = self.get_weapons_at_location(attack)

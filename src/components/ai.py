@@ -38,15 +38,23 @@ class MeleeMonster:  # SeaSerpent
                                     colors['light_red'])
             # in melee range
             if (target.x, target.y) in neighbors or (target.x, target.y) == (entity.x, entity.y):
-                damage = 2
-                message, result = target.fighter.take_damage(damage)
-                message_log.add_message('The {} attacked your {} for {} damage!'.format(entity.name,
-                                                                                        target.fighter.name,
-                                                                                        damage), colors['light_red'])
-                message_log.add_message(message)
+                damage = entity.size.value + 1
+                if entity.name == 'Giant Bat':
+                    hit_zone = randint(0, 10)
+                    if hit_zone < 5 and target.mast_sail.max_sails > 0:  # and target.mast_sail.current_sails > 0:
+                        result = target.mast_sail.take_sail_damage(damage, message_log)
+                    else:
+                        result = target.crew.take_damage(damage, message_log)
+                elif entity.name == 'Sea Serpent':
+                    result = target.fighter.take_damage(damage, message_log)
+                #     message_log.add_message('The {} attacked your {} for {} damage!'.format(entity.name,
+                #                                                                             target.fighter.name,
+                #                                                                             damage), colors['light_red'])
+                # message_log.add_message(message)
+                
                 if result:  # entity is dead
-                    message, state = kill_player(target, icons)
-                message_log.add_message(message)
+                    state = kill_player(target, icons)
+                # message_log.add_message(message)
                 return state
             
             # chase target
