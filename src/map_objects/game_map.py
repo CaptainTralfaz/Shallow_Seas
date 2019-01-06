@@ -274,7 +274,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                                          category=ItemCategory.EXOTICS, weight=.5, volume=.5,
                                          quantity=(size_component.value + 1) * 2))
                     cargo_component = Cargo(capacity=size_component.value * 10 + 5, manifest=manifest)
-                    view_component = View(size_component.value + 5)
+                    view_component = View(size_component.value + 3)
                     mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
                     fighter_component = Fighter("body", size_component.value * 10 + 5)
                     wing_component = Wings("wings", 2, size_component.value)

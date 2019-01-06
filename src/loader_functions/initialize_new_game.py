@@ -80,16 +80,15 @@ def get_constants():
         'compass': pygame.image.load('icons/misc/Compass.png'),
         'arrow': pygame.image.load('icons/misc/Arrow.png'),
         'fog': pygame.image.load('icons/misc/Fog.png'),
-        # misc game icons 16x16
-        'sun': pygame.image.load('icons/misc/Sun.png'),
-        'moon': pygame.image.load('icons/misc/Moon.png'),
-        'moon_shadow': pygame.image.load('icons/misc/MoonShadow.png'),
-        'sky': pygame.image.load('icons/misc/Sky.png'),
         'calm': pygame.image.load('icons/misc/Sky.png'),
         'hazy': pygame.image.load('icons/misc/Haze.png'),
         'cloudy': pygame.image.load('icons/misc/Cloud.png'),
         'rainy': pygame.image.load('icons/misc/Rain.png'),
         'stormy': pygame.image.load('icons/misc/Storm.png'),
+        # misc game icons 16x16
+        'sun': pygame.image.load('icons/misc/Sun.png'),
+        'moon': pygame.image.load('icons/misc/Moon.png'),
+        'moon_shadow': pygame.image.load('icons/misc/MoonShadow.png'),
         # terrain icons 42x42
         'deep_sea': pygame.image.load('icons/terrain/DeepSea.png'),
         'sea': pygame.image.load('icons/terrain/Sea.png'),

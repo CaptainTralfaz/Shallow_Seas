@@ -21,14 +21,24 @@ class Masts:
         elif self.current_sails > self.max_sails:
             self.current_sails = self.max_sails
     
-    def take_sail_damage(self, amount):
+    def take_sail_damage(self, amount, message_log):
         self.sail_hp -= amount
-        if self.sail_hp < 0:
+        if self.sail_hp < 1 and self.max_sails > 0:
             self.max_sails -= 1
+            message_log.add_message('Lost a Sail!', (200, 150, 40))
             if self.current_sails > self.max_sails:
                 self.current_sails = self.max_sails
             if self.max_sails > 0:
                 self.sail_hp = self.size * 2 + 2
+        elif self.max_sails < 1:
+            self.current_sails = 0
+            self.max_sails = 0
+            self.sail_hp = 0
+            message_log.add_message('No sails left to damage'.format(amount), (200, 150, 40))
+        else:
+            message_log.add_message('Sail takes {} damage'.format(amount), (200, 150, 40))
+
+        return False
     
     def take_mast_damage(self, amount):
         self.mast_hp -= amount

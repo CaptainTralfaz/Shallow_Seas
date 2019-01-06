@@ -314,16 +314,19 @@ def render_wind(game_map, view_surf, constants):
 
 
 def render_time(game_time, view_surf, constants):
-    text = '{}.{:02d}.{} {:02d}:{:02d} {}'.format(game_time.day, game_time.month, game_time.year, game_time.hrs,
-                                                  game_time.min, game_time.get_time_of_day_info['name'])
+    text = '{}.{:02d}.{} {:02d}:{:02d}'.format(game_time.day, game_time.month, game_time.year, game_time.hrs,
+                                               game_time.min)
     (width, height) = constants['font'].size(text)
     time_text = constants['font'].render(text, True, constants['colors'].get('text'))
-    time_surf = pygame.Surface((width, height))
+    time_surf = pygame.Surface((width, height * 2))
     time_surf.fill(constants['colors']['dark_gray'])
     time_surf.blit(time_text, (0, 1))
+    text = game_time.get_time_of_day_info['name']
+    time_text = constants['font'].render(text, True, constants['colors'].get('text'))
+    time_surf.blit(time_text, (0, height + 1))
     
     border_panel = pygame.Surface((width + 2 * constants['margin'],
-                                   height + 2 * constants['margin']))
+                                   2 * height + 2 * constants['margin']))
     border_panel.blit(time_surf, (constants['margin'], constants['margin']))
     render_border(border_panel, constants['colors']['text'])
     
@@ -348,38 +351,40 @@ def render_weather(game_time, game_weather, view_surf, constants):
         relative_time = 600 + numeric_time
     elif 600 <= numeric_time < 1800:
         relative_time = numeric_time - 600
-    elif numeric_time >= 1800:
+    else:  # numeric_time >= 1800:
         relative_time = numeric_time - 1800
-    icon_x = relative_time * 4 // 75
     
-    if relative_time < 300:
-        icon_y = 16 - icon_x
-    elif relative_time > 900:
-        icon_y = icon_x - (icon.get_width() * 3)
+    icon_x = relative_time * (constants['tile_size'] * 4) // 1200
+    
+    if relative_time <= 300:
+        icon_y = (constants['tile_size']) - icon_x
+    elif relative_time >= 900:
+        icon_y = icon_x - (constants['tile_size'] * 3)
     else:
         icon_y = 0
-
-    sky_surf = pygame.Surface((5 * icon.get_width(), icon.get_height()))
-    sky_surf.fill(constants['colors'][time_dict['sky']])
-    sky_surf.blit(icon, (icon_x, icon_y))
     
-    if not (6 <= game_time.hrs < 18):
+    # print(numeric_time, relative_time, icon_x, icon_y)
+    sky_surf = pygame.Surface((4 * constants['tile_size'], constants['tile_size']))
+    sky_surf.fill(constants['colors'][time_dict['sky']])
+    sky_surf.blit(icon, (icon_x - 8, icon_y))
+    
+    if not (600 <= relative_time < 1800):
         moon_shadow_icon = constants['icons']['moon_shadow']
         moon_shadow_icon = colorize(moon_shadow_icon, constants['colors'][time_dict['sky']])
         
-        if game_time.hrs >= 18:  # account for day change in middle of night
+        if relative_time >= 1800:  # account for day change in middle of night
             offset = 0
         else:
             offset = 1
-        sky_surf.blit(moon_shadow_icon, (icon_x - abs(game_time.day - 15 - offset), icon_y))
+        sky_surf.blit(moon_shadow_icon, (icon_x - abs(game_time.day - 15 - offset) - 8, icon_y))
     
     icon = constants['icons'][weather_dict['name'].lower()]
     for x in range(sky_surf.get_width() // icon.get_width()):
         sky_surf.blit(icon, (x * icon.get_width(), (x + 1) % 2))
 
-    weather_surf = pygame.Surface((width + constants['margin'] + sky_surf.get_width(), height))
+    weather_surf = pygame.Surface((width + constants['margin'] + sky_surf.get_width(), constants['tile_size']))
     weather_surf.fill(constants['colors']['dark_gray'])
-    weather_surf.blit(weather_text, (0, 1))
+    weather_surf.blit(weather_text, (0, (constants['tile_size'] - height) // 2 + 1))
     weather_surf.blit(sky_surf, (width + constants['margin'] - 1, 1))
 
     border_panel = pygame.Surface((weather_surf.get_width() + 2 * constants['margin'],
@@ -629,7 +634,7 @@ def render_entity_info(panel, entity, constants, vertical):
     if entity.crew:
         panel.blit(make_bar('Crew'.format(entity.fighter.name.capitalize()), font,
                             constants['colors']['text'],
-                            entity.crew.crew, entity.crew.max_crew,
+                            len(entity.crew.crew), entity.crew.max_crew,
                             constants['colors']['light_red'], constants['colors']['dark_red'],
                             panel.get_width()), (0, vertical))
         vertical += font.get_height() + constants['margin'] // 2
@@ -660,14 +665,15 @@ def render_weapons(panel, entity, constants, vertical):
 def make_bar(text, font, font_color, current, maximum, top_color, bottom_color, bar_width):
     max_bar = pygame.Surface((bar_width, font.get_height()))
     max_bar.fill(bottom_color)
-    current_bar_length = math.floor(float(current / maximum * bar_width))
-    if current_bar_length < 0:
-        current_bar_length = 0
-    current_bar = pygame.Surface((current_bar_length, font.get_height()))
-    current_bar.fill(top_color)
+    if maximum > 0:
+        current_bar_length = math.floor(float(current / maximum * bar_width))
+        if current_bar_length < 0:
+            current_bar_length = 0
+        current_bar = pygame.Surface((current_bar_length, font.get_height()))
+        current_bar.fill(top_color)
+        max_bar.blit(current_bar, (0, 0))
     bar_text = font.render('{}:'.format(text), True, font_color)
     bar_nums = font.render('{}/{}'.format(current, maximum), True, font_color)
-    max_bar.blit(current_bar, (0, 0))
     max_bar.blit(bar_text, (1, 1))
     max_bar.blit(bar_nums, (max_bar.get_width() - bar_nums.get_width(), 1))
     

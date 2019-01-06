@@ -169,12 +169,13 @@ def cube_rotate_cc(cube):
     return Cube(new_x, new_y, new_z)
 
 
-def get_fov(fighter, game_map, game_time, game_weather, fog_view=0):
-    view = fighter.view
+def get_fov(entity, game_map, game_time, game_weather, fog_view=0):
+    view = entity.view
     view += game_time.get_time_of_day_info['view']
     view += game_weather.get_weather_info['view']
-    if fighter.owner.wings:
+    if entity.owner.wings:
         view += 1
+    # account for phases of the moon
     if not (6 <= game_time.hrs < 18):
         if (13 < game_time.day < 18) \
                 or (game_time.day == 13 and game_time.hrs >= 18) \
@@ -188,8 +189,8 @@ def get_fov(fighter, game_map, game_time, game_weather, fog_view=0):
         view = 1
 
     viewed_hexes = []
-    center_coords = hex_to_cube(Hex(fighter.owner.x, fighter.owner.y))
-    viewed_hexes.append(Hex(fighter.owner.x, fighter.owner.y))
+    center_coords = hex_to_cube(Hex(entity.owner.x, entity.owner.y))
+    viewed_hexes.append(Hex(entity.owner.x, entity.owner.y))
     current = center_coords
     
     for k in range(0, view):
@@ -206,7 +207,9 @@ def get_fov(fighter, game_map, game_time, game_weather, fog_view=0):
                 if hx not in viewed_hexes[1:]:
                     viewed_hexes.append(hx)
                 if game_map.in_bounds(hx.col, hx.row) \
-                        and (Elevation.SHALLOWS < game_map.terrain[hx.col][hx.row].elevation or fog > fog_view):
+                        and ((Elevation.SHALLOWS < game_map.terrain[hx.col][hx.row].elevation
+                              and not entity.owner.wings)
+                             or fog > fog_view):
                     break
             
             current = cube_neighbor(current, i)
