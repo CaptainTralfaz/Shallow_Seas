@@ -24,31 +24,53 @@ def render_display(display, game_map, player, entities,
     display.fill(constants['colors']['black'])
     
     # draw and blit mini-map
-    map_surf = render_map(game_map, player, entities, constants)
+    map_surf = render_map(game_map=game_map,
+                          player=player,
+                          entities=entities,
+                          constants=constants)
     display.blit(map_surf, (0, 0))
     
     # draw and blit status panel
-    status_surf = render_status(player, constants)
+    status_surf = render_status(player=player,
+                                constants=constants)
     display.blit(status_surf, (0, constants['map_height'] + constants['control_height']))
     
     # draw and blit available controls
-    control_surf = render_control(game_map, player, entities, constants, game_state)
+    control_surf = render_control(game_map=game_map,
+                                  player=player,
+                                  entities=entities,
+                                  constants=constants,
+                                  game_state=game_state)
     display.blit(control_surf, (0, constants['map_height']))
     
     # draw and blit game messages
-    message_surf = render_messages(message_log, constants)
+    message_surf = render_messages(message_log=message_log,
+                                   constants=constants)
     display.blit(message_surf, (constants['status_width'], constants['view_height']))
     
+    # draw and blit cargo manifest
     if game_state == GameStates.CARGO:
-        inventory_surf = render_manifest(player.cargo, constants)
+        inventory_surf = render_manifest(cargo=player.cargo,
+                                         constants=constants)
         display.blit(inventory_surf, (constants['map_width'], 0))
     else:
         # draw and blit game play area
-        board_surf = render_board(game_map, player, entities, constants, game_state, game_time, game_weather)
+        board_surf = render_board(game_map=game_map,
+                                  player=player,
+                                  entities=entities,
+                                  constants=constants,
+                                  game_state=game_state,
+                                  game_time=game_time,
+                                  game_weather=game_weather)
         display.blit(board_surf, (constants['map_width'], 0))
         
         # Draw and blit info under mouse, but now out of bounds
-        info_surf = get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants)
+        info_surf = get_info_under_mouse(game_map=game_map,
+                                         player=player,
+                                         entities=entities,
+                                         mouse_x=mouse_x,
+                                         mouse_y=mouse_y,
+                                         constants=constants)
         if info_surf:
             location_x = mouse_x + constants['half_tile']
             location_y = mouse_y + constants['half_tile']
@@ -67,12 +89,12 @@ def render_manifest(cargo, constants):
     inventory_surf.fill(constants['colors']['dark_gray'])
     
     vertical = constants['margin']
-    vertical = render_cargo_header(inventory_surf, vertical, constants)
-    vertical = render_cargo(inventory_surf, cargo, vertical, constants)
-    vertical = render_cargo_totals(inventory_surf, cargo, vertical, constants)
+    vertical = render_cargo_header(inventory_surf=inventory_surf, vertical=vertical, constants=constants)
+    vertical = render_cargo(inventory_surf=inventory_surf, cargo=cargo, vertical=vertical, constants=constants)
+    vertical = render_cargo_totals(inventory_surf=inventory_surf, cargo=cargo, vertical=vertical, constants=constants)
     
     border_panel = pygame.Surface((constants['view_width'], constants['view_height']))
-    render_border(border_panel, constants['colors']['text'])
+    render_border(panel=border_panel, color=constants['colors']['text'])
     
     border_panel.blit(inventory_surf, (constants['margin'], constants['margin']))
     return border_panel
@@ -105,8 +127,12 @@ def render_cargo_totals(inventory_surf, cargo, vertical, constants):
     
     for field in [cargo.get_manifest_weight(), cargo.get_manifest_volume()]:
         horizontal += constants['tab']
-        render_cargo_info(inventory_surf, field, constants['font'], constants['colors']['text'],
-                          horizontal, vertical)
+        render_cargo_info(surface=inventory_surf,
+                          field=field,
+                          font=constants['font'],
+                          color=constants['colors']['text'],
+                          horizontal=horizontal,
+                          vertical=vertical)
     vertical += constants['font'].get_height() + constants['margin']
     return vertical
 
@@ -127,8 +153,12 @@ def render_cargo(inventory_surf, cargo, vertical, constants):
         for field in [item.weight, item.volume, item.get_item_weight(), item.get_item_volume()]:
             horizontal += constants['tab']
             # print(item.name, field)
-            render_cargo_info(inventory_surf, field, constants['font'], constants['colors']['text'],
-                              horizontal, vertical)
+            render_cargo_info(surface=inventory_surf,
+                              field=field,
+                              font=constants['font'],
+                              color=constants['colors']['text'],
+                              horizontal=horizontal,
+                              vertical=vertical)
         
         vertical += constants['font'].get_height() + constants['margin']
     return vertical
@@ -155,7 +185,7 @@ def render_messages(message_log, constants):
     
     border_panel = pygame.Surface((constants['message_width'], constants['message_height']))
     
-    render_border(border_panel, constants['colors']['text'])
+    render_border(panel=border_panel, color=constants['colors']['text'])
     
     border_panel.blit(message_surf, (constants['margin'], constants['margin']))
     return border_panel
@@ -212,12 +242,12 @@ def render_board(game_map, player, entities, constants, game_state, game_time, g
                 and (0 <= entity.y < game_map.height) \
                 and (entity.x, entity.y) in player.view.fov:
             if entity.mast_sail and not game_state == GameStates.PLAYER_DEAD:
-                icon = create_ship_icon(entity, constants)
+                icon = create_ship_icon(entity=entity, constants=constants)
             else:
                 icon = entity.icon
             
             if icon and entity.mobile and not game_state == GameStates.PLAYER_DEAD:
-                game_map_surf.blit(rot_center(icon, direction_angle[entity.mobile.direction]),
+                game_map_surf.blit(rot_center(image=icon, angle=direction_angle[entity.mobile.direction]),
                                    (entity.x * constants['tile_size'] - constants['margin'],
                                     entity.y * constants['tile_size'] + entity.x % 2 * constants['half_tile']
                                     - constants['half_tile']))
@@ -257,18 +287,17 @@ def render_board(game_map, player, entities, constants, game_state, game_time, g
                                    - constants['half_tile']
                                    - constants['margin']))
     
-    render_time(game_time, view_surf, constants)
-    render_weather(game_time, game_weather, view_surf, constants)
-    render_wind(game_map, view_surf, constants)
+    render_time(game_time=game_time, view_surf=view_surf, constants=constants)
+    render_weather(game_time=game_time, game_weather=game_weather, view_surf=view_surf, constants=constants)
+    render_wind(game_map=game_map, view_surf=view_surf, constants=constants)
     
     border_panel = pygame.Surface((constants['view_width'],
                                    constants['view_height']))
-    render_border(border_panel, constants['colors']['text'])
+    render_border(panel=border_panel, color=constants['colors']['text'])
     
     border_panel.blit(view_surf, (constants['margin'], constants['margin']))
     return border_panel
-
-
+    
     # # wind direction
     # direction_text = constants['font'].render('Wind Direction:', True, constants['colors'].get('text'))
     # status_panel.blit(direction_text, (constants['half_tile'], constants['half_tile']))
@@ -303,13 +332,13 @@ def render_wind(game_map, view_surf, constants):
     wind_surf.blit(compass, (wind_surf.get_width() - compass.get_width(), 0))
     
     if game_map.wind_direction is not None:
-        wind_surf.blit(rot_center(constants['icons']['pointer'], direction_angle[game_map.wind_direction]),
+        wind_surf.blit(rot_center(image=constants['icons']['pointer'], angle=direction_angle[game_map.wind_direction]),
                        (wind_surf.get_width() - compass.get_width(), 0))
-
+    
     border_panel = pygame.Surface((wind_surf.get_width() + 2 * constants['margin'],
                                    wind_surf.get_height() + 2 * constants['margin']))
     border_panel.blit(wind_surf, (constants['margin'], constants['margin']))
-    render_border(border_panel, constants['colors']['text'])
+    render_border(panel=border_panel, color=constants['colors']['text'])
     
     view_surf.blit(border_panel, (view_surf.get_width() - border_panel.get_width(), 0))
 
@@ -329,10 +358,10 @@ def render_time(game_time, view_surf, constants):
     border_panel = pygame.Surface((width + 2 * constants['margin'],
                                    2 * height + 2 * constants['margin']))
     border_panel.blit(time_surf, (constants['margin'], constants['margin']))
-    render_border(border_panel, constants['colors']['text'])
+    render_border(panel=border_panel, color=constants['colors']['text'])
     
     view_surf.blit(border_panel, (0, 0))
-    
+
 
 def render_weather(game_time, game_weather, view_surf, constants):
     weather_dict = game_weather.get_weather_info
@@ -347,7 +376,7 @@ def render_weather(game_time, game_weather, view_surf, constants):
     else:
         icon = constants['icons']['moon']
     
-    numeric_time = 100 * game_time.hrs + 100 * game_time.min // 60  # Eample: 6:45 = 675, 21:30 = 2150
+    numeric_time = 100 * game_time.hrs + 100 * game_time.min // 60  # Example: 6:45 = 675, 21:30 = 2150
     if numeric_time < 600:
         relative_time = 600 + numeric_time
     elif 600 <= numeric_time < 1800:
@@ -371,7 +400,7 @@ def render_weather(game_time, game_weather, view_surf, constants):
     
     if not (600 <= relative_time < 1800):
         moon_shadow_icon = constants['icons']['moon_shadow']
-        moon_shadow_icon = colorize(moon_shadow_icon, constants['colors'][time_dict['sky']])
+        moon_shadow_icon = colorize(image=moon_shadow_icon, new_color=constants['colors'][time_dict['sky']])
         
         if relative_time >= 1800:  # account for day change in middle of night
             offset = 0
@@ -382,17 +411,17 @@ def render_weather(game_time, game_weather, view_surf, constants):
     icon = constants['icons'][weather_dict['name'].lower()]
     for x in range(sky_surf.get_width() // icon.get_width()):
         sky_surf.blit(icon, (x * icon.get_width(), (x + 1) % 2))
-
+    
     weather_surf = pygame.Surface((width + constants['margin'] + sky_surf.get_width(), constants['tile_size']))
     weather_surf.fill(constants['colors']['dark_gray'])
     weather_surf.blit(weather_text, (0, (constants['tile_size'] - height) // 2 + 1))
     weather_surf.blit(sky_surf, (width + constants['margin'] - 1, 1))
-
+    
     border_panel = pygame.Surface((weather_surf.get_width() + 2 * constants['margin'],
                                    weather_surf.get_height() + 2 * constants['margin']))
     border_panel.blit(weather_surf, (constants['margin'], constants['margin']))
-    render_border(border_panel, constants['colors']['text'])
-
+    render_border(panel=border_panel, color=constants['colors']['text'])
+    
     view_surf.blit(border_panel, ((view_surf.get_width() - border_panel.get_width()) // 2, 0))
 
 
@@ -405,12 +434,12 @@ def colorize(image, new_color):
     :return: New colorized Surface instance
     """
     image = image.copy()
-
+    
     # zero out RGB values
     image.fill((0, 0, 0, 255), None, pygame.BLEND_RGBA_MULT)
     # add in new RGB values
     image.fill(new_color[0:3] + (0,), None, pygame.BLEND_RGBA_ADD)
-
+    
     return image
 
 
@@ -422,11 +451,16 @@ def render_status(player, constants):
     
     vertical = 0
     
-    vertical = render_entity_info(status_panel, player, constants, vertical)
+    vertical = render_entity_info(panel=status_panel,
+                                  entity=player,
+                                  font=constants['font'],
+                                  colors=constants['colors'],
+                                  margin=constants['margin'],
+                                  vertical=vertical)
     
     border_panel = pygame.Surface((constants['status_width'],
                                    constants['status_height']))
-    render_border(border_panel, constants['colors']['text'])
+    render_border(panel=border_panel, color=constants['colors']['text'])
     
     border_panel.blit(status_panel, (constants['margin'], constants['margin']))
     return border_panel
@@ -447,8 +481,15 @@ def render_control(game_map, player, entities, constants, game_state):
                       {'rotation': 90, 'text': 'Turn Port'},
                       {'rotation': 270, 'text': 'Turn Starboard'}]
         for key in arrow_keys:
-            vertical = make_arrow_button(control_panel, split, margin, key['rotation'],
-                                         key['text'], constants, vertical)
+            vertical = make_arrow_button(panel=control_panel,
+                                         split=split,
+                                         margin=margin,
+                                         rotation=key['rotation'],
+                                         text=key['text'],
+                                         icon=constants['icons']['arrow'],
+                                         font=constants['font'],
+                                         color=constants['colors']['text'],
+                                         vertical=vertical)
         text_keys = [{'name': 'Cmd', 'text': 'Targeting'}]
         if player.mast_sail and player.mast_sail.masts:
             text_keys.append({'name': 'Shift', 'text': 'Sails'})
@@ -469,8 +510,15 @@ def render_control(game_map, player, entities, constants, game_state):
             text_keys.append({'name': 'Space', 'text': 'Pass'})
         text_keys.append({'name': 'Esc', 'text': 'Quit'})
         for key in text_keys:
-            vertical = make_text_button(control_panel, split, margin, key['name'],
-                                        key['text'], constants, vertical)
+            vertical = make_text_button(panel=control_panel,
+                                        split=split,
+                                        margin=margin,
+                                        name=key['name'],
+                                        text=key['text'],
+                                        font=constants['font'],
+                                        color=constants['colors']['text'],
+                                        bkg_color=constants['colors']['dark_gray'],
+                                        vertical=vertical)
     elif game_state == GameStates.TARGETING:
         split = 58
         arrow_keys = []
@@ -489,13 +537,27 @@ def render_control(game_map, player, entities, constants, game_state):
             if player.crew.verify_arrow_target(entities):
                 text_keys.append({'name': 'Space', 'text': 'Arrow Attack'})
         for key in arrow_keys:
-            vertical = make_arrow_button(control_panel, split, margin, key['rotation'],
-                                         key['text'], constants, vertical)
+            vertical = make_arrow_button(panel=control_panel,
+                                         split=split,
+                                         margin=margin,
+                                         rotation=key['rotation'],
+                                         text=key['text'],
+                                         icon=constants['icons']['arrow'],
+                                         font=constants['font'],
+                                         color=constants['colors']['text'],
+                                         vertical=vertical)
         text_keys.append({'name': 'Cmd', 'text': 'Exit Targeting'})
         text_keys.append({'name': 'Esc', 'text': 'Exit Targeting'})
         for key in text_keys:
-            vertical = make_text_button(control_panel, split, margin, key['name'],
-                                        key['text'], constants, vertical)
+            vertical = make_text_button(panel=control_panel,
+                                        split=split,
+                                        margin=margin,
+                                        name=key['name'],
+                                        text=key['text'],
+                                        font=constants['font'],
+                                        color=constants['colors']['text'],
+                                        bkg_color=constants['colors']['dark_gray'],
+                                        vertical=vertical)
     elif game_state == GameStates.SAILS:
         split = 58
         arrow_keys = []
@@ -507,13 +569,27 @@ def render_control(game_map, player, entities, constants, game_state):
             # left repair sails
             # right repair masts
         for key in arrow_keys:
-            vertical = make_arrow_button(control_panel, split, margin, key['rotation'],
-                                         key['text'], constants, vertical)
+            vertical = make_arrow_button(panel=control_panel,
+                                         split=split,
+                                         margin=margin,
+                                         rotation=key['rotation'],
+                                         text=key['text'],
+                                         icon=constants['icons']['arrow'],
+                                         font=constants['font'],
+                                         color=constants['colors']['text'],
+                                         vertical=vertical)
         text_keys = [{'name': 'Shift', 'text': 'Exit Adjust Sails'},
                      {'name': 'Esc', 'text': 'Exit Adjust Sails'}]
         for key in text_keys:
-            vertical = make_text_button(control_panel, split, margin, key['name'],
-                                        key['text'], constants, vertical)
+            vertical = make_text_button(panel=control_panel,
+                                        split=split,
+                                        margin=margin,
+                                        name=key['name'],
+                                        text=key['text'],
+                                        font=constants['font'],
+                                        color=constants['colors']['text'],
+                                        bkg_color=constants['colors']['dark_gray'],
+                                        vertical=vertical)
     elif game_state == GameStates.SPECIAL:
         split = 58
         arrow_keys = [{'rotation': 0, 'text': 'Ram'},
@@ -521,14 +597,28 @@ def render_control(game_map, player, entities, constants, game_state):
                       {'rotation': 90, 'text': 'Assign Crew'},
                       {'rotation': 270, 'text': 'Assign Crew'}]
         for key in arrow_keys:
-            vertical = make_arrow_button(control_panel, split, margin, key['rotation'],
-                                         key['text'], constants, vertical)
+            vertical = make_arrow_button(panel=control_panel,
+                                         split=split,
+                                         margin=margin,
+                                         rotation=key['rotation'],
+                                         text=key['text'],
+                                         icon=constants['icons']['arrow'],
+                                         font=constants['font'],
+                                         color=constants['colors']['text'],
+                                         vertical=vertical)
         text_keys = [{'name': 'Space', 'text': 'Cargo'},
                      {'name': 'Opt', 'text': 'Quit'},
                      {'name': 'Esc', 'text': 'Quit'}]
         for key in text_keys:
-            vertical = make_text_button(control_panel, split, margin, key['name'],
-                                        key['text'], constants, vertical)
+            vertical = make_text_button(panel=control_panel,
+                                        split=split,
+                                        margin=margin,
+                                        name=key['name'],
+                                        text=key['text'],
+                                        font=constants['font'],
+                                        color=constants['colors']['text'],
+                                        bkg_color=constants['colors']['dark_gray'],
+                                        vertical=vertical)
     elif game_state == GameStates.CARGO:
         split = 58
         # arrow_keys = [{'rotation': 0, 'text': 'Ram'},
@@ -536,23 +626,44 @@ def render_control(game_map, player, entities, constants, game_state):
         #               {'rotation': 90, 'text': 'Assign Crew'},
         #               {'rotation': 270, 'text': 'Assign Crew'}]
         # for key in arrow_keys:
-        #     vertical = make_arrow_button(control_panel, split, margin, key['rotation'],
-        #                                  key['text'], constants, vertical)
+        #     vertical = make_arrow_button(panel=control_panel,
+        #                                          split=split,
+        #                                          margin=margin,
+        #                                          rotation=key['rotation'],
+        #                                          text=key['text'],
+        #                                          icon=constants['icons']['arrow'],
+        #                                          font=constants['font'],
+        #                                          color=constants['colors']['text'],
+        #                                          vertical=vertical)
         text_keys = [{'name': 'Space', 'text': 'Exit Cargo'},
                      {'name': 'Esc', 'text': 'Exit Cargo'}]
         for key in text_keys:
-            vertical = make_text_button(control_panel, split, margin, key['name'],
-                                        key['text'], constants, vertical)
+            vertical = make_text_button(panel=control_panel,
+                                        split=split,
+                                        margin=margin,
+                                        name=key['name'],
+                                        text=key['text'],
+                                        font=constants['font'],
+                                        color=constants['colors']['text'],
+                                        bkg_color=constants['colors']['dark_gray'],
+                                        vertical=vertical)
     else:  # Dead
         split = 58
         text_keys = [{'name': 'Esc', 'text': 'Quit'}]
         for key in text_keys:
-            vertical = make_text_button(control_panel, split, margin, key['name'],
-                                        key['text'], constants, vertical)
+            vertical = make_text_button(panel=control_panel,
+                                        split=split,
+                                        margin=margin,
+                                        name=key['name'],
+                                        text=key['text'],
+                                        font=constants['font'],
+                                        color=constants['colors']['text'],
+                                        bkg_color=constants['colors']['dark_gray'],
+                                        vertical=vertical)
     
     border_panel = pygame.Surface((constants['control_width'],
                                    constants['control_height']))
-    render_border(border_panel, constants['colors']['text'])
+    render_border(panel=border_panel, color=constants['colors']['text'])
     
     border_panel.blit(control_panel, (constants['margin'], constants['margin']))
     return border_panel
@@ -564,25 +675,25 @@ def render_control(game_map, player, entities, constants, game_state):
 #     xy_rect.center = (status_panel.get_width() // 2, xy_text.get_height() * 2)
 #     status_panel.blit(xy_text, xy_rect)
 
-def make_arrow_button(panel, split, margin, rotation, text, constants, vertical):
-    panel.blit(rot_center(constants['icons']['arrow'], rotation),
-               (split - margin - constants['icons']['arrow'].get_width(), vertical))
-    panel.blit(constants['font'].render(text, True, constants['colors']['text']),
+def make_arrow_button(panel, split, margin, rotation, text, icon, font, color, vertical):
+    panel.blit(rot_center(image=icon, angle=rotation),
+               (split - margin - icon.get_width(), vertical))
+    panel.blit(font.render(text, True, color),
                (split + margin, vertical + 1))
-    vertical += constants['font'].get_height() + margin
+    vertical += font.get_height() + margin
     return vertical
 
 
-def make_text_button(panel, split, margin, name, text, constants, vertical):
-    key_text = constants['font'].render(name, True, constants['colors']['dark_gray'])
-    w, h = constants['font'].size(name)
+def make_text_button(panel, split, margin, name, text, font, color, bkg_color, vertical):
+    key_text = font.render(name, True, bkg_color)
+    w, h = font.size(name)
     key_surf = pygame.Surface((w + 3, h))
-    key_surf.fill(constants['colors']['text'])
+    key_surf.fill(color)
     key_surf.blit(key_text, (1, 1))
     panel.blit(key_surf, (split - margin - key_surf.get_width(), vertical))
-    panel.blit(constants['font'].render(text, True, constants['colors']['text']),
+    panel.blit(font.render(text, True, color),
                (split + margin, vertical + 1))
-    vertical += constants['font'].get_height() + margin
+    vertical += font.get_height() + margin
     return vertical
 
 
@@ -594,75 +705,105 @@ def render_border(panel, color):
                        (2, panel.get_height() - 3)), 1)
 
 
-def render_entity_info(panel, entity, constants, vertical):
-    font = constants['font']
+def render_entity_info(panel, entity, font, colors, margin, vertical):
     # ship name
-    name_text = font.render(entity.name, True, constants['colors']['text'])
+    name_text = font.render(entity.name, True, colors['text'])
     panel.blit(name_text, (0, vertical + 1))
-    vertical += font.get_height() + constants['margin'] // 2
-    
+    if entity.name == 'player':
+        text = 'X:{} Y:{}'.format(entity.x, entity.y)
+        coords_text = font.render(text, True, colors['text'])
+        (width, height) = font.size(text)
+        panel.blit(coords_text, (panel.get_width() - width, vertical + 1))
+    vertical += font.get_height() + margin // 2
     if entity.mast_sail and entity.mast_sail.masts > 0:
-        panel.blit(make_bar('Sails', font, constants['colors']['text'],
-                            entity.mast_sail.current_sails, entity.mast_sail.max_sails,
-                            constants['colors']['light_blue'], constants['colors']['dark_blue'],
-                            panel.get_width()), (0, vertical))
+        panel.blit(make_bar(text='Sails', font=font,
+                            font_color=colors['text'],
+                            current=entity.mast_sail.current_sails,
+                            maximum=entity.mast_sail.max_sails,
+                            top_color=colors['light_blue'],
+                            bottom_color=colors['dark_blue'],
+                            bar_width=panel.get_width()),
+                   (0, vertical))
         vertical += font.get_height() + 1
-        panel.blit(make_bar('Sails HPs', font, constants['colors']['text'],
-                            entity.mast_sail.sail_hp, entity.mast_sail.sail_hp_max,
-                            constants['colors']['light_red'], constants['colors']['dark_red'],
-                            panel.get_width()), (0, vertical))
-        vertical += font.get_height() + constants['margin'] // 2
-        panel.blit(make_bar('Masts HPs', font, constants['colors']['text'],
-                            entity.mast_sail.mast_hp, entity.mast_sail.mast_hp_max,
-                            constants['colors']['light_red'], constants['colors']['dark_red'],
-                            panel.get_width()), (0, vertical))
-        vertical += font.get_height() + constants['margin'] // 2
+        panel.blit(make_bar(text='Sails HPs', font=font,
+                            font_color=colors['text'],
+                            current=entity.mast_sail.sail_hp,
+                            maximum=entity.mast_sail.sail_hp_max,
+                            top_color=colors['light_red'],
+                            bottom_color=colors['dark_red'],
+                            bar_width=panel.get_width()),
+                   (0, vertical))
+        vertical += font.get_height() + margin // 2
+        panel.blit(make_bar(text='Masts HPs', font=font,
+                            font_color=colors['text'],
+                            current=entity.mast_sail.mast_hp,
+                            maximum=entity.mast_sail.mast_hp_max,
+                            top_color=colors['light_red'],
+                            bottom_color=colors['dark_red'],
+                            bar_width=panel.get_width()),
+                   (0, vertical))
+        vertical += font.get_height() + margin // 2
     if entity.mobile:
-        panel.blit(make_bar('Momentum', font, constants['colors']['text'],
-                            entity.mobile.current_momentum, entity.mobile.max_momentum,
-                            constants['colors']['light_green'], constants['colors']['dark_green'],
-                            panel.get_width()), (0, vertical))
-        vertical += font.get_height() + constants['margin'] // 2
-        panel.blit(make_bar('Speed', font, constants['colors']['text'],
-                            entity.mobile.current_speed, entity.mobile.max_speed,
-                            constants['colors']['light_green'], constants['colors']['dark_green'],
-                            panel.get_width()), (0, vertical))
-        vertical += font.get_height() + constants['margin'] // 2
+        panel.blit(make_bar(text='Momentum', font=font,
+                            font_color=colors['text'],
+                            current=entity.mobile.current_momentum,
+                            maximum=entity.mobile.max_momentum,
+                            top_color=colors['light_green'],
+                            bottom_color=colors['dark_green'],
+                            bar_width=panel.get_width()),
+                   (0, vertical))
+        vertical += font.get_height() + margin // 2
+        panel.blit(make_bar(text='Speed', font=font,
+                            font_color=colors['text'],
+                            current=entity.mobile.current_speed,
+                            maximum=entity.mobile.max_speed,
+                            top_color=colors['light_green'],
+                            bottom_color=colors['dark_green'],
+                            bar_width=panel.get_width()),
+                   (0, vertical))
+        vertical += font.get_height() + margin // 2
     if entity.fighter:
-        panel.blit(make_bar('{} Points'.format(entity.fighter.name.capitalize()), font,
-                            constants['colors']['text'],
-                            entity.fighter.hps, entity.fighter.max_hps,
-                            constants['colors']['light_red'], constants['colors']['dark_red'],
-                            panel.get_width()), (0, vertical))
-        vertical += font.get_height() + constants['margin'] // 2
+        panel.blit(make_bar(text='{} Points'.format(entity.fighter.name.capitalize()), font=font,
+                            font_color=colors['text'],
+                            current=entity.fighter.hps,
+                            maximum=entity.fighter.max_hps,
+                            top_color=colors['light_red'],
+                            bottom_color=colors['dark_red'],
+                            bar_width=panel.get_width()),
+                   (0, vertical))
+        vertical += font.get_height() + margin // 2
     if entity.crew:
-        panel.blit(make_bar('Crew'.format(entity.fighter.name.capitalize()), font,
-                            constants['colors']['text'],
-                            len(entity.crew.crew), entity.crew.max_crew,
-                            constants['colors']['light_red'], constants['colors']['dark_red'],
-                            panel.get_width()), (0, vertical))
-        vertical += font.get_height() + constants['margin'] // 2
+        panel.blit(make_bar(text='Crew'.format(entity.fighter.name.capitalize()), font=font,
+                            font_color=colors['text'],
+                            current=len(entity.crew.crew),
+                            maximum=entity.crew.max_crew,
+                            top_color=colors['light_red'],
+                            bottom_color=colors['dark_red'],
+                            bar_width=panel.get_width()),
+                   (0, vertical))
+        vertical += font.get_height() + margin // 2
     
     if entity.weapons:
-        vertical = render_weapons(panel, entity, constants, vertical)
+        vertical = render_weapons(panel=panel,
+                                  entity=entity,
+                                  font=font,
+                                  colors=colors,
+                                  vertical=vertical)
     
     return vertical
 
 
-def render_weapons(panel, entity, constants, vertical):
+def render_weapons(panel, entity, font, colors, vertical):
     for weapon in entity.weapons.weapon_list:
         if weapon.current_cd == 0:
-            color = constants['colors']['text']
+            color = colors['text']
         else:
-            color = constants['colors']['gray']
-        weapon_text = constants['font'].render("{} {}".format(weapon.location,
-                                                              weapon.name), True, color)
+            color = colors['gray']
+        weapon_text = font.render("{} {}".format(weapon.location, weapon.name), True, color)
         panel.blit(weapon_text, (0, vertical))
-        hp_text = constants['font'].render("[{}] {}/{}".format(weapon.current_cd,
-                                                               weapon.hps,
-                                                               weapon.max_hps), True, color)
+        hp_text = font.render("[{}] {}/{}".format(weapon.current_cd, weapon.hps, weapon.max_hps), True, color)
         panel.blit(hp_text, (panel.get_width() - hp_text.get_width(), vertical))
-        vertical += constants['font'].get_height()
+        vertical += font.get_height()
     return vertical
 
 
@@ -684,10 +825,6 @@ def make_bar(text, font, font_color, current, maximum, top_color, bottom_color, 
     return max_bar
 
 
-def clear_all(surface):
-    surface.fill((0, 0, 0))
-
-
 def rot_center(image, angle):
     """rotate an image while keeping its center and size"""
     orig_rect = image.get_rect()
@@ -702,7 +839,7 @@ def render_map(game_map, player, entities, constants):
     map_surf = pygame.Surface((constants['map_width'] - 2 * constants['margin'],
                                constants['map_height'] - 2 * constants['margin']))
     map_surf.fill(constants['colors']['dark_gray'])
-    town = None
+    port = None
     block = pygame.Surface(constants['map_block'])
     small_block = pygame.Surface((constants['block_size'] // 2, constants['block_size'] // 2))
     big_block = pygame.Surface((constants['block_size'] + 2, constants['block_size'] + 2))
@@ -715,7 +852,7 @@ def render_map(game_map, player, entities, constants):
                                       - constants['block_size'] // 2))
                 if game_map.terrain[x][y].decoration:
                     if game_map.terrain[x][y].decoration.name == 'Port':
-                        town = (x, y)
+                        port = (x, y)
                     else:
                         small_block.fill(constants['colors'][game_map.terrain[x][y].decoration.color])
                         map_surf.blit(small_block, (x * constants['block_size']
@@ -724,8 +861,8 @@ def render_map(game_map, player, entities, constants):
                                                     + (x % 2) * (constants['block_size'] // 2)
                                                     - constants['block_size'] // 2
                                                     + 1))
-    if town:
-        (x, y) = town
+    if port:
+        (x, y) = port
         big_block.fill(constants['colors'][game_map.terrain[x][y].decoration.color])
         map_surf.blit(big_block, (x * constants['block_size']
                                   - 1,
@@ -748,12 +885,13 @@ def render_map(game_map, player, entities, constants):
             else:
                 block.fill(constants['colors']['light_red'])
             map_surf.blit(block, (entity.x * constants['block_size'],
-                                  entity.y * constants['block_size'] + (entity.x % 2) * (constants['block_size'] // 2)
+                                  entity.y * constants['block_size']
+                                  + (entity.x % 2) * (constants['block_size'] // 2)
                                   - constants['block_size'] // 2))
     
     border_panel = pygame.Surface((constants['map_width'],
                                    constants['map_height']))
-    render_border(border_panel, constants['colors']['text'])
+    render_border(panel=border_panel, color=constants['colors']['text'])
     
     border_panel.blit(map_surf, (constants['margin'], constants['margin']))
     
@@ -761,7 +899,9 @@ def render_map(game_map, player, entities, constants):
 
 
 def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants):
-    grid_x, grid_y = get_grid_from_coords((mouse_x, mouse_y), (player.x, player.y), constants)
+    grid_x, grid_y = get_grid_from_coords(coords=(mouse_x, mouse_y),
+                                          player_coords=(player.x, player.y),
+                                          constants=constants)
     vertical = 0
     width = 0
     entity_surf = None
@@ -859,7 +999,12 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
             entity_surf.fill(constants['colors']['dark_gray'])
             vert = constants['margin']
             for entity in entities_under_mouse:
-                vert += render_entity_info(entity_surf, entity, constants, vert)
+                vert += render_entity_info(panel=entity_surf,
+                                           entity=entity,
+                                           font=constants['font'],
+                                           colors=constants['colors'],
+                                           margin=constants['margin'],
+                                           vertical=vert)
             vertical += entity_surf.get_height()
     
     if location_surf:
@@ -883,7 +1028,7 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
             info_surf.blit(entity_surf, (constants['margin'], vert))
     
     if info_surf:
-        render_border(info_surf, constants['colors']['text'])
+        render_border(panel=info_surf, color=constants['colors']['text'])
     return info_surf
 
 

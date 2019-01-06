@@ -12,7 +12,7 @@ class Mobile:
         self.rowing = False
         self.catching_wind = False
     
-    def move(self, game_map):
+    def move(self, game_map, message_log):
         # Move the entity by their current_speed
         dx, dy = hex_directions[self.direction]
         for speed in range(0, self.current_speed):
@@ -27,18 +27,18 @@ class Mobile:
                     and game_map.terrain[new_x][new_y].decoration \
                     and game_map.terrain[new_x][new_y].decoration.name == 'Port' \
                     and self.owner.name is "player":
-                print('{} sailed into Port'.format(self.owner.name))
+                message_log.add_message(message='{} sailed into Port'.format(self.owner.name))
                 self.owner.x = new_x
                 self.owner.y = new_y
                 self.current_speed = 0
                 self.current_momentum = 0
-                if hasattr(self.owner, "mast_sail"):
+                if self.owner.mast_sail:
                     self.owner.mast_sail.current_sails = 0
                 break
-            elif game_map.in_bounds(new_x, new_y) and \
+            elif game_map.in_bounds(x=new_x, y=new_y) and \
                     game_map.terrain[new_x][new_y].elevation > Elevation.SHALLOWS \
                     and not self.owner.wings:
-                print("{} crashed into island!".format(self.owner.name))
+                message_log.add_message("{} crashed into island!".format(self.owner.name))
                 # take damage depending on speed
                 self.current_speed = 0
                 self.current_momentum = self.max_momentum
@@ -82,7 +82,7 @@ def can_move_direction(neighbor, game_map):
     if not game_map.in_bounds(x=new_x, y=new_y, margin=1):
         return False
     # TODO: account for flyers
-    elif game_map.in_bounds(new_x, new_y) \
+    elif game_map.in_bounds(x=new_x, y=new_y) \
             and game_map.terrain[new_x][new_y].elevation > Elevation.SHALLOWS:
         return False
     return True

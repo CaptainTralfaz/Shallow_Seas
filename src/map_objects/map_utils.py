@@ -14,22 +14,16 @@ class Hex:
         self.row = row
 
 
-#                  Up (0)          upper left (1)  lower left (2)  Down (3)        lower right (4) upper right (5)
-cube_directions = [Cube(0, 1, -1), Cube(-1, 1, 0), Cube(-1, 0, 1), Cube(0, -1, 1), Cube(1, -1, 0), Cube(1, 0, -1)]
+cube_directions = [Cube(0, 1, -1),  # (0) Up
+                   Cube(-1, 1, 0),  # (1) upper left
+                   Cube(-1, 0, 1),  # (2) lower left
+                   Cube(0, -1, 1),  # (3) Down
+                   Cube(1, -1, 0),  # (4) lower right
+                   Cube(1, 0, -1)]  # (5) upper right
 
 hex_directions = [(0, -1), (-1, -1), (-1, 0), (0, 1), (1, 0), (1, -1)]
 
 direction_angle = [0, 60, 120, 180, 240, 300]
-
-
-# compass_direction = {
-#     "N": 0,
-#     "NW": 1,
-#     "SW": 2,
-#     "S": 3,
-#     "SE": 4,
-#     "NE": 5
-# }
 
 
 def get_grid_from_coords(coords, player_coords, constants):
@@ -37,7 +31,8 @@ def get_grid_from_coords(coords, player_coords, constants):
     player_col, player_row = player_coords
     col = player_col - 9 + (x - constants['map_width'] + constants['margin']) // constants['tile_size']
     row = player_row - 9 + (y - constants['half_tile'] * (col % 2)
-                            + (player_col % 2) * constants['half_tile'] - constants['margin']) // constants['tile_size']
+                            + (player_col % 2) * constants['half_tile']
+                            - constants['margin']) // constants['tile_size']
     return col, row
 
 
@@ -87,9 +82,9 @@ def cube_distance(cube1, cube2):
 
 
 def offset_distance(hex1, hex2):
-    cube1 = hex_to_cube(hex1)
-    cube2 = hex_to_cube(hex2)
-    return cube_distance(cube1, cube2)
+    cube1 = hex_to_cube(hexagon=hex1)
+    cube2 = hex_to_cube(hexagon=hex2)
+    return cube_distance(cube1=cube1, cube2=cube2)
 
 
 def lerp(a, b, t):
@@ -97,7 +92,7 @@ def lerp(a, b, t):
 
 
 def cube_lerp(a, b, t):
-    return Cube(lerp(a.x, b.x, t), lerp(a.y, b.y, t), lerp(a.z, b.z, t))
+    return Cube(x=lerp(a.x, b.x, t), y=lerp(a.y, b.y, t), z=lerp(a.z, b.z, t))
 
 
 def cube_line_draw(cube1, cube2):
@@ -107,10 +102,10 @@ def cube_line_draw(cube1, cube2):
     :param cube2: ending cube coordinates
     :return: list of cubes from cube1 to cube2 inclusive
     """
-    n = cube_distance(cube1, cube2)
+    n = cube_distance(cube1=cube1, cube2=cube2)
     cube_line = []
     for i in range(0, n + 1):
-        cube_line.append(cube_round(cube_lerp(cube1, cube2, 1.0 / n * i)))
+        cube_line.append(cube_round(cube=cube_lerp(a=cube1, b=cube2, t=1.0 / n * i)))
     return cube_line[1:]
 
 
@@ -133,7 +128,7 @@ def cube_round(cube):
 
 
 def hex_round(hexagon):
-    return cube_to_hex(cube_round(hex_to_cube(hexagon)))
+    return cube_to_hex(cube=cube_round(cube=hex_to_cube(hexagon=hexagon)))
 
 
 def hex_line_draw(hex1: Hex, hex2: Hex):
@@ -144,9 +139,9 @@ def hex_line_draw(hex1: Hex, hex2: Hex):
     :return: list of Hexes forming the line
     """
     hex_line = []
-    cube_line = cube_line_draw(hex_to_cube(hex1), hex_to_cube(hex2))
+    cube_line = cube_line_draw(cube1=hex_to_cube(hexagon=hex1), cube2=hex_to_cube(hexagon=hex2))
     for cube in cube_line:
-        hex_line.append(cube_to_hex(cube))
+        hex_line.append(cube_to_hex(cube=cube))
     return hex_line
 
 
@@ -155,18 +150,18 @@ def cube_direction(direction):
 
 
 def cube_neighbor(cube, direction):
-    return cube_add(cube, cube_direction(direction))
+    return cube_add(cube1=cube, cube2=cube_direction(direction))
 
 
 def cube_add(cube1, cube2):
-    return Cube(cube1.x + cube2.x, cube1.y + cube2.y, cube1.z + cube2.z)
+    return Cube(x=cube1.x + cube2.x, y=cube1.y + cube2.y, z=cube1.z + cube2.z)
 
 
 def cube_rotate_cc(cube):
     new_x = - cube.z
     new_y = - cube.x
     new_z = - cube.y
-    return Cube(new_x, new_y, new_z)
+    return Cube(x=new_x, y=new_y, z=new_z)
 
 
 def get_fov(entity, game_map, game_time, game_weather, fog_view=0):
@@ -181,24 +176,24 @@ def get_fov(entity, game_map, game_time, game_weather, fog_view=0):
                 or (game_time.day == 13 and game_time.hrs >= 18) \
                 or (game_time.day == 18 and game_time.hrs < 6):
             view -= 1
-        elif (game_time.day > 28 or game_time.day < 3)\
+        elif (game_time.day > 28 or game_time.day < 3) \
                 or (game_time.day == 28 and game_time.hrs >= 18) \
                 or (game_time.day == 3 and game_time.hrs < 6):
             view += 1
     if view < 1:
         view = 1
-
+    
     viewed_hexes = []
-    center_coords = hex_to_cube(Hex(entity.owner.x, entity.owner.y))
-    viewed_hexes.append(Hex(entity.owner.x, entity.owner.y))
+    center_coords = hex_to_cube(hexagon=Hex(column=entity.owner.x, row=entity.owner.y))
+    viewed_hexes.append(Hex(column=entity.owner.x, row=entity.owner.y))
     current = center_coords
     
     for k in range(0, view):
-        current = cube_neighbor(current, 4)
+        current = cube_neighbor(cube=current, direction=4)
     
     for i in range(0, 6):
         for j in range(0, view):
-            cube_line = cube_line_draw(center_coords, current)
+            cube_line = cube_line_draw(cube1=center_coords, cube2=current)
             fog = 0
             for cube in cube_line:
                 hx = cube_to_hex(cube)
@@ -232,35 +227,49 @@ def get_cell_from_mouse(x, y, player_column, player_row):
 
 def get_target_hexes(player):
     target_hexes = []
-    p_cube = hex_to_cube(Hex(player.x, player.y))
+    p_cube = hex_to_cube(hexagon=Hex(column=player.x, row=player.y))
     if player.weapons and player.weapons.weapon_list:
         for weapon in player.weapons.weapon_list:
             if weapon.location == "Bow" and weapon.current_cd == 0:
-                target_hexes.extend(get_axis_target_cubes(weapon.max_range, p_cube,
-                                                          player.mobile.direction))
+                target_hexes.extend(get_axis_target_cubes(max_range=weapon.max_range,
+                                                          p_cube=p_cube,
+                                                          direction=player.mobile.direction))
             if weapon.location == "Stern" and weapon.current_cd == 0:
-                target_hexes.extend(get_axis_target_cubes(weapon.max_range, p_cube,
-                                                          reverse_direction(player.mobile.direction)))
+                target_hexes.extend(get_axis_target_cubes(max_range=weapon.max_range,
+                                                          p_cube=p_cube,
+                                                          direction=reverse_direction(direction=
+                                                                                      player.mobile.direction)))
             if weapon.location == "Port" and weapon.current_cd == 0:
-                target_hexes.extend(get_cone_target_cubes(weapon.max_range, p_cube,
-                                                          player.mobile.direction))
+                target_hexes.extend(get_cone_target_cubes(max_range=weapon.max_range,
+                                                          p_cube=p_cube,
+                                                          p_direction=player.mobile.direction))
             if weapon.location == "Starboard" and weapon.current_cd == 0:
-                target_hexes.extend(get_cone_target_cubes(weapon.max_range, p_cube,
-                                                          reverse_direction(player.mobile.direction)))
+                target_hexes.extend(get_cone_target_cubes(max_range=weapon.max_range,
+                                                          p_cube=p_cube,
+                                                          p_direction=reverse_direction(direction=
+                                                                                        player.mobile.direction)))
     return target_hexes
 
 
 def get_target_hexes_at_location(player, location, max_range):
     target_hexes = []
-    p_cube = hex_to_cube(Hex(player.x, player.y))
+    p_cube = hex_to_cube(hexagon=Hex(column=player.x, row=player.y))
     if location == "Bow":
-        target_hexes.extend(get_axis_target_cubes(max_range, p_cube, player.mobile.direction))
+        target_hexes.extend(get_axis_target_cubes(max_range=max_range,
+                                                  p_cube=p_cube,
+                                                  direction=player.mobile.direction))
     if location == "Stern":
-        target_hexes.extend(get_axis_target_cubes(max_range, p_cube, reverse_direction(player.mobile.direction)))
+        target_hexes.extend(get_axis_target_cubes(max_range=max_range,
+                                                  p_cube=p_cube,
+                                                  direction=reverse_direction(direction=player.mobile.direction)))
     if location == "Port":
-        target_hexes.extend(get_cone_target_cubes(max_range, p_cube, player.mobile.direction))
+        target_hexes.extend(get_cone_target_cubes(max_range=max_range,
+                                                  p_cube=p_cube,
+                                                  p_direction=player.mobile.direction))
     if location == "Starboard":
-        target_hexes.extend(get_cone_target_cubes(max_range, p_cube, reverse_direction(player.mobile.direction)))
+        target_hexes.extend(get_cone_target_cubes(max_range=max_range,
+                                                  p_cube=p_cube,
+                                                  p_direction=reverse_direction(direction=player.mobile.direction)))
     return target_hexes
 
 
@@ -276,9 +285,9 @@ def get_axis_target_cubes(max_range, p_cube, direction):
     target_hexes = []
     current_cube = p_cube
     for r in range(max_range):
-        tile = cube_to_hex(cube_add(current_cube, cube_directions[direction]))
+        tile = cube_to_hex(cube=cube_add(cube1=current_cube, cube2=cube_directions[direction]))
         target_hexes.append((tile.col, tile.row))
-        current_cube = hex_to_cube(tile)
+        current_cube = hex_to_cube(hexagon=tile)
     return target_hexes
 
 
@@ -287,34 +296,36 @@ def get_cone_target_cubes(max_range, p_cube, p_direction):
     target_cubes = []
     for x in range(1, max_range + 1):
         for y in range(0, x + 1):
-            target_cubes.append(Cube(-x, y, x - y))
+            target_cubes.append(Cube(x=-x, y=y, z=x - y))
     # rotate and translate, then convert to (x, y)
     target_hexes = []
     for cube in target_cubes:
         r_cube = cube
         for step in range(6 - p_direction):
-            r_cube = cube_rotate_cc(r_cube)
-        t_cube = cube_add(p_cube, r_cube)
-        t_hex = cube_to_hex(t_cube)
+            r_cube = cube_rotate_cc(cube=r_cube)
+        t_cube = cube_add(cube1=p_cube, cube2=r_cube)
+        t_hex = cube_to_hex(cube=t_cube)
         target_hexes.append((t_hex.col, t_hex.row))
     return target_hexes
 
 
 def get_spatial_relation(tx, ty, td, ex, ey, ed):
-    target_cube = hex_to_cube(Hex(tx, ty))
-    entity_cube = hex_to_cube(Hex(ex, ey))
+    target_cube = hex_to_cube(Hex(column=tx, row=ty))
+    entity_cube = hex_to_cube(Hex(column=ex, row=ey))
     
-    target_rotated = Cube(target_cube.x - entity_cube.x, target_cube.y - entity_cube.y, target_cube.z - entity_cube.z)
+    target_rotated = Cube(x=target_cube.x - entity_cube.x,
+                          y=target_cube.y - entity_cube.y,
+                          z=target_cube.z - entity_cube.z)
     rotated_direction = td
     # do rotation
     
     for step in range(ed):
-        target_rotated = cube_rotate_cc(target_rotated)
+        target_rotated = cube_rotate_cc(cube=target_rotated)
         rotated_direction -= 1
     if rotated_direction < 0:
         rotated_direction += 6
     # print("relative direction: ", rotated_direction)
-    target_rotated = cube_add(target_rotated, entity_cube)
+    target_rotated = cube_add(cube1=target_rotated, cube2=entity_cube)
     
     # find relationship
     if (entity_cube.x - target_rotated.x) > 0 and (entity_cube.y - target_rotated.y) > 0:
