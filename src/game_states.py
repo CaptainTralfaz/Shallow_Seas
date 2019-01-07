@@ -2,6 +2,9 @@ from enum import Enum
 
 
 class GameStates(Enum):
+    """
+    Holds the state of the game
+    """
     CURRENT_TURN = 1
     TARGETING = 2
     PLAYER_DEAD = 3

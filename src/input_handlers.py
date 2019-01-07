@@ -3,6 +3,12 @@ from src.game_states import GameStates
 
 
 def handle_keys(event, game_state):
+    """
+    Translates user interactions into code commands depending on the state of the game
+    :param event: list of interactions
+    :param game_state: determines which command set to forward interactions to
+    :return: dict of key presses and meaning depending on state
+    """
     if game_state == GameStates.CURRENT_TURN:
         return handle_keys_current_turn(event)
     elif game_state == GameStates.TARGETING:
@@ -18,6 +24,11 @@ def handle_keys(event, game_state):
     
     
 def handle_keys_current_turn(event):
+    """
+    Interaction translation for standard CURRENT_TURN events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
     if event:
         if event.type == KEYDOWN and event.key == K_ESCAPE:
             # Exit the game
@@ -53,6 +64,11 @@ def handle_keys_current_turn(event):
 
 
 def handle_keys_targeting(event):
+    """
+    Interaction translation for TARGETING events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
     if event:
         if event.type == KEYDOWN and event.key == K_ESCAPE:
             # Exit Targeting state
@@ -84,6 +100,11 @@ def handle_keys_targeting(event):
 
 
 def handle_keys_adjust_sails(event):
+    """
+    Interaction translation for SAILS events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
     if event:
         if event.type == KEYDOWN and event.key == K_ESCAPE:
             # Exit the Adjust Sails state
@@ -109,6 +130,11 @@ def handle_keys_adjust_sails(event):
 
 
 def handle_keys_special(event):
+    """
+    Interaction translation for SPECIAL action events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
     if event:
         if event.type == KEYDOWN and event.key == K_ESCAPE:
             # Exit Special Keys state
@@ -140,6 +166,11 @@ def handle_keys_special(event):
 
 
 def handle_keys_cargo(event):
+    """
+    Interaction translation for CARGO screen events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
     if event:
         if event.type == KEYDOWN and event.key == K_ESCAPE:
             # Exit Special Keys state
@@ -169,6 +200,11 @@ def handle_keys_cargo(event):
 
 
 def handle_keys_player_dead(event):
+    """
+    Interaction translation for PLAYER_DEAD events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
     if event:
         if event.type == KEYDOWN and event.key == K_ESCAPE:
             # Exit the game

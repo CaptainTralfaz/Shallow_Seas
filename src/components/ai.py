@@ -11,7 +11,7 @@ class PeacefulMonster:
         entity = self.owner
         neighbors = get_hex_neighbors(x=entity.x, y=entity.y)
         if entity.mobile.current_speed < 1 \
-                and can_move_direction(neighbors[entity.mobile.direction], game_map):
+                and can_move_direction(entity=entity, neighbor=neighbors[entity.mobile.direction], game_map=game_map):
             entity.mobile.rowing = 1
             if (entity.x, entity.y) in target.view.fov:
                 message_log.add_message(message="{} at {}:{} swims lazily".format(entity.name, entity.x, entity.y))
@@ -38,17 +38,22 @@ class MeleeMonster:  # SeaSerpent
             if (target.x, target.y) in neighbors or (target.x, target.y) == (entity.x, entity.y):
                 damage = entity.size.value + 1
                 death_result = False
+                details = []
                 if entity.name == 'Giant Bat':
                     hit_zone = randint(0, 10)
                     if hit_zone < 5 and target.mast_sail.max_sails > 0:  # and target.mast_sail.current_sails > 0:
-                        death_result = target.mast_sail.take_sail_damage(amount=damage, message_log=message_log)
+                        death_result, details = target.mast_sail.take_sail_damage(amount=damage)
+                        message_log.unpack(details=details, color=colors['amber'])
                     else:
-                        death_result = target.crew.take_damage(amount=damage, message_log=message_log)
+                        death_result, details = target.crew.take_damage(amount=damage)
+                        message_log.unpack(details=details, color=colors['amber'])
                 elif entity.name == 'Sea Serpent':
-                    death_result = target.fighter.take_damage(amount=damage, message_log=message_log)
+                    death_result, details = target.fighter.take_damage(amount=damage)
+                    message_log.unpack(details=details, color=colors['amber'])
                 
                 if death_result:  # entity is dead
-                    state = kill_player(player=target, icons=icons)
+                    message, state = kill_player(player=target, icons=icons)
+                    message_log.add_message(message=message, color=colors['red'])
                 return state
             
             # chase target
@@ -70,7 +75,9 @@ class MeleeMonster:  # SeaSerpent
                 rr = -1  # rotate right
                 # action rules:
                 if entity.mobile.current_speed < 1 \
-                        and can_move_direction(neighbors[entity.mobile.direction], game_map):
+                        and can_move_direction(entity=entity,
+                                               neighbor=neighbors[entity.mobile.direction],
+                                               game_map=game_map):
                     entity.mobile.rowing = 2
                     message_log.add_message(message='{} has a burst of speed'.format(entity.name),
                                             color=colors['yellow'])
@@ -112,15 +119,19 @@ class MeleeMonster:  # SeaSerpent
         # critter can't see target - act like Peaceful Monster
         else:
             if entity.mobile.current_speed < 1 \
-                    and can_move_direction(neighbor=neighbors[entity.mobile.direction], game_map=game_map):
+                    and can_move_direction(entity=entity,
+                                           neighbor=neighbors[entity.mobile.direction],
+                                           game_map=game_map):
                 entity.mobile.rowing = 1
                 if (entity.x, entity.y) in target.view.fov:
-                    message_log.add_message(message="{} at {}:{} swims lazily".format(entity.name, entity.x, entity.y))
+                    message_log.add_message(message="{} at {}:{} swims lazily".format(entity.name,
+                                                                                      entity.x, entity.y))
             else:
                 direction = randint(-1, 1)
                 entity.mobile.rotate(direction)
                 if (entity.x, entity.y) in target.view.fov:
-                    message_log.add_message("{} at {}:{} wanders aimlessly".format(entity.name, entity.x, entity.y))
+                    message_log.add_message(message="{} at {}:{} wanders aimlessly".format(entity.name,
+                                                                                           entity.x, entity.y))
         
         return state
 

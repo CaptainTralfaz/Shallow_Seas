@@ -3,17 +3,23 @@ from src.map_objects.map_utils import get_fov
 
 class View:
     def __init__(self, view):
+        """
+        Component detailing an entity's view
+        :param view: int distance in hexes an entity can "see"
+        """
         self.view = view
         self.fov = {}
     
     def set_fov(self, game_map, game_time, game_weather):
         """
         :param game_map: the current map being played on
+        :param game_time: current game Time
+        :param game_weather: current map Weather conditions
         :return: Nothing - modify current map
         """
         # get list of visible tiles
         port = None
-        visible_tiles = get_fov(self, game_map, game_time, game_weather)
+        visible_tiles = get_fov(self, game_map=game_map, game_time=game_time, game_weather=game_weather)
         if self.owner.name == 'player':
             for (x, y) in visible_tiles:
                 if (0 <= x < game_map.width) and (0 <= y < game_map.height) and not game_map.terrain[x][y].seen:

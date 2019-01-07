@@ -5,12 +5,22 @@ from src.death_functions import kill_monster
 
 class Crew:
     def __init__(self, size: int, crew: int):
+        """
+        
+        :param size:
+        :param crew:
+        """
         self.max_crew = size * 10 + 5
         if crew > self.max_crew:
             crew = self.max_crew
         self.crew = self.starting_crew(crew)
-        
+    
     def starting_crew(self, crew):
+        """
+        
+        :param crew:
+        :return:
+        """
         crew_list = []
         for i in range(0, crew):
             member = Crewman()
@@ -18,27 +28,46 @@ class Crew:
             print('Crewman {} the {} added'.format(member.name, member.profession))
         return crew_list
     
-    def take_damage(self, amount: int, message_log):
+    def take_damage(self, amount: int):
+        """
+        
+        :param amount:
+        :return:
+        """
+        details = []
         for i in range(amount):
             if len(self.crew) > 0:
                 dead_man = randint(0, len(self.crew) - 1)
-                message_log.add_message('Crewman {} the {} has died!'.format(self.crew[dead_man].name,
-                                                                             self.crew[dead_man].profession),
-                                        (200, 150, 40))
+                details.append('Crewman {} the {} has died!'.format(self.crew[dead_man].name,
+                                                                    self.crew[dead_man].profession))
                 del self.crew[dead_man]
                 if len(self.crew) < 1:
-                    message_log.add_message('{} has died!'.format(self.owner.name), (200, 150, 40))
-                    return True
-        return False
+                    details.append('{} has died!'.format(self.owner.name))
+                    return True, details
+        return False, details
 
     def add_crew(self, crewman):
+        """
+        
+        :param crewman:
+        :return:
+        """
         if len(self.crew) + 1 > self.max_crew:
             return {'message': 'No room on ship for more crew'}
         else:
             self.crew.append(crewman)
             return {'message': 'Crewman {} the {} added'.format(crewman.name, crewman.profession)}
 
-    def arrow_attack(self, terrain, entities, message_log, icons):
+    def arrow_attack(self, terrain, entities, message_log, icons, colors):
+        """
+        
+        :param terrain:
+        :param entities:
+        :param message_log:
+        :param icons:
+        :param colors:
+        :return:
+        """
         total_damage = 1 + len(self.crew) // 10
         target_hexes = get_hex_neighbors(self.owner.x, self.owner.y)
         target_hexes.append((self.owner.x, self.owner.y))
@@ -48,11 +77,18 @@ class Crew:
             amount = total_damage // len(targeted_entities)
             # message_log.add_message('{} {} takes {} damage!'.format(entity.name, entity.fighter.name, amount),
             #                         (200, 150, 40))
-            dead_result = entity.fighter.take_damage(amount, message_log)
+            dead_result, details = entity.fighter.take_damage(amount)
+            message_log.unpack(details=details, color=colors['amber'])
             if dead_result:  # entity is dead
-                kill_monster(terrain[entity.x][entity.y].elevation.value, entity, icons)
-    
+                details = kill_monster(terrain[entity.x][entity.y].elevation.value, entity, icons)
+            message_log.unpack(details=details, color=colors['amber'])
+            
     def verify_arrow_target(self, entities):
+        """
+        
+        :param entities:
+        :return:
+        """
         target_hexes = get_hex_neighbors(self.owner.x, self.owner.y)
         target_hexes.append((self.owner.x, self.owner.y))
         for entity in entities:
@@ -63,11 +99,18 @@ class Crew:
 
 class Crewman:
     def __init__(self):
+        """
+        
+        """
         self.name = self.generate_name
         self.profession = self.generate_profession
     
     @property
     def generate_name(self):
+        """
+        
+        :return:
+        """
         possible_names = ['James',
                           'Porter',
                           'Jones',
@@ -88,6 +131,10 @@ class Crewman:
 
     @property
     def generate_profession(self):
+        """
+        
+        :return:
+        """
         possible_professions = ['Sailor',
                                 'Cook',
                                 'Archer',

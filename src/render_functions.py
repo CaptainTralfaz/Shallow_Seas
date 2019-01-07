@@ -21,6 +21,21 @@ class RenderOrder(Enum):
 
 def render_display(display, game_map, player, entities,
                    constants, mouse_x, mouse_y, message_log, game_state, game_time, game_weather):
+    """
+    Draw the game!
+    :param display: The main display window surface
+    :param game_map: the GameMap object
+    :param player: Player entity
+    :param entities: other actors
+    :param constants: dict game constants
+    :param mouse_x: int x coordinate of mouse
+    :param mouse_y: int y coordinate of mouse
+    :param message_log: list of messages for display
+    :param game_state: current enum game state
+    :param game_time: current game Time object
+    :param game_weather: current game Weather object
+    :return: None
+    """
     display.fill(constants['colors']['black'])
     
     # draw and blit mini-map
@@ -125,7 +140,7 @@ def render_cargo_totals(inventory_surf, cargo, vertical, constants):
     text_rect = text.get_rect(topright=(horizontal, vertical))
     inventory_surf.blit(text, text_rect)
     
-    for field in [cargo.get_manifest_weight(), cargo.get_manifest_volume()]:
+    for field in [cargo.weight, cargo.volume]:
         horizontal += constants['tab']
         render_cargo_info(surface=inventory_surf,
                           field=field,

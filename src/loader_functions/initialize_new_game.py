@@ -69,6 +69,7 @@ def get_constants():
         'violet': (127, 0, 255),
         'cantaloupe': (255, 204, 102),
         'carnation': (255, 111, 207),
+        'amber': (200, 150, 40),
     }
     
     icons = {

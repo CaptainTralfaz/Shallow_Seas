@@ -56,7 +56,9 @@ def main():
                          weight=2, volume=2, quantity=2))
     manifest.append(Item(name='Wood', icon=constants['icons']['wood'], category=ItemCategory.MATERIALS,
                          weight=2, volume=2, quantity=2))
-    cargo_component = Cargo(capacity=size_component.value * 10 + 5, manifest=manifest)
+    cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
+                            max_weight=size_component.value * 10 + 5,
+                            manifest=manifest)
     view_component = View(view=size_component.value + 3)
     fighter_component = Fighter("hull", size_component.value * 10 + 10)
     weapons_component = WeaponList()
@@ -200,8 +202,8 @@ def main():
                     and not game_state == GameStates.PLAYER_DEAD \
                     or exit_screen:
                 
+                # reset game state
                 game_state = GameStates.CURRENT_TURN
-                # message_log.adjust_view(len(message_log.messages) - constants['message_panel_size'])
                 
                 for entity in entities:
                     if entity.ai:
@@ -227,7 +229,8 @@ def main():
                     player.crew.arrow_attack(terrain=game_map.terrain,
                                              entities=entities,
                                              message_log=message_log,
-                                             icons=constants['icons'])
+                                             icons=constants['icons'],
+                                             colors=constants['colors'])
                 elif attack:
                     message_log.add_message(message='Player attacks to the {}!'.format(attack),
                                             color=constants['colors']['aqua'])
@@ -235,7 +238,8 @@ def main():
                                           entities=entities,
                                           location=attack,
                                           message_log=message_log,
-                                          icons=constants['icons'])
+                                          icons=constants['icons'],
+                                          colors=constants['colors'])
                 
                 # after attacks made, update fog (not before, due to FOV changes)
                 game_map.roll_fog(game_time=game_time, game_weather=game_weather)
@@ -262,20 +266,23 @@ def main():
                                                 color=constants['colors']['aqua'])
                 
                 # MOMENTUM CHANGES ------------------------------------------------------------------------------------
+                if slowing:
+                    player.mobile.change_momentum(amount=slowing, reason='slowing')
+                    # message_log.unpack(details=details, color=constants['colors']['text'])
+
                 if rowing:
                     player.mobile.rowing = 1
-                    message_log.add_message(message='Rowing, +1 momentum')
-                
-                if slowing:
-                    player.mobile.change_momentum(amount=slowing)
-                    message_log.add_message(message='Slowing, -1 momentum', color=constants['colors']['aqua'])
-                
+                    # message_log.add_message(message='Rowing...')
+
                 # ROWING ----------------------------------------------------------------------------------------------
                 for entity in entities:
                     # change momentum due to rowing
                     if entity.mobile and entity.mobile.rowing and entity.mobile.current_speed < entity.mobile.max_speed:
-                        entity.mobile.change_momentum(amount=entity.mobile.rowing)
-                        # check to make sure a ship can't go to max speed
+                        if entity.mast_sail:
+                            reason = 'rowing'
+                        else:
+                            reason = 'swimming'
+                        entity.mobile.change_momentum(amount=entity.mobile.rowing, reason=reason)
                         if entity.mast_sail and entity.mobile.current_speed == entity.mobile.max_speed:
                             entity.mobile.current_speed -= 1
                             entity.mobile.current_momentum = entity.mobile.max_momentum
@@ -287,13 +294,11 @@ def main():
                         if entity.mast_sail and entity.mast_sail.current_sails > 0:
                             entity.mast_sail.momentum_due_to_wind(wind_direction=game_map.wind_direction)
                             entity.mast_sail.catching_wind = True
-                            message_log.add_message(message='{} catching Wind,'
-                                                            ' + momentum'.format(entity.name.capitalize()))
+                            message_log.add_message(message='{} catching Wind'.format(entity.name.capitalize()))
                         elif entity.wings and entity.wings.current_wing_power > 0:
                             entity.wings.momentum_due_to_wind(wind_direction=game_map.wind_direction)
                             entity.mast_sail.catching_wind = True
-                            message_log.add_message(message='{} catching Wind,'
-                                                            ' + momentum'.format(entity.name.capitalize()))
+                            message_log.add_message(message='{} catching Wind'.format(entity.name.capitalize()))
                 
                 # DRAG ------------------------------------------------------------------------------------------------
                 # change momentum due to drag if not rowing or catching wind
@@ -304,7 +309,8 @@ def main():
                     elif entity.mobile and entity.mobile.rowing:
                         drag = 0
                     if entity.mobile:
-                        entity.mobile.change_momentum(amount=drag)
+                        entity.mobile.change_momentum(amount=drag, reason='drag')
+                    # reset action after drag applied
                     if entity.mast_sail:
                         entity.mast_sail.catching_wind = False
                     if entity.mobile:
@@ -323,14 +329,13 @@ def main():
                 
                 # SAILS / ROTATE --------------------------------------------------------------------------------------
                 if sails:
-                    player.mast_sail.adjust_sails(amount=sails)
-                    message_log.add_message(message='Player Adjusts sails to {}'.format(player.mast_sail.current_sails),
-                                            color=constants['colors']['aqua'])
-                
+                    details = player.mast_sail.adjust_sails(amount=sails)
+                    message_log.unpack(details=details, color=constants['colors']['aqua'])
+                    
                 # rotate boat last
                 if rotate:
-                    player.mobile.rotate(rotate=rotate)
-                    message_log.add_message(message='Player rotates {}'.format('port' if rotate == 1 else 'starboard'))
+                    details = player.mobile.rotate(rotate=rotate)
+                    message_log.unpack(details=details, color=constants['colors']['aqua'])
                 
                 if exit_screen:
                     game_quit = True
@@ -343,7 +348,8 @@ def main():
                            height=game_map.height,
                            game_time=game_time,
                            weather=game_weather)
-            
+                message_log.reset_view()
+
             elif scroll:
                 if constants['map_width'] <= mouse_x < constants['display_width'] \
                         and constants['view_height'] <= mouse_y < constants['display_height']:

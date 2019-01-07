@@ -33,15 +33,15 @@ class Wings:
     
     def momentum_due_to_wind(self, wind_direction: int):
         if with_wind(self.owner.mobile.direction, wind_direction):  # with wind: +2 momentum
-            self.owner.mobile.change_momentum(amount=2 * self.current_wing_power)
+            self.owner.mobile.change_momentum(amount=2 * self.current_wing_power, reason='wind')
             self.catching_wind = True
             return 2 * self.current_wing_power
         elif cross_wind(self.owner.mobile.direction, wind_direction):  # cross wind: +1 momentum
-            self.owner.mobile.change_momentum(amount=self.current_wing_power)
+            self.owner.mobile.change_momentum(amount=self.current_wing_power, reason='wind')
             self.catching_wind = True
             return self.current_wing_power
         elif against_wind(self.owner.mobile.direction, wind_direction):  # against wind: -1 momentum
-            self.owner.mobile.change_momentum(amount=-self.current_wing_power)
+            self.owner.mobile.change_momentum(amount=-self.current_wing_power, reason='reverse wind')
             self.catching_wind = False
             return -self.current_wing_power
         else:
