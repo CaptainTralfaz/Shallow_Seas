@@ -52,7 +52,7 @@ class Cargo:
         else:
             for cargo in self.manifest:
                 if cargo.name == item.name:
-                    cargo.adjust_quantity(amount=item.quantity, message_log=message_log)
+                    adjust_quantity(cargo=cargo, amount=item.quantity, message_log=message_log)
     
     def remove_item_from_manifest(self, item, message_log):
         """
@@ -101,23 +101,22 @@ class Item:
         return self.volume * self.quantity
 
 
-def adjust_quantity(item, amount, manifest, message_log):
+def adjust_quantity(cargo, amount, message_log):
     """
     Add or subtract quantity of an Item
-    :param item: Item object
+    :param cargo: Item object
     :param amount: amount to modify quantity by
-    :param manifest: Manifest object of Item container
     :param message_log: game message log
     :return: None - modify Item quantity directly
     """
-    item.quantity += amount
+    cargo.quantity += amount
     if amount > 0:
-        message_log.add_message('{} of {} added to cargo'.format(amount, item.name))
-    elif amount < 0 < amount + item.quantity:
-        message_log.add_message('{} of {} removed from cargo'.format(abs(amount), item.name))
-    elif amount < 0 and (amount + item.quantity == 0):
-        message_log.add_message('All {} of {} removed from cargo'.format(abs(amount), item.name))
-        manifest.remove_item_from_manifest(item=item, message_log=message_log)
+        message_log.add_message('{} of {} added to cargo'.format(amount, cargo.name))
+    elif amount < 0 < amount + cargo.quantity:
+        message_log.add_message('{} of {} removed from cargo'.format(abs(amount), cargo.name))
+    elif amount < 0 and (amount + cargo.quantity == 0):
+        message_log.add_message('All {} of {} removed from cargo'.format(abs(amount), cargo.name))
+        cargo.remove_item_from_manifest(item=item, message_log=message_log)
 
 
 class ItemCategory(Enum):

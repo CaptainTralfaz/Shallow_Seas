@@ -28,7 +28,7 @@ def main():
     global fps_clock
     fps_clock = pygame.time.Clock()
     
-    game_time = Time()
+    game_time = Time(constants['tick'])
     game_weather = Weather()
     
     display_surface = pygame.display.set_mode((constants['display_width'], constants['display_height']))
@@ -267,7 +267,7 @@ def main():
                 
                 # MOMENTUM CHANGES ------------------------------------------------------------------------------------
                 if slowing:
-                    player.mobile.change_momentum(amount=slowing, reason='slowing')
+                    player.mobile.decrease_momentum(amount=slowing, reason='slowing')
                     # message_log.unpack(details=details, color=constants['colors']['text'])
 
                 if rowing:
@@ -277,29 +277,34 @@ def main():
                 # ROWING ----------------------------------------------------------------------------------------------
                 for entity in entities:
                     # change momentum due to rowing
-                    if entity.mobile and entity.mobile.rowing and entity.mobile.current_speed < entity.mobile.max_speed:
+                    if entity.mobile and entity.mobile.rowing:
                         if entity.mast_sail:
                             reason = 'rowing'
                         else:
                             reason = 'swimming'
-                        entity.mobile.change_momentum(amount=entity.mobile.rowing, reason=reason)
-                        if entity.mast_sail and entity.mobile.current_speed == entity.mobile.max_speed:
-                            entity.mobile.current_speed -= 1
-                            entity.mobile.current_momentum = entity.mobile.max_momentum
-                
+                        details = entity.mobile.increase_momentum(amount=entity.mobile.rowing, reason=reason)
+                        if (entity.x, entity.y) in player.view.fov:
+                            message_log.unpack(details=details)
+                        
                 # WIND ------------------------------------------------------------------------------------------------
                 # adjust speed for wind for each entity with a sail up if there is wind
                 if game_map.wind_direction is not None:
                     for entity in entities:
                         if entity.mast_sail and entity.mast_sail.current_sails > 0:
-                            entity.mast_sail.momentum_due_to_wind(wind_direction=game_map.wind_direction)
-                            entity.mast_sail.catching_wind = True
-                            message_log.add_message(message='{} catching Wind'.format(entity.name.capitalize()))
+                            details = entity.mast_sail.momentum_due_to_wind(wind_direction=game_map.wind_direction,
+                                                                            message_log=message_log,
+                                                                            color=constants['colors']['aqua'])
+                            for detail in details:
+                                if (entity.x, entity.y) in player.view.fov:
+                                    message_log.add_message(detail)
                         elif entity.wings and entity.wings.current_wing_power > 0:
-                            entity.wings.momentum_due_to_wind(wind_direction=game_map.wind_direction)
-                            entity.mast_sail.catching_wind = True
-                            message_log.add_message(message='{} catching Wind'.format(entity.name.capitalize()))
-                
+                            details = entity.wings.momentum_due_to_wind(wind_direction=game_map.wind_direction,
+                                                                        message_log = message_log,
+                                                                        color = constants['colors']['aqua'])
+                            for detail in details:
+                                if (entity.x, entity.y) in player.view.fov:
+                                    message_log.add_message(detail)
+
                 # DRAG ------------------------------------------------------------------------------------------------
                 # change momentum due to drag if not rowing or catching wind
                 for entity in entities:
@@ -309,7 +314,10 @@ def main():
                     elif entity.mobile and entity.mobile.rowing:
                         drag = 0
                     if entity.mobile:
-                        entity.mobile.change_momentum(amount=drag, reason='drag')
+                        details = entity.mobile.decrease_momentum(amount=drag, reason='drag')
+                        for detail in details:
+                            if (entity.x, entity.y) in player.view.fov:
+                                message_log.add_message(detail)
                     # reset action after drag applied
                     if entity.mast_sail:
                         entity.mast_sail.catching_wind = False

@@ -117,29 +117,35 @@ class Masts:
         self.mast_hp += amount
         results.append("Mast {}repaired for {}".format(message, amount))
 
-    def momentum_due_to_wind(self, wind_direction: int):
+    def momentum_due_to_wind(self, wind_direction: int, message_log, color):
         """
         Adjust momentum due to wind: +2 per sail if traveling with wind,
                                      +1 per sail if direction is off by 1 facing
                                      -1 per sail if traveling against wind
         :param wind_direction: int direction of wind
+        :param message_log: current message log
+        :param color: tuple for message color
         :return: int amount to change momentum by
         """
+        results = []
         if with_wind(self.owner.mobile.direction, wind_direction):  # with wind: +2 momentum
-            self.owner.mobile.change_momentum(amount=2 * self.current_sails, reason='wind')
+            message_log.add_message(message='{} catches wind'.format(self.owner.name), color=color)
+            results = self.owner.mobile.increase_momentum(amount=2 * self.current_sails, reason='wind')
             self.catching_wind = True  # no drag this turn
-            return 2 * self.current_sails
+            return results
         elif cross_wind(self.owner.mobile.direction, wind_direction):  # cross wind: +1 momentum
-            self.owner.mobile.change_momentum(amount=self.current_sails, reason='wind')
+            message_log.add_message(message='{} catches wind'.format(self.owner.name), color=color)
+            results = self.owner.mobile.increase_momentum(amount=self.current_sails, reason='wind')
             self.catching_wind = True  # no drag this turn
-            return self.current_sails
+            return results
         elif against_wind(self.owner.mobile.direction, wind_direction):  # against wind: -1 momentum
-            self.owner.mobile.change_momentum(amount=-self.current_sails, reason='reverse wind')
+            message_log.add_message(message='{} catches reverse wind'.format(self.owner.name), color=color)
+            results = self.owner.mobile.decrease_momentum(amount=-self.current_sails, reason='reverse wind')
             self.catching_wind = False  # drag this turn
-            return -self.current_sails
+            return results
         else:
             self.catching_wind = False  # drag this turn
-            return None
+            return results
 
 
 def with_wind(entity_direction: int, wind_direction: int):

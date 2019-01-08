@@ -51,8 +51,9 @@ class Mobile:
             elif game_map.in_bounds(x=new_x, y=new_y) and \
                     game_map.terrain[new_x][new_y].elevation > Elevation.SHALLOWS \
                     and not self.owner.wings:
-                message_log.add_message(message="{} crashed into island!".format(self.owner.name))
-                # take damage depending on speed
+                # if (self.owner.x, self.owner.y) in
+                #     message_log.add_message(message="{} crashed into island!".format(self.owner.name))
+                # take damage depending on speed ?
                 self.current_speed = 0
                 self.current_momentum = self.max_momentum
                 break
@@ -75,36 +76,65 @@ class Mobile:
             self.direction += len(hex_directions)
         return results
     
-    def change_momentum(self, amount: int, reason: str):
+    def increase_momentum(self, amount: int, reason: str):
         """
-        Modify current momentum of an Entity
-        TODO: figure out messaging for this
+        Modify current momentum of an Entity, and speed if necessary
         :param amount: int amount modify momentum
         :param reason: str reason for messages
         :return: None - eventually messages
         """
         results = []
-        if amount > 0 and self.current_momentum + amount > self.max_momentum:
-            self.current_momentum += amount
-            if self.current_momentum > self.max_momentum:
-                self.current_speed += 1
-                self.current_momentum -= self.max_momentum + 1
-                
-                if self.current_speed > self.max_speed:
-                    self.current_speed = self.max_speed
+        if reason == 'wind':
+            if self.current_momentum + amount > self.max_momentum and self.current_speed == self.max_speed:
+                if self.current_momentum == self.max_momentum:
+                    results.append('{} maintains top speed'.format(self.owner.name))
+                else:
                     self.current_momentum = self.max_momentum
-        elif amount > 0:
-            self.current_momentum += amount
-            results.append('{} momentum increased by {} due to {}'.format(self.owner.name, amount, reason))
-        elif amount < 0 and self.current_speed == 0:  # amount < 0
-            results.append('{} momentum decreased by {} due to {}'.format(self.owner.name, amount, reason))
+                    results.append('{} reached top speed'.format(self.owner.name))
+            elif self.current_momentum + amount > self.max_momentum and self.current_speed < self.max_speed:
+                self.current_momentum += (amount - self.max_momentum)
+                self.current_speed += 1
+                results.append('{} gained speed from {}'.format(self.owner.name, reason))
+            else:
+                self.current_momentum += amount
         else:
+            if self.current_speed > 0:
+                if self.current_momentum + amount > self.max_momentum:
+                    self.current_momentum = self.max_momentum
+                    results.append('{} maintains speed from {}'.format(self.owner.name, reason))
+                else:
+                    self.current_momentum += amount
+            elif self.current_momentum + amount > self.max_momentum:
+                self.current_speed += 1
+                self.current_momentum += (amount - self.max_momentum)
+                results.append('{} gained speed from {}'.format(self.owner.name, reason))
+            else:
+                self.current_momentum += amount
+        return results
+
+    def decrease_momentum(self, amount: int, reason: str):
+        """
+        Decrease current momentum of an Entity, and speed if necessary
+        :param amount: int amount modify momentum
+        :param reason: str reason for messages
+        :return: None - eventually messages
+        """
+        results = []
+        if self.current_speed == 0:
+            if self.current_momentum == 0:
+                results.append('{} remains stopped'.format(self.owner.name))
+            elif self.current_momentum + amount <= 0:
+                self.current_momentum = 0
+                results.append('{} stops due to {}'.format(self.owner.name, reason))
+            else:
+                self.current_momentum += amount
+        else:
+            self.current_momentum += amount
             if self.current_momentum < 0:
+                self.current_momentum += self.max_momentum
                 self.current_speed -= 1
-                self.current_momentum += self.max_momentum + 1
-                if self.current_speed < 0:
-                    self.current_speed = 0
-                    self.current_momentum = 0
+                results.append('{} loses speed due to {}'.format(self.owner.name, reason))
+        return results
 
 
 def can_move_direction(entity, neighbor, game_map):
@@ -123,3 +153,6 @@ def can_move_direction(entity, neighbor, game_map):
             and not entity.wings:
         return False
     return True
+
+
+

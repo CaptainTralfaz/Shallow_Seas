@@ -32,15 +32,15 @@ class Weather:
         if self.conditions == Conditions.CALM:
             self.conditions = Conditions.HAZY
             self.turn_count = 0
-            message_log.add_message("There is a haze in the air", color)
+            message_log.add_message("A haze is in the air", color)
         elif self.conditions == Conditions.HAZY:
             self.conditions = Conditions.CLOUDY
             self.turn_count = 0
-            message_log.add_message("The clouds gather", color)
+            message_log.add_message("Clouds gather in the sky", color)
         elif self.conditions == Conditions.CLOUDY:
             self.conditions = Conditions.RAINY
             self.turn_count = 0
-            message_log.add_message("It begins to rain", color)
+            message_log.add_message("Rain begins to fall", color)
         elif self.conditions == Conditions.RAINY:
             self.conditions = Conditions.STORMY
             self.turn_count = 0

@@ -2,15 +2,21 @@ from enum import Enum
 
 
 class Time:
-    def __init__(self):
+    def __init__(self, tick):
+        """
+        Object holding game time information
+        12 months per year, 30 days per month, 24 hrs per day, 60 minutes per hour
+        
+        """
         self.hrs = 12
         self.min = 00
         self.day = 1
         self.month = 1
         self.year = 1111  # Year of Steve
-    
+        self.tick = tick
+        
     def roll_min(self):
-        self.min += 2
+        self.min += self.tick
         if self.min >= 60:
             self.min -= 60
             self.roll_hrs()
@@ -40,6 +46,10 @@ class Time:
     
     @property
     def get_time_of_day_info(self):
+        """
+        Gets info for each particular time of day
+        :return: dict of information pertaining to the particular time of day
+        """
         if self.hrs in [1, 2]:
             return time_of_day_info[TimeOfDay.DEEPNIGHT]
         elif self.hrs in [3, 4]:
@@ -69,6 +79,9 @@ class Time:
 
 
 class TimeOfDay(Enum):
+    """
+    Time of Day Enum, mainly used as key for information dictionary
+    """
     DAWN = 0
     MORNING = 1
     FORENOON = 2

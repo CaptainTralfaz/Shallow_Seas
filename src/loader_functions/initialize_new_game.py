@@ -3,6 +3,7 @@ import pygame
 
 def get_constants():
     frames_per_second = 60  # frames per second, the general speed of the program
+    tick = 2  # number of minutes of game time that pass each turn
     
     margin = 5
     tab = 75
@@ -142,6 +143,7 @@ def get_constants():
     
     constants = {
         'FPS': frames_per_second,
+        'tick': tick,
         'display_title': display_title,
         'display_width': display_width,
         'display_height': display_height,

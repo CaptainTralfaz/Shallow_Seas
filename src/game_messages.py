@@ -57,12 +57,13 @@ class MessageLog:
         if self.view_pointer < 0:
             self.view_pointer = 0
 
-    def unpack(self, details: list, color: tuple):
+    def unpack(self, details: list, color: tuple=(200, 200, 200)):
         """
         add a list of messages all at once, all the same color
         :param details: list of messages
         :param color: color of messages
         :return: None
         """
-        for detail in details:
-            self.add_message(detail, color)
+        if details:
+            for detail in details:
+                self.add_message(detail, color)
