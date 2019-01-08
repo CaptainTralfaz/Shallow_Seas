@@ -3,6 +3,11 @@ from enum import Enum
 
 class Terrain:
     def __init__(self, elevation):
+        """
+        Height of terrain determines the terrain Enum value, name, mini-map color, and icon
+        This class will also track if the tile has been seen, contains fog, or contains a decoration
+        :param elevation: int elevation height
+        """
         self.elevation = Elevation(elevation)
         self.seen = False
         self.fog = False
@@ -44,6 +49,10 @@ class Terrain:
 
 class Decoration:
     def __init__(self, name):
+        """
+        Decoration name, icon, and mini-map color
+        :param name: determines the icon and mini-map color
+        """
         self.name = name
         self.icon = None
         self.color = None
@@ -66,6 +75,9 @@ class Decoration:
 
 
 class Elevation(Enum):
+    """
+    Enum to track elevation
+    """
     DEEPS = 0
     WATER = 1
     SHALLOWS = 2
@@ -74,17 +86,17 @@ class Elevation(Enum):
     JUNGLE = 5
     MOUNTAIN = 6
     VOLCANO = 7
-
+    
     def __lt__(self, other):
         if self.__class__ is other.__class__:
             return self.value < other.value
         return NotImplemented
-
+    
     def __le__(self, other):
         if self.__class__ is other.__class__:
             return self.value <= other.value
         return NotImplemented
-
+    
     def __gt__(self, other):
         if self.__class__ is other.__class__:
             return self.value > other.value
@@ -94,14 +106,13 @@ class Elevation(Enum):
         if self.__class__ is other.__class__:
             return self.value >= other.value
         return NotImplemented
-
+    
     def __eq__(self, other):
         if self.__class__ is other.__class__:
             return self.value == other.value
         return NotImplemented
-
+    
     def __ne__(self, other):
         if self.__class__ is other.__class__:
             return self.value != other.value
         return NotImplemented
-

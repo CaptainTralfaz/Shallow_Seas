@@ -2,6 +2,10 @@ from enum import Enum
 
 
 class Size(Enum):
+    """
+    Component Enum detailing Size of an Entity
+    TODO: comparisons will be used for Ramming actions
+    """
     TINY = 0
     SMALL = 1
     MEDIUM = 2

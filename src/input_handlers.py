@@ -1,8 +1,15 @@
 from pygame.locals import *
+
 from src.game_states import GameStates
 
 
 def handle_keys(event, game_state):
+    """
+    Translates user interactions into code commands depending on the state of the game
+    :param event: list of interactions
+    :param game_state: determines which command set to forward interactions to
+    :return: dict of key presses and meaning depending on state
+    """
     if game_state == GameStates.CURRENT_TURN:
         return handle_keys_current_turn(event)
     elif game_state == GameStates.TARGETING:
@@ -15,9 +22,14 @@ def handle_keys(event, game_state):
         return handle_keys_cargo(event)
     elif game_state == GameStates.PLAYER_DEAD:
         return handle_keys_player_dead(event)
-    
-    
+
+
 def handle_keys_current_turn(event):
+    """
+    Interaction translation for standard CURRENT_TURN events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
     if event:
         if event.type == KEYDOWN and event.key == K_ESCAPE:
             # Exit the game
@@ -28,7 +40,7 @@ def handle_keys_current_turn(event):
                 return {'scroll': 1}
             elif event.button in [4]:
                 return {'scroll': -1}
-
+        
         if event.type == KEYDOWN:
             # mac command  mod L:1024 R:2048  key L:310 R:309
             # mac option   mod L:256  R:512   key L:308 R:307
@@ -53,17 +65,22 @@ def handle_keys_current_turn(event):
 
 
 def handle_keys_targeting(event):
+    """
+    Interaction translation for TARGETING events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
     if event:
         if event.type == KEYDOWN and event.key == K_ESCAPE:
             # Exit Targeting state
             return {'target_cancel': True}
-
+        
         if event.type == MOUSEBUTTONDOWN:
             if event.button in [5]:
                 return {'scroll': 1}
             elif event.button in [4]:
                 return {'scroll': -1}
-
+        
         if event.type == KEYDOWN:
             # mac command  mod L:1024 R:2048  key L:310 R:309
             # mac option   mod L:256  R:512   key L:308 R:307
@@ -84,6 +101,11 @@ def handle_keys_targeting(event):
 
 
 def handle_keys_adjust_sails(event):
+    """
+    Interaction translation for SAILS events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
     if event:
         if event.type == KEYDOWN and event.key == K_ESCAPE:
             # Exit the Adjust Sails state
@@ -94,7 +116,7 @@ def handle_keys_adjust_sails(event):
                 return {'scroll': 1}
             elif event.button in [4]:
                 return {'scroll': -1}
-
+        
         if event.type == KEYDOWN:
             # mac command  mod L:1024 R:2048  key L:310 R:309
             # mac option   mod L:256  R:512   key L:308 R:307
@@ -109,6 +131,11 @@ def handle_keys_adjust_sails(event):
 
 
 def handle_keys_special(event):
+    """
+    Interaction translation for SPECIAL action events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
     if event:
         if event.type == KEYDOWN and event.key == K_ESCAPE:
             # Exit Special Keys state
@@ -140,6 +167,11 @@ def handle_keys_special(event):
 
 
 def handle_keys_cargo(event):
+    """
+    Interaction translation for CARGO screen events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
     if event:
         if event.type == KEYDOWN and event.key == K_ESCAPE:
             # Exit Special Keys state
@@ -169,6 +201,11 @@ def handle_keys_cargo(event):
 
 
 def handle_keys_player_dead(event):
+    """
+    Interaction translation for PLAYER_DEAD events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
     if event:
         if event.type == KEYDOWN and event.key == K_ESCAPE:
             # Exit the game
@@ -179,12 +216,11 @@ def handle_keys_player_dead(event):
                 return {'scroll': 1}
             elif event.button in [4]:
                 return {'scroll': -1}
-
+        
         # if event.type == KEYDOWN:
-            # mac command  mod L:1024 R:2048  key L:310 R:309
-            # mac option   mod L:256  R:512   key L:308 R:307
-            # mac shift    mod L:1    R:2     key L:304 R:303
-            # if event.key in [307, 308]:
-            #     return {'special': True}
+        # mac command  mod L:1024 R:2048  key L:310 R:309
+        # mac option   mod L:256  R:512   key L:308 R:307
+        # mac shift    mod L:1    R:2     key L:304 R:303
+        # if event.key in [307, 308]:
+        #     return {'special': True}
     return {}
-

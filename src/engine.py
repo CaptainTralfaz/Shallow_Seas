@@ -28,7 +28,7 @@ def main():
     global fps_clock
     fps_clock = pygame.time.Clock()
     
-    game_time = Time()
+    game_time = Time(constants['tick'])
     game_weather = Weather()
     
     display_surface = pygame.display.set_mode((constants['display_width'], constants['display_height']))
@@ -37,7 +37,7 @@ def main():
     
     game_quit = False
     
-    message_log = MessageLog(constants['log_size'], constants['message_panel_size'])
+    message_log = MessageLog(height=constants['log_size'], panel_size=constants['message_panel_size'])
     
     player_icon = constants['icons']['ship_1_mast']
     size_component = Size.SMALL
@@ -56,13 +56,15 @@ def main():
                          weight=2, volume=2, quantity=2))
     manifest.append(Item(name='Wood', icon=constants['icons']['wood'], category=ItemCategory.MATERIALS,
                          weight=2, volume=2, quantity=2))
-    cargo_component = Cargo(capacity=size_component.value * 10 + 5, manifest=manifest)
+    cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
+                            max_weight=size_component.value * 10 + 5,
+                            manifest=manifest)
     view_component = View(view=size_component.value + 3)
     fighter_component = Fighter("hull", size_component.value * 10 + 10)
     weapons_component = WeaponList()
     weapons_component.add_all(size=str(size_component))  # Hacky for now
     mast_component = Masts(name="Mast", masts=size_component.value, size=size_component.value)
-    mobile_component = Mobile(direction=0, max_momentum=size_component.value * 2 + 2)
+    mobile_component = Mobile(direction=0, max_momentum=int(size_component.value) * 2 + 2)
     crew_component = Crew(size=size_component.value, crew=50)
     player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
                     y=constants['board_height'] - 1, icon=player_icon, render_order=RenderOrder.PLAYER,
@@ -100,7 +102,7 @@ def main():
                    message_log=message_log,
                    game_weather=game_weather)
     pygame.display.flip()
-
+    
     # Main Loop -------------------------------------------------------------------------------------------------------
     while not game_quit:
         user_input = None
@@ -181,9 +183,9 @@ def main():
                     if game_map.terrain[player.x][player.y].decoration \
                             and game_map.terrain[player.x][player.y].decoration.name == 'Port':
                         target = False
-                    elif attack == 'Arrows' and player.crew.verify_arrow_target(entities):
+                    elif attack == 'Arrows' and player.crew.verify_arrow_target(entities=entities):
                         target = True
-                    elif player.weapons.verify_target_at_location(attack, entities):
+                    elif player.weapons.verify_target_at_location(attack=attack, entities=entities):
                         target = True
                     else:
                         target = None
@@ -200,16 +202,16 @@ def main():
                     and not game_state == GameStates.PLAYER_DEAD \
                     or exit_screen:
                 
+                # reset game state
                 game_state = GameStates.CURRENT_TURN
-                # message_log.adjust_view(len(message_log.messages) - constants['message_panel_size'])
                 
                 for entity in entities:
                     if entity.ai:
-                        result = entity.ai.take_turn(game_map,
-                                                     player,
-                                                     message_log,
-                                                     constants['colors'],
-                                                     constants['icons'])
+                        result = entity.ai.take_turn(game_map=game_map,
+                                                     target=player,
+                                                     message_log=message_log,
+                                                     colors=constants['colors'],
+                                                     icons=constants['icons'])
                         if result:
                             game_state = GameStates.PLAYER_DEAD
                 
@@ -222,29 +224,35 @@ def main():
                                 weapon.current_cd -= 1
                 
                 if attack == 'Arrows':
-                    message_log.add_message('Player attacks with {}!'.format(attack), constants['colors']['aqua'])
-                    player.crew.arrow_attack(game_map.terrain, entities, message_log, constants['icons'])
+                    message_log.add_message(message='Player attacks with {}!'.format(attack),
+                                            color=constants['colors']['aqua'])
+                    player.crew.arrow_attack(terrain=game_map.terrain,
+                                             entities=entities,
+                                             message_log=message_log,
+                                             icons=constants['icons'],
+                                             colors=constants['colors'])
                 elif attack:
-                    message_log.add_message('Player attacks to the {}!'.format(attack), constants['colors']['aqua'])
-                    player.weapons.attack(game_map.terrain, entities, attack, message_log, constants['icons'])
+                    message_log.add_message(message='Player attacks to the {}!'.format(attack),
+                                            color=constants['colors']['aqua'])
+                    player.weapons.attack(terrain=game_map.terrain,
+                                          entities=entities,
+                                          location=attack,
+                                          message_log=message_log,
+                                          icons=constants['icons'],
+                                          colors=constants['colors'])
                 
                 # after attacks made, update fog (not before, due to FOV changes)
-                game_map.roll_fog(game_time, game_weather)
+                game_map.roll_fog(game_time=game_time, game_weather=game_weather)
                 
                 if other_action:
-                    # for decoration in game_map.decorations:
-                    #     if (player.x, player.y) == decoration['location'] and decoration['name'] in ['salvage']:
-                    #         message_log.add_message('Grabbed {}!'.format(decoration['name']),
-                    #                                 constants['colors']['aqua'])
-                    #         game_map.decorations.remove({'name': 'salvage', 'location': (player.x, player.y)})
                     for entity in entities:
                         if not entity.ai and entity.name not in ['player', ''] and \
                                 (entity.x, entity.y) == (player.x, player.y):
-                            message_log.add_message('You harvest the {}'.format(entity.name),
-                                                    constants['colors']['aqua'])
+                            message_log.add_message(message='You harvest the {}'.format(entity.name),
+                                                    color=constants['colors']['aqua'])
                             if entity.cargo:
                                 for cargo in entity.cargo.manifest:
-                                    player.cargo.add_item_to_manifest(cargo, message_log)
+                                    player.cargo.add_item_to_manifest(item=cargo, message_log=message_log)
                             
                             entity.name = ''
                             entity.icon = None
@@ -253,40 +261,49 @@ def main():
                     if game_map.in_bounds(player.x, player.y) \
                             and game_map.terrain[player.x][player.y].decoration \
                             and game_map.terrain[player.x][player.y].decoration.name == 'Port':
-                        message_log.add_message('Ahoy! In this port, ye can: trade, repair, hire crew... or Plunder!',
-                                                constants['colors']['aqua'])
+                        message_log.add_message(message='Ahoy! In this port, ye can: trade, repair, hire crew... '
+                                                        'or Plunder!',
+                                                color=constants['colors']['aqua'])
                 
                 # MOMENTUM CHANGES ------------------------------------------------------------------------------------
+                if slowing:
+                    player.mobile.decrease_momentum(amount=slowing, reason='slowing')
+                    # message_log.unpack(details=details, color=constants['colors']['text'])
+                
                 if rowing:
                     player.mobile.rowing = 1
-                    message_log.add_message('Rowing, +1 momentum')
-                
-                if slowing:
-                    player.mobile.change_momentum(amount=slowing)
-                    message_log.add_message('Slowing, -1 momentum', constants['colors']['aqua'])
+                    # message_log.add_message(message='Rowing...')
                 
                 # ROWING ----------------------------------------------------------------------------------------------
                 for entity in entities:
                     # change momentum due to rowing
-                    if entity.mobile and entity.mobile.rowing and entity.mobile.current_speed < entity.mobile.max_speed:
-                        entity.mobile.change_momentum(amount=entity.mobile.rowing)
-                        # check to make sure a ship can't go to max speed
-                        if entity.mast_sail and entity.mobile.current_speed == entity.mobile.max_speed:
-                            entity.mobile.current_speed -= 1
-                            entity.mobile.current_momentum = entity.mobile.max_momentum
+                    if entity.mobile and entity.mobile.rowing:
+                        if entity.mast_sail:
+                            reason = 'rowing'
+                        else:
+                            reason = 'swimming'
+                        details = entity.mobile.increase_momentum(amount=entity.mobile.rowing, reason=reason)
+                        if (entity.x, entity.y) in player.view.fov:
+                            message_log.unpack(details=details)
                 
                 # WIND ------------------------------------------------------------------------------------------------
                 # adjust speed for wind for each entity with a sail up if there is wind
                 if game_map.wind_direction is not None:
                     for entity in entities:
                         if entity.mast_sail and entity.mast_sail.current_sails > 0:
-                            entity.mast_sail.momentum_due_to_wind(wind_direction=game_map.wind_direction)
-                            entity.mast_sail.catching_wind = True
-                            message_log.add_message('{} catching Wind, + momentum'.format(entity.name.capitalize()))
+                            details = entity.mast_sail.momentum_due_to_wind(wind_direction=game_map.wind_direction,
+                                                                            message_log=message_log,
+                                                                            color=constants['colors']['aqua'])
+                            for detail in details:
+                                if (entity.x, entity.y) in player.view.fov:
+                                    message_log.add_message(detail)
                         elif entity.wings and entity.wings.current_wing_power > 0:
-                            entity.wings.momentum_due_to_wind(wind_direction=game_map.wind_direction)
-                            entity.mast_sail.catching_wind = True
-                            message_log.add_message('{} catching Wind, + momentum'.format(entity.name.capitalize()))
+                            details = entity.wings.momentum_due_to_wind(wind_direction=game_map.wind_direction,
+                                                                        message_log=message_log,
+                                                                        color=constants['colors']['aqua'])
+                            for detail in details:
+                                if (entity.x, entity.y) in player.view.fov:
+                                    message_log.add_message(detail)
                 
                 # DRAG ------------------------------------------------------------------------------------------------
                 # change momentum due to drag if not rowing or catching wind
@@ -297,7 +314,11 @@ def main():
                     elif entity.mobile and entity.mobile.rowing:
                         drag = 0
                     if entity.mobile:
-                        entity.mobile.change_momentum(amount=drag)
+                        details = entity.mobile.decrease_momentum(amount=drag, reason='drag')
+                        for detail in details:
+                            if (entity.x, entity.y) in player.view.fov:
+                                message_log.add_message(detail)
+                    # reset action after drag applied
                     if entity.mast_sail:
                         entity.mast_sail.catching_wind = False
                     if entity.mobile:
@@ -308,31 +329,34 @@ def main():
                     if entity.mobile:
                         old_x = entity.x
                         old_y = entity.y
-                        entity.mobile.move(game_map=game_map)
-                        if not (entity.x == old_x and entity.y == old_y) \
-                                or game_map.wind_direction is not None:  # recalculate fov if entity moved and wind
-                            entity.view.set_fov(game_map, game_time, game_weather)
-                            # print("{} moved to {}:{}".format(entity.name, entity.x, entity.y))
+                        entity.mobile.move(game_map=game_map, message_log=message_log)
+                        if entity.x != old_x \
+                                or entity.y != old_y \
+                                or game_map.wind_direction is not None:  # recalculate fov if entity moved or wind
+                            entity.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
                 
                 # SAILS / ROTATE --------------------------------------------------------------------------------------
                 if sails:
-                    player.mast_sail.adjust_sails(amount=sails)
-                    message_log.add_message('Player Adjusts sails to {}'.format(player.mast_sail.current_sails),
-                                            constants['colors']['aqua'])
+                    details = player.mast_sail.adjust_sails(amount=sails)
+                    message_log.unpack(details=details, color=constants['colors']['aqua'])
                 
                 # rotate boat last
                 if rotate:
-                    player.mobile.rotate(rotate=rotate)
-                    message_log.add_message('Player rotates {}'.format('port' if rotate == 1 else 'starboard'))
+                    details = player.mobile.rotate(rotate=rotate)
+                    message_log.unpack(details=details, color=constants['colors']['aqua'])
                 
                 if exit_screen:
                     game_quit = True
                 
-                change_wind(game_map, message_log, constants['colors']['yellow'])
+                change_wind(game_map=game_map, message_log=message_log, color=constants['colors']['yellow'])
                 game_time.roll_min()
-                change_weather(game_weather, message_log, constants['colors']['yellow'])
-                adjust_fog(fog=game_map.fog, width=game_map.width, height=game_map.height,
-                           game_time=game_time, weather=game_weather)
+                change_weather(weather=game_weather, message_log=message_log, color=constants['colors']['yellow'])
+                adjust_fog(fog=game_map.fog,
+                           width=game_map.width,
+                           height=game_map.height,
+                           game_time=game_time,
+                           weather=game_weather)
+                message_log.reset_view()
             
             elif scroll:
                 if constants['map_width'] <= mouse_x < constants['display_width'] \

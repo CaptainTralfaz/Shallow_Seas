@@ -1,5 +1,5 @@
 rowboat = {"name": "rowboat",
-           "type": "boat",
+           "type": "ship",
            "size": 0,
            "masts": None,
            "max_speed": 1,
@@ -12,7 +12,7 @@ rowboat = {"name": "rowboat",
 }
 
 sloop = {"name": "sloop",
-         "type": "boat",
+         "type": "ship",
          "size": 1,
          "masts": 1,
          "max_speed": 2,

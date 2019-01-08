@@ -3,7 +3,7 @@ from src.render_functions import RenderOrder
 
 class Entity:
     """
-    A generic object to represent ships, enemies, etc.
+    A generic object to represent ships, enemies, containers, etc.
     """
     
     def __init__(self, name, x, y, icon, render_order=RenderOrder.CORPSE, ai=None, block_view=None, elevation=None,

@@ -2,15 +2,21 @@ from enum import Enum
 
 
 class Time:
-    def __init__(self):
+    def __init__(self, tick):
+        """
+        Object holding game time information
+        12 months per year, 30 days per month, 24 hrs per day, 60 minutes per hour
+        
+        """
         self.hrs = 12
         self.min = 00
         self.day = 1
         self.month = 1
         self.year = 1111  # Year of Steve
+        self.tick = tick
     
     def roll_min(self):
-        self.min += 2
+        self.min += self.tick
         if self.min >= 60:
             self.min -= 60
             self.roll_hrs()
@@ -40,6 +46,10 @@ class Time:
     
     @property
     def get_time_of_day_info(self):
+        """
+        Gets info for each particular time of day
+        :return: dict of information pertaining to the particular time of day
+        """
         if self.hrs in [1, 2]:
             return time_of_day_info[TimeOfDay.DEEPNIGHT]
         elif self.hrs in [3, 4]:
@@ -69,6 +79,9 @@ class Time:
 
 
 class TimeOfDay(Enum):
+    """
+    Time of Day Enum, mainly used as key for information dictionary
+    """
     DAWN = 0
     MORNING = 1
     FORENOON = 2
@@ -81,8 +94,8 @@ class TimeOfDay(Enum):
     MIDNIGHT = 9
     DEEPNIGHT = 10
     WEEHOURS = 11
-    
-    
+
+
 time_of_day_info = {TimeOfDay.DAWN: {'name': 'Dawn', 'begin': 5, 'view': 0, 'fog': 10, 'sky': 'carnation'},
                     TimeOfDay.MORNING: {'name': 'Morning', 'begin': 7, 'view': 0, 'fog': 5, 'sky': 'cyan'},
                     TimeOfDay.FORENOON: {'name': 'Forenoon', 'begin': 9, 'view': 0, 'fog': 0, 'sky': 'aqua'},
@@ -97,7 +110,6 @@ time_of_day_info = {TimeOfDay.DAWN: {'name': 'Dawn', 'begin': 5, 'view': 0, 'fog
                     TimeOfDay.WEEHOURS: {'name': 'Wee Hours', 'begin': 3, 'view': -1, 'fog': 15, 'sky': 'violet'}
                     }
 
-
 # Dawn	5:30 - 7:25 A		10%
 # Morning	7:30 - 9:25 A		5%
 # Late Morning	9:30 - 11:25 A
@@ -110,4 +122,3 @@ time_of_day_info = {TimeOfDay.DAWN: {'name': 'Dawn', 'begin': 5, 'view': 0, 'fog
 # Midnight	11:30 - 1:25 P/A	-3	5%
 # Deep Night	1:30 - 3:25 A	-2	10%
 # Wee Hours	3:30 - 5:25 A	-1	15%
-
