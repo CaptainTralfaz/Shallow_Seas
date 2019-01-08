@@ -7,7 +7,7 @@ class Weather:
         self.conditions = Conditions.CALM
         self.turn_count = 0
         self.max_turn_count = 50
-        
+    
     def calms(self, message_log, color):
         if self.conditions == Conditions.STORMY:
             self.conditions = Conditions.RAINY
@@ -27,7 +27,7 @@ class Weather:
             message_log.add_message("The sky clears", color)
         else:
             self.turn_count += 1
-
+    
     def worsens(self, message_log, color):
         if self.conditions == Conditions.CALM:
             self.conditions = Conditions.HAZY
@@ -47,7 +47,7 @@ class Weather:
             message_log.add_message("STORM! Batten down the hatches!", color)
         else:
             self.turn_count += 1
-        
+    
     @property
     def get_weather_info(self):
         if self.conditions == Conditions.CALM:
@@ -61,7 +61,7 @@ class Weather:
         elif self.conditions == Conditions.STORMY:
             return weather_effects[Conditions.STORMY]
 
-        
+
 def change_weather(weather, message_log, color):
     delay = 10  # leave weather for at least this many turns
     change_chance = randint(0, weather.max_turn_count)
@@ -94,5 +94,3 @@ weather_effects = {Conditions.CALM: {'name': 'Calm', 'view': 1, 'fog': 0},
                    Conditions.RAINY: {'name': 'rainy', 'view': -1, 'fog': 10},
                    Conditions.STORMY: {'name': 'stormy', 'view': -2, 'fog': 15}
                    }
-
-

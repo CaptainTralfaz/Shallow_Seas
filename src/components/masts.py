@@ -88,7 +88,7 @@ class Masts:
         else:
             self.sail_hp -= amount
             results.append('A mast took {} damage'.format(amount))
-            
+    
     def repair_sails(self, amount):
         """
         Repair sails
@@ -102,7 +102,7 @@ class Masts:
             message = "fully "
         self.sail_hp += amount
         results.append("Sail {}repaired for {}".format(message, amount))
-        
+    
     def repair_masts(self, amount):
         """
         Repair masts
@@ -116,7 +116,7 @@ class Masts:
             message = "fully "
         self.mast_hp += amount
         results.append("Mast {}repaired for {}".format(message, amount))
-
+    
     def momentum_due_to_wind(self, wind_direction: int, message_log, color):
         """
         Adjust momentum due to wind: +2 per sail if traveling with wind,

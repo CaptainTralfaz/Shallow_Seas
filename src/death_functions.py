@@ -34,5 +34,5 @@ def kill_monster(elevation, entity, icons):
     else:
         entity.name = ''
         entity.icon = None
-
+    
     return death_message

@@ -111,7 +111,7 @@ class Mobile:
             else:
                 self.current_momentum += amount
         return results
-
+    
     def decrease_momentum(self, amount: int, reason: str):
         """
         Decrease current momentum of an Entity, and speed if necessary
@@ -153,6 +153,3 @@ def can_move_direction(entity, neighbor, game_map):
             and not entity.wings:
         return False
     return True
-
-
-

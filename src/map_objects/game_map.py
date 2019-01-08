@@ -12,7 +12,7 @@ from src.map_objects.map_generator import generate_terrain
 from src.map_objects.map_utils import hex_directions
 from src.map_objects.tile import Decoration, Elevation
 from src.render_functions import RenderOrder
-from src.weather import Conditions, weather_effects
+from src.weather import weather_effects
 
 
 class GameMap:
@@ -125,7 +125,7 @@ class GameMap:
                 fog_chance = randint(0, 99)
                 if fog_chance < base_fog:
                     self.fog[0][y] = True
-            
+    
     def in_bounds(self, x: int, y: int, margin=0):
         """
         Makes sure a tile (x, y) coordinate is not outside of the map width and height

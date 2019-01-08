@@ -22,7 +22,7 @@ class Fighter:
             results.append('{} {} is destroyed!'.format(self.owner.name, self.name))
             return True, results
         return False, results
-        
+    
     def heal_damage(self, amount: int):
         """
         Heal Entity HP

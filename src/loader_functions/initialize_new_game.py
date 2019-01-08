@@ -19,18 +19,18 @@ def get_constants():
     
     view_width = display_width - map_width  # includes margins
     view_height = 618  # includes margins
-
+    
     control_width = map_width
     control_height = display_height - view_height
     
     status_width = map_width  # includes margins
-    status_height = display_height - map_height - control_height # includes margins
+    status_height = display_height - map_height - control_height  # includes margins
     
     message_width = display_width - map_width  # includes margins
     message_height = display_height - view_height  # includes margins
     message_panel_size = 9
     log_size = 50
-
+    
     board_width = 64
     board_height = board_width
     island_size = board_height // 2
@@ -38,7 +38,7 @@ def get_constants():
     
     font = pygame.font.Font('freesansbold.ttf', 16)
     # font = pygame.font.Font('/Users/brianhaler/PycharmProjects/Shallow_Seas/src/data/fonts/joystix-monospace.ttf', 10)
-
+    
     max_entities = board_width // 4
     
     tile_size = 32
@@ -55,7 +55,7 @@ def get_constants():
         'dark_red': (150, 0, 0),
         'orange': (255, 127, 0),
         'bright_yellow': (255, 255, 0),
-        'yellow':  (200, 200, 0),
+        'yellow': (200, 200, 0),
         'green': (0, 255, 0),
         'medium_green': (0, 175, 0),
         'light_green': (0, 125, 0),

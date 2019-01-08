@@ -1,5 +1,5 @@
-from src.map_objects.map_utils import get_target_hexes_at_location, get_hex_neighbors
 from src.death_functions import kill_monster
+from src.map_objects.map_utils import get_target_hexes_at_location
 
 max_weapons = {
     "Size.TINY": {"Bow": 0,
@@ -114,7 +114,7 @@ class WeaponList:
                                        entity=entity,
                                        icons=icons)
                 message_log.unpack(details=details, color=colors['amber'])
-
+    
     def verify_target_at_location(self, attack, entities):
         """
         Returns true if a target exists for a particular attack from a facing

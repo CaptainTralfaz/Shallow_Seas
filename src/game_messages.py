@@ -35,7 +35,7 @@ class MessageLog:
             del self.messages[0]
         if self.message_panel_size < len(self.messages) <= self.height:
             self.adjust_view(1)
-        
+    
     def adjust_view(self, amount):
         """
         Change view of the message log as per scroll of mouse
@@ -47,7 +47,7 @@ class MessageLog:
             self.view_pointer = self.height - self.message_panel_size
         if self.view_pointer < 0:
             self.view_pointer = 0
-            
+    
     def reset_view(self):
         """
         Reset the view to the last message
@@ -56,8 +56,8 @@ class MessageLog:
         self.view_pointer = len(self.messages) - self.message_panel_size
         if self.view_pointer < 0:
             self.view_pointer = 0
-
-    def unpack(self, details: list, color: tuple=(200, 200, 200)):
+    
+    def unpack(self, details: list, color: tuple = (200, 200, 200)):
         """
         add a list of messages all at once, all the same color
         :param details: list of messages

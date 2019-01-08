@@ -16,7 +16,7 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
     num_seeds = randint(max_seeds // 2, max_seeds)
     seeds = get_seed_locations(width=game_map.width, height=game_map.height, num=num_seeds)
     height_map = [[0 for y in range(game_map.height)] for x in range(game_map.width)]
-
+    
     for seed in seeds:
         size = randint(island_size // 2, island_size)
         x, y = seed
@@ -37,7 +37,7 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
     
     islands = find_all_islands(height_map=height_map, width=game_map.width, height=game_map.height)
     largest, largest_islands = get_largest_islands(islands=islands)
-
+    
     port_x = None
     port_y = None
     for island in islands:
@@ -57,7 +57,7 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
             valid_tiles = remove_bad_tiles(height_map, island)
             port_x, port_y = valid_tiles[randint(0, len(valid_tiles) - 1)]
             print(port_x, port_y)
-            
+    
     for x in range(game_map.width):
         for y in range(game_map.height):
             if height_map[x][y] > 7:

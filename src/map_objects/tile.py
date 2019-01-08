@@ -86,17 +86,17 @@ class Elevation(Enum):
     JUNGLE = 5
     MOUNTAIN = 6
     VOLCANO = 7
-
+    
     def __lt__(self, other):
         if self.__class__ is other.__class__:
             return self.value < other.value
         return NotImplemented
-
+    
     def __le__(self, other):
         if self.__class__ is other.__class__:
             return self.value <= other.value
         return NotImplemented
-
+    
     def __gt__(self, other):
         if self.__class__ is other.__class__:
             return self.value > other.value
@@ -106,14 +106,13 @@ class Elevation(Enum):
         if self.__class__ is other.__class__:
             return self.value >= other.value
         return NotImplemented
-
+    
     def __eq__(self, other):
         if self.__class__ is other.__class__:
             return self.value == other.value
         return NotImplemented
-
+    
     def __ne__(self, other):
         if self.__class__ is other.__class__:
             return self.value != other.value
         return NotImplemented
-

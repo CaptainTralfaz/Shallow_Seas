@@ -1,14 +1,15 @@
 from random import choice, randint
-from src.map_objects.map_utils import get_hex_neighbors
+
 from src.death_functions import kill_monster
+from src.map_objects.map_utils import get_hex_neighbors
 
 
 class Crew:
     def __init__(self, size: int, crew: int):
         """
-        
-        :param size:
-        :param crew:
+        Component detailing crew
+        :param size: Entity Size to determine maximum number of crew
+        :param crew: current number of crew
         """
         self.max_crew = size * 10 + 5
         if crew > self.max_crew:
@@ -17,9 +18,9 @@ class Crew:
     
     def starting_crew(self, crew):
         """
-        
-        :param crew:
-        :return:
+        Fills ship with the number of crew given
+        :param crew: int max number of crew
+        :return: list of generated crew
         """
         crew_list = []
         for i in range(0, crew):
@@ -30,9 +31,9 @@ class Crew:
     
     def take_damage(self, amount: int):
         """
-        
-        :param amount:
-        :return:
+        Kills crew members. Death if the last crewman dies
+        :param amount: int number of crew to kill
+        :return: True if the last crew member died, messages
         """
         details = []
         for i in range(amount):
@@ -45,28 +46,28 @@ class Crew:
                     details.append('{} has died!'.format(self.owner.name))
                     return True, details
         return False, details
-
+    
     def add_crew(self, crewman):
         """
-        
-        :param crewman:
-        :return:
+        Adds a new crewman if there is room
+        :param crewman: Crew member
+        :return: Message
         """
         if len(self.crew) + 1 > self.max_crew:
             return {'message': 'No room on ship for more crew'}
         else:
             self.crew.append(crewman)
             return {'message': 'Crewman {} the {} added'.format(crewman.name, crewman.profession)}
-
+    
     def arrow_attack(self, terrain, entities, message_log, icons, colors):
         """
-        
-        :param terrain:
-        :param entities:
-        :param message_log:
-        :param icons:
-        :param colors:
-        :return:
+        Attack neighboring Entities
+        :param terrain: passed to fov
+        :param entities: list of possible Entity targets
+        :param message_log: the message log
+        :param icons: passed to kill_monster
+        :param colors: tuple dict for message colors
+        :return: None
         """
         total_damage = 1 + len(self.crew) // 10
         target_hexes = get_hex_neighbors(self.owner.x, self.owner.y)
@@ -81,13 +82,13 @@ class Crew:
             message_log.unpack(details=details, color=colors['amber'])
             if dead_result:  # entity is dead
                 details = kill_monster(terrain[entity.x][entity.y].elevation.value, entity, icons)
-            message_log.unpack(details=details, color=colors['amber'])
-            
+                message_log.unpack(details=details, color=colors['amber'])
+    
     def verify_arrow_target(self, entities):
         """
-        
-        :param entities:
-        :return:
+        Makes sure there is an adjacent target for an arrow attack
+        :param entities: list of possible entity targets
+        :return: boolean True if attackable neighbor, else False
         """
         target_hexes = get_hex_neighbors(self.owner.x, self.owner.y)
         target_hexes.append((self.owner.x, self.owner.y))
@@ -100,7 +101,7 @@ class Crew:
 class Crewman:
     def __init__(self):
         """
-        
+        container for crew memeber
         """
         self.name = self.generate_name
         self.profession = self.generate_profession
@@ -108,8 +109,9 @@ class Crewman:
     @property
     def generate_name(self):
         """
-        
-        :return:
+        Creates a name for a crewman
+        TODO: move to Generator
+        :return: str 'firstName + lastName'
         """
         possible_names = ['James',
                           'Porter',
@@ -128,12 +130,13 @@ class Crewman:
                              'Black'
                              ]
         return "{} {}".format(choice(possible_names), choice(possible_surnames))
-
+    
     @property
     def generate_profession(self):
         """
-        
-        :return:
+        Assigns a profession to a crewman
+        TODO: move to Generator
+        :return: str profession name
         """
         possible_professions = ['Sailor',
                                 'Cook',
