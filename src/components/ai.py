@@ -7,6 +7,9 @@ from src.map_objects.map_utils import get_hex_neighbors, hex_to_cube, Hex, get_s
 
 
 class PeacefulMonster:
+    """
+    A peaceful entity that wanders the map randomly
+    """
     def take_turn(self, game_map, target, message_log, colors, icons):
         entity = self.owner
         neighbors = get_hex_neighbors(x=entity.x, y=entity.y)
@@ -23,7 +26,16 @@ class PeacefulMonster:
         return None
 
 
-class MeleeMonster:  # SeaSerpent
+class ScaredyCat:
+    """
+    An entity that runs away from the player
+    """
+
+
+class MeleeMonster:  # Sea Serpent and Giant Bat
+    """
+    An entity that tries to get next to the player to attack
+    """
     # TODO: find a way to implement last known location (last_seen) as a target hex - add state? need dijkstra maps
     def take_turn(self, game_map, target, message_log, colors, icons):
         state = None
