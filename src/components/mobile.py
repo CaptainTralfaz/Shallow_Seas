@@ -57,24 +57,24 @@ class Mobile:
                     and not self.owner.wings:
                 if (self.owner.x, self.owner.y) in player.view.fov:
                     message = "{} crashed into island".format(self.owner.name)
-                    if self.owner.fighter:
-                        death_result, details = self.owner.fighter.take_damage(self.current_speed)
-                                                                               # * self.owner.size.value)
-                        message += (' and takes {} {} damage!'.format(self.owner.name,
-                                                                      self.current_speed,  # * self.owner.size.value,
-                                                                      self.owner.fighter.name))
-                        if death_result:
-                            if self.owner.name == 'player':
-                                death_message, death_state = kill_player(player=player, icons=icons)
-                                results.append(death_message)
-                            else:
-                                kill_monster(entity=self.owner, icons=icons)
-                    else:
-                        message += '!'
+                    # if self.owner.fighter:
+                    #     death_result, details = self.owner.fighter.take_damage(self.current_speed)
+                    #                                                            # * self.owner.size.value)
+                    #     message += (' and takes {} {} damage!'.format(self.owner.name,
+                    #                                                   self.current_speed,  # * self.owner.size.value,
+                    #                                                   self.owner.fighter.name))
+                    #     if death_result:
+                    #         if self.owner.name == 'player':
+                    #             death_message, death_state = kill_player(player=player, icons=icons)
+                    #             results.append(death_message)
+                    #         else:
+                    #             kill_monster(entity=self.owner, icons=icons)
+                    # else:
+                    #     message += '!'
                     results.append(message)
-                    results.append('{} speed reduced to 0'.format(self.owner.name))
+                    results.append('{} speed and momentum reduced to 0'.format(self.owner.name))
                 self.current_speed = 0
-                self.current_momentum = self.max_momentum
+                self.current_momentum = 0
                 break
             else:
                 # Just move

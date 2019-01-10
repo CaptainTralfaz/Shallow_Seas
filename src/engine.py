@@ -40,7 +40,7 @@ def main():
     message_log = MessageLog(height=constants['log_size'], panel_size=constants['message_panel_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.MEDIUM
+    size_component = Size.SMALL
     manifest = []
     manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))
