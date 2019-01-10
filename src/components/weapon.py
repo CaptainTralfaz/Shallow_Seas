@@ -110,9 +110,9 @@ class WeaponList:
             dead_result, details = entity.fighter.take_damage(amount=amount)
             message_log.unpack(details=details, color=colors['amber'])
             if dead_result:  # entity is dead
-                details = kill_monster(elevation=terrain[entity.x][entity.y].elevation.value,
-                                       entity=entity,
-                                       icons=icons)
+                details = kill_monster(entity=entity,
+                                       icons=icons,
+                                       elevation = terrain[entity.x][entity.y].elevation.value)
                 message_log.unpack(details=details, color=colors['amber'])
     
     def verify_target_at_location(self, attack, entities):

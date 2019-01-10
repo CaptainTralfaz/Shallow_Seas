@@ -40,7 +40,7 @@ def main():
     message_log = MessageLog(height=constants['log_size'], panel_size=constants['message_panel_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.SMALL
+    size_component = Size.MEDIUM
     manifest = []
     manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))
@@ -222,7 +222,8 @@ def main():
                         for weapon in entity.weapons.weapon_list:
                             if weapon.current_cd > 0:
                                 weapon.current_cd -= 1
-                
+
+                # ATTACKS ---------------------------------------------------------------------------------------------
                 if attack == 'Arrows':
                     message_log.add_message(message='Player attacks with {}!'.format(attack),
                                             color=constants['colors']['aqua'])
@@ -308,11 +309,13 @@ def main():
                 # DRAG ------------------------------------------------------------------------------------------------
                 # change momentum due to drag if not rowing or catching wind
                 for entity in entities:
-                    drag = -1
+                    drag = - 1
                     if entity.mast_sail and entity.mast_sail.catching_wind:
                         drag = 0
-                    elif entity.mobile and entity.mobile.rowing:
+                    if entity.mobile and entity.mobile.rowing:
                         drag = 0
+                    if slowing:
+                        drag = - 1
                     if entity.mobile:
                         details = entity.mobile.decrease_momentum(amount=drag, reason='drag')
                         for detail in details:
@@ -327,24 +330,23 @@ def main():
                 # MOVEMENT --------------------------------------------------------------------------------------------
                 for entity in entities:
                     if entity.mobile:
-                        old_x = entity.x
-                        old_y = entity.y
-                        entity.mobile.move(game_map=game_map, message_log=message_log)
-                        if entity.x != old_x \
-                                or entity.y != old_y \
-                                or game_map.wind_direction is not None:  # recalculate fov if entity moved or wind
-                            entity.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
-                
+                        details, state = entity.mobile.move(game_map=game_map, player=player, icons=constants['icons'])
+                        for detail in details:
+                            if (entity.x, entity.y) in player.view.fov:
+                                message_log.add_message(message=detail, color=constants['colors']['aqua'])
+                        if state:
+                            game_state = state
+                            
                 # SAILS / ROTATE --------------------------------------------------------------------------------------
                 if sails:
                     details = player.mast_sail.adjust_sails(amount=sails)
                     message_log.unpack(details=details, color=constants['colors']['aqua'])
-                
+
                 # rotate boat last
                 if rotate:
                     details = player.mobile.rotate(rotate=rotate)
                     message_log.unpack(details=details, color=constants['colors']['aqua'])
-                
+
                 if exit_screen:
                     game_quit = True
                 
@@ -356,6 +358,9 @@ def main():
                            height=game_map.height,
                            game_time=game_time,
                            weather=game_weather)
+                for entity in entities:
+                    if entity.view:
+                        entity.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
                 message_log.reset_view()
             
             elif scroll:
