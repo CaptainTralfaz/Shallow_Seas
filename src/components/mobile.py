@@ -1,5 +1,6 @@
 from src.map_objects.map_utils import hex_directions
 from src.map_objects.tile import Elevation
+from src.death_functions import kill_player, kill_monster
 
 
 class Mobile:
@@ -19,14 +20,17 @@ class Mobile:
         self.rowing = False
         self.catching_wind = False
     
-    def move(self, game_map, message_log):
+    def move(self, game_map, player, icons):
         """
         Change tile coordinates in a line (determined by speed and direction of travel)
         :param game_map: current game map
-        :param message_log: game message log
+        :param player: player entity
+        :param icons: for death functions
         :return: None
         """
         # Move the entity by their current_speed
+        death_state = None
+        results = []
         dx, dy = hex_directions[self.direction]
         for speed in range(0, self.current_speed):
             new_x = self.owner.x + dx
@@ -40,7 +44,7 @@ class Mobile:
                     and game_map.terrain[new_x][new_y].decoration \
                     and game_map.terrain[new_x][new_y].decoration.name == 'Port' \
                     and self.owner.name is "player":
-                message_log.add_message(message='{} sailed into Port'.format(self.owner.name))
+                results.append('{} sailed into Port'.format(self.owner.name))
                 self.owner.x = new_x
                 self.owner.y = new_y
                 self.current_speed = 0
@@ -51,9 +55,24 @@ class Mobile:
             elif game_map.in_bounds(x=new_x, y=new_y) and \
                     game_map.terrain[new_x][new_y].elevation > Elevation.SHALLOWS \
                     and not self.owner.wings:
-                # if (self.owner.x, self.owner.y) in
-                #     message_log.add_message(message="{} crashed into island!".format(self.owner.name))
-                # take damage depending on speed ?
+                if (self.owner.x, self.owner.y) in player.view.fov:
+                    message = "{} crashed into island".format(self.owner.name)
+                    if self.owner.fighter:
+                        death_result, details = self.owner.fighter.take_damage(self.current_speed)
+                                                                               # * self.owner.size.value)
+                        message += (' and takes {} {} damage!'.format(self.owner.name,
+                                                                      self.current_speed,  # * self.owner.size.value,
+                                                                      self.owner.fighter.name))
+                        if death_result:
+                            if self.owner.name == 'player':
+                                death_message, death_state = kill_player(player=player, icons=icons)
+                                results.append(death_message)
+                            else:
+                                kill_monster(entity=self.owner, icons=icons)
+                    else:
+                        message += '!'
+                    results.append(message)
+                    results.append('{} speed reduced to 0'.format(self.owner.name))
                 self.current_speed = 0
                 self.current_momentum = self.max_momentum
                 break
@@ -61,6 +80,7 @@ class Mobile:
                 # Just move
                 self.owner.x = new_x
                 self.owner.y = new_y
+        return results, death_state
     
     def rotate(self, rotate: int):
         """
@@ -92,9 +112,9 @@ class Mobile:
                     self.current_momentum = self.max_momentum
                     results.append('{} reached top speed'.format(self.owner.name))
             elif self.current_momentum + amount > self.max_momentum and self.current_speed < self.max_speed:
-                self.current_momentum += (amount - self.max_momentum)
+                self.current_momentum += (amount - 1 - self.max_momentum)
                 self.current_speed += 1
-                results.append('{} gained speed from {}'.format(self.owner.name, reason))
+                results.append('{} gains speed from {}'.format(self.owner.name, reason))
             else:
                 self.current_momentum += amount
         else:
@@ -106,8 +126,8 @@ class Mobile:
                     self.current_momentum += amount
             elif self.current_momentum + amount > self.max_momentum:
                 self.current_speed += 1
-                self.current_momentum += (amount - self.max_momentum)
-                results.append('{} gained speed from {}'.format(self.owner.name, reason))
+                self.current_momentum += (amount - 1 - self.max_momentum)
+                results.append('{} gains speed from {}'.format(self.owner.name, reason))
             else:
                 self.current_momentum += amount
         return results
@@ -131,7 +151,7 @@ class Mobile:
         else:
             self.current_momentum += amount
             if self.current_momentum < 0:
-                self.current_momentum += self.max_momentum
+                self.current_momentum += self.max_momentum + 1
                 self.current_speed -= 1
                 results.append('{} loses speed due to {}'.format(self.owner.name, reason))
         return results

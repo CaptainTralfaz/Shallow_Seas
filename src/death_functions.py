@@ -13,7 +13,7 @@ def kill_player(player, icons):
     return 'You have died!', GameStates.PLAYER_DEAD
 
 
-def kill_monster(elevation, entity, icons):
+def kill_monster(entity, icons, elevation=0):
     """
     Kill an entity by changing the entity information and icon
     :param elevation: to see if the creature is on land
