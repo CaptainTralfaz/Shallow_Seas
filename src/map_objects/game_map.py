@@ -316,7 +316,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
     :return: None - modify entity list directly
     """
     # Get a random number of entities
-    number_of_monsters = randint(2 * max_entities // 3, max_entities + 1)
+    number_of_monsters = randint(2 * max_entities // 3, max_entities)
     
     # This should be
     # 1 choose monster
