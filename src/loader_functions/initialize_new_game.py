@@ -2,6 +2,10 @@ import pygame
 
 
 def get_constants():
+    """
+    Holds all the default values for the game
+    :return: dict constants
+    """
     frames_per_second = 60  # frames per second, the general speed of the program
     tick = 2  # number of minutes of game time that pass each turn
     
