@@ -359,7 +359,7 @@ def render_wind(game_map, view_surf, constants):
 
 
 def render_time(game_time, view_surf, constants):
-    text = '{}.{:02d}.{} {:02d}:{:02d}'.format(game_time.day, game_time.month, game_time.year, game_time.hrs,
+    text = '{}.{:02d}.{} {:02d}:{:02d}'.format(game_time.year, game_time.month, game_time.day, game_time.hrs,
                                                game_time.min)
     (width, height) = constants['font'].size(text)
     time_text = constants['font'].render(text, True, constants['colors'].get('text'))
@@ -413,19 +413,19 @@ def render_weather(game_time, game_weather, view_surf, constants):
     sky_surf.fill(constants['colors'][time_dict['sky']])
     sky_surf.blit(icon, (icon_x - 8, icon_y))
     
-    if not (600 <= relative_time < 1800):
+    if not (600 <= numeric_time < 1800):
         moon_shadow_icon = constants['icons']['moon_shadow']
         moon_shadow_icon = colorize(image=moon_shadow_icon, new_color=constants['colors'][time_dict['sky']])
         
-        if relative_time >= 1800:  # account for day change in middle of night
+        if numeric_time >= 1800:  # account for day change in middle of night
             offset = 0
         else:
             offset = 1
         sky_surf.blit(moon_shadow_icon, (icon_x - abs(game_time.day - 15 - offset) - 8, icon_y))
     
-    icon = constants['icons'][weather_dict['name'].lower()]
-    for x in range(sky_surf.get_width() // icon.get_width()):
-        sky_surf.blit(icon, (x * icon.get_width(), (x + 1) % 2))
+    # icon = constants['icons'][weather_dict['name'].lower()]
+    # for x in range(sky_surf.get_width() // icon.get_width()):
+    #     sky_surf.blit(icon, (x * icon.get_width(), (x + 1) % 2))
     
     weather_surf = pygame.Surface((width + constants['margin'] + sky_surf.get_width(), constants['tile_size']))
     weather_surf.fill(constants['colors']['dark_gray'])
