@@ -46,11 +46,15 @@ def main():
                          weight=2, volume=2, quantity=2))
     manifest.append(Item(name='Meat', icon=constants['icons']['meat'], category=ItemCategory.SUPPLIES,
                          weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Pearl', icon=constants['icons']['pearl'], category=ItemCategory.EXOTICS,
-                         weight=0.01, volume=0.01, quantity=3))
+    manifest.append(Item(name='Pearls', icon=constants['icons']['pearl'], category=ItemCategory.EXOTICS,
+                         weight=0.01, volume=0.01, quantity=30))
     manifest.append(Item(name='Rope', icon=constants['icons']['rope'], category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))
     manifest.append(Item(name='Rum', icon=constants['icons']['rum'], category=ItemCategory.EXOTICS,
+                         weight=0.1, volume=2, quantity=2))
+    manifest.append(Item(name='Fish', icon=constants['icons']['fish'], category=ItemCategory.SUPPLIES,
+                         weight=0.1, volume=2, quantity=2))
+    manifest.append(Item(name='Fruit', icon=constants['icons']['fruit'], category=ItemCategory.SUPPLIES,
                          weight=0.1, volume=2, quantity=2))
     manifest.append(Item(name='Water', icon=constants['icons']['water'], category=ItemCategory.SUPPLIES,
                          weight=2, volume=2, quantity=2))
@@ -249,7 +253,7 @@ def main():
                     for entity in entities:
                         if not entity.ai and entity.name not in ['player', ''] and \
                                 (entity.x, entity.y) == (player.x, player.y):
-                            message_log.add_message(message='You harvest the {}'.format(entity.name),
+                            message_log.add_message(message='You salvage the {}'.format(entity.name),
                                                     color=constants['colors']['aqua'])
                             if entity.cargo:
                                 for cargo in entity.cargo.manifest:

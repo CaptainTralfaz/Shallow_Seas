@@ -111,12 +111,12 @@ def adjust_quantity(cargo, amount, message_log):
     """
     cargo.quantity += amount
     if amount > 0:
-        message_log.add_message('{} of {} added to cargo'.format(amount, cargo.name))
+        message_log.add_message('{} {} added to cargo'.format(amount, cargo.name))
     elif amount < 0 < amount + cargo.quantity:
-        message_log.add_message('{} of {} removed from cargo'.format(abs(amount), cargo.name))
+        message_log.add_message('{} {} removed from cargo'.format(abs(amount), cargo.name))
     elif amount < 0 and (amount + cargo.quantity == 0):
-        message_log.add_message('All {} of {} removed from cargo'.format(abs(amount), cargo.name))
-        cargo.remove_item_from_manifest(item=item, message_log=message_log)
+        message_log.add_message('All {} {} removed from cargo'.format(abs(amount), cargo.name))
+        # cargo.remove_item_from_manifest(item=item, message_log=message_log)
 
 
 class ItemCategory(Enum):
