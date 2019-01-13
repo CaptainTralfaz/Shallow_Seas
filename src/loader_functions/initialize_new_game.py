@@ -100,7 +100,6 @@ def get_constants():
         'sea': pygame.image.load('icons/terrain/Sea.png'),
         'shallows': pygame.image.load('icons/terrain/Shallows.png'),
         'dunes': pygame.image.load('icons/terrain/Dunes.png'),
-        'swamp': pygame.image.load('icons/terrain/Swamp.png'),
         'grassland': pygame.image.load('icons/terrain/Grassland.png'),
         'jungle': pygame.image.load('icons/terrain/Jungle.png'),
         'mountain': pygame.image.load('icons/terrain/Mountain.png'),

@@ -315,11 +315,11 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
     :param game_weather: current map Weather
     :return: None - modify entity list directly
     """
-    # Get a random number of entities
-    number_of_monsters = randint(2 * max_entities // 3, max_entities)
+    # Get a the number of entities
+    number_of_monsters = max_entities  # randint(2 * max_entities // 3, max_entities)
     
     # This should be
-    # 1 choose monster
+    # 1 choose monster / item
     # 2 then place - if flying, no location checks, if swimming, try to place until not on land
     
     for i in range(number_of_monsters):
@@ -331,7 +331,27 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
             if game_map.terrain[x][y].elevation < Elevation.DUNES:
                 placed = True
                 random_val = randint(0, 100)
-                if random_val < 40:
+                if random_val < 5:
+                    manifest = []
+                    manifest.append(Item(name='Pearls', icon=constants['icons']['pearl'],
+                                         category=ItemCategory.EXOTICS, weight=.01, volume=.01,
+                                         quantity=randint(10, 20) + randint(10, 20)))
+                    manifest.append(Item(name='Rope', icon=constants['icons']['pearl'],
+                                         category=ItemCategory.SUPPLIES, weight=1, volume=2,
+                                         quantity=randint(0, 2) + randint(0, 2) + 1))
+                    manifest.append(Item(name='Wood', icon=constants['icons']['wood'],
+                                         category=ItemCategory.SUPPLIES, weight=2, volume=2,
+                                         quantity=randint(0, 2) + 1))
+                    manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'],
+                                         category=ItemCategory.SUPPLIES, weight=1, volume=2,
+                                         quantity=randint(0, 1) + 1))
+                    cargo_component = Cargo(max_volume=5,  max_weight=10, manifest=manifest)
+                    npc_icon = icons['salvage']
+                    npc = Entity(name='Chest', x=x, y=y,
+                                 icon=npc_icon,
+                                 render_order=RenderOrder.FLOATING,
+                                 cargo=cargo_component)
+                elif random_val < 40:
                     size_component = Size.MEDIUM
                     manifest = []
                     manifest.append(Item(name='Turtle Meat', icon=constants['icons']['meat'],
