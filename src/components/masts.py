@@ -1,4 +1,4 @@
-from src.map_objects.map_utils import hex_directions
+from map_objects.map_utils import hex_directions
 
 
 class Masts:

@@ -1,4 +1,4 @@
-from src.components.masts import with_wind, against_wind, cross_wind
+from components.masts import with_wind, against_wind, cross_wind
 
 
 class Wings:

@@ -1,4 +1,4 @@
-from src.render_functions import RenderOrder
+from render_functions import RenderOrder
 
 
 class Entity:

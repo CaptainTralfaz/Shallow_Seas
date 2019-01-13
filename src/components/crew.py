@@ -1,7 +1,7 @@
 from random import choice, randint
 
-from src.death_functions import kill_monster
-from src.map_objects.map_utils import get_hex_neighbors
+from death_functions import kill_monster
+from map_objects.map_utils import get_hex_neighbors
 
 
 class Crew:

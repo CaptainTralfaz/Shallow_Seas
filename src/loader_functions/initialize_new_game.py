@@ -41,7 +41,7 @@ def get_constants():
     island_seeds = board_height
     
     font = pygame.font.Font('freesansbold.ttf', 16)
-    # font = pygame.font.Font('/Users/brianhaler/PycharmProjects/Shallow_Seas/src/data/fonts/joystix-monospace.ttf', 10)
+    # font = pygame.font.Font('/Users/brianhaler/PycharmProjects/Shallow_Seas/data/fonts/joystix-monospace.ttf', 10)
     
     max_entities = board_width // 4
     

@@ -1,6 +1,6 @@
 from pygame.locals import *
 
-from src.game_states import GameStates
+from game_states import GameStates
 
 
 def handle_keys(event, game_state):

@@ -3,9 +3,9 @@ from enum import Enum
 
 import pygame
 
-from src.game_states import GameStates
-from src.map_objects.map_utils import direction_angle, get_grid_from_coords, get_target_hexes, get_hex_neighbors
-from src.map_objects.tile import Elevation
+from game_states import GameStates
+from map_objects.map_utils import direction_angle, get_grid_from_coords, get_target_hexes, get_hex_neighbors
+from map_objects.tile import Elevation
 
 
 class RenderOrder(Enum):
@@ -489,9 +489,9 @@ def render_weather(game_time, game_weather, view_surf, constants):
             offset = 1
         sky_surf.blit(moon_shadow_icon, (icon_x - abs(game_time.day - 15 - offset) - 8, icon_y))
     
-    # icon = constants['icons'][weather_dict['name'].lower()]
-    # for x in range(sky_surf.get_width() // icon.get_width()):
-    #     sky_surf.blit(icon, (x * icon.get_width(), (x + 1) % 2))
+    icon = constants['icons'][weather_dict['name'].lower()]
+    for x in range(sky_surf.get_width() // icon.get_width()):
+        sky_surf.blit(icon, (x * icon.get_width(), (x + 1) % 2))
     
     weather_surf = pygame.Surface((width + constants['margin'] + sky_surf.get_width(), constants['tile_size']))
     weather_surf.fill(constants['colors']['dark_gray'])
