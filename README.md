@@ -2,6 +2,16 @@
 Hobby project: Pirate-inspired RogueLite
  - 2018.12.28
 
+usage:
+
+cd Shallow_seas/src
+
+python3 engine.py
+
+(still learning all my importing for python, but it seems to only work from command line if 
+actually run from inside the Shallow_seas/src directory)
+
+
 #Key Commands
 
  - Arrow_UP : Row
