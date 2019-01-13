@@ -1,4 +1,4 @@
-from src.map_objects.tile import Elevation
+from map_objects.tile import Elevation
 
 
 class Cube:

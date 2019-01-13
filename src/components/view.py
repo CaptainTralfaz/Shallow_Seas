@@ -1,4 +1,4 @@
-from src.map_objects.map_utils import get_fov
+from map_objects.map_utils import get_fov
 
 
 class View:

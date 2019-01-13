@@ -2,23 +2,23 @@ from random import randint
 
 import pygame
 
-from src.components.cargo import Cargo, Item, ItemCategory
-from src.components.crew import Crew
-from src.components.fighter import Fighter
-from src.components.masts import Masts
-from src.components.mobile import Mobile
-from src.components.size import Size
-from src.components.view import View
-from src.components.weapon import WeaponList
-from src.entity import Entity
-from src.game_messages import MessageLog
-from src.game_states import GameStates
-from src.input_handlers import handle_keys
-from src.loader_functions.initialize_new_game import get_constants
-from src.map_objects.game_map import make_map, change_wind, adjust_fog
-from src.render_functions import render_display, RenderOrder
-from src.time import Time
-from src.weather import Weather, change_weather
+from components.cargo import Cargo, Item, ItemCategory
+from components.crew import Crew
+from components.fighter import Fighter
+from components.masts import Masts
+from components.mobile import Mobile
+from components.size import Size
+from components.view import View
+from components.weapon import WeaponList
+from entity import Entity
+from game_messages import MessageLog
+from game_states import GameStates
+from input_handlers import handle_keys
+from loader_functions.initialize_new_game import get_constants
+from map_objects.game_map import make_map, change_wind, adjust_fog
+from render_functions import render_display, RenderOrder
+from game_time import Time
+from weather import Weather, change_weather
 
 
 def main():

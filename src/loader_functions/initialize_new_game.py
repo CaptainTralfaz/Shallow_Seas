@@ -2,6 +2,10 @@ import pygame
 
 
 def get_constants():
+    """
+    Holds all the default values for the game
+    :return: dict constants
+    """
     frames_per_second = 60  # frames per second, the general speed of the program
     tick = 2  # number of minutes of game time that pass each turn
     
@@ -37,7 +41,7 @@ def get_constants():
     island_seeds = board_height
     
     font = pygame.font.Font('freesansbold.ttf', 16)
-    # font = pygame.font.Font('/Users/brianhaler/PycharmProjects/Shallow_Seas/src/data/fonts/joystix-monospace.ttf', 10)
+    # font = pygame.font.Font('/Users/brianhaler/PycharmProjects/Shallow_Seas/data/fonts/joystix-monospace.ttf', 10)
     
     max_entities = board_width // 4
     

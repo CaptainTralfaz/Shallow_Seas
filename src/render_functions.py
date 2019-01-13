@@ -3,9 +3,9 @@ from enum import Enum
 
 import pygame
 
-from src.game_states import GameStates
-from src.map_objects.map_utils import direction_angle, get_grid_from_coords, get_target_hexes, get_hex_neighbors
-from src.map_objects.tile import Elevation
+from game_states import GameStates
+from map_objects.map_utils import direction_angle, get_grid_from_coords, get_target_hexes, get_hex_neighbors
+from map_objects.tile import Elevation
 
 
 class RenderOrder(Enum):
@@ -22,7 +22,7 @@ class RenderOrder(Enum):
 def render_display(display, game_map, player, entities,
                    constants, mouse_x, mouse_y, message_log, game_state, game_time, game_weather):
     """
-    Draw the game!
+    Draw the game: Status panel, Mini Map, messages, controls, GameBoard / Cargo Manifest
     :param display: The main display window surface
     :param game_map: the GameMap object
     :param player: Player entity
@@ -99,6 +99,12 @@ def render_display(display, game_map, player, entities,
 
 
 def render_manifest(cargo, constants):
+    """
+    Render the manifest in the main display
+    :param cargo: Cargo component
+    :param constants: constants
+    :return: None
+    """
     inventory_surf = pygame.Surface((constants['view_width'] - 2 * constants['margin'],
                                      constants['view_height'] - 2 * constants['margin']))
     inventory_surf.fill(constants['colors']['dark_gray'])
@@ -116,6 +122,13 @@ def render_manifest(cargo, constants):
 
 
 def render_cargo_header(inventory_surf, vertical, constants):
+    """
+    Render the Header of the cargo manifest
+    :param inventory_surf: Surface to render on
+    :param vertical: int y value in pixels to render
+    :param constants: constants
+    :return: the current int vertical value (one line for the header)
+    """
     constants['font'].set_underline(True)
     header_list = ['Qty', 'Weight', 'Volume', 'Total Wt', 'Total Vol']
     horizontal = constants['margin']
@@ -135,6 +148,14 @@ def render_cargo_header(inventory_surf, vertical, constants):
 
 
 def render_cargo_totals(inventory_surf, cargo, vertical, constants):
+    """
+    Render the weight and volume totals at the bottom of the manifest
+    :param inventory_surf: Surface to render on
+    :param cargo: Cargo component
+    :param vertical: int y value in pixels to render
+    :param constants: constants
+    :return: the current int vertical value
+    """
     horizontal = 4 * constants['tab'] + constants['margin']
     text = constants['font'].render('Totals:', True, constants['colors']['text'])
     text_rect = text.get_rect(topright=(horizontal, vertical))
@@ -153,6 +174,14 @@ def render_cargo_totals(inventory_surf, cargo, vertical, constants):
 
 
 def render_cargo(inventory_surf, cargo, vertical, constants):
+    """
+    Render the name and quantity, the send to subroutine for the float renders of weight and volume
+    :param inventory_surf: Surface to render on
+    :param cargo: Cargo component
+    :param vertical: int y value in pixels to render
+    :param constants: constants
+    :return: the current int vertical value
+    """
     for item in cargo.manifest:
         horizontal = constants['margin']
         inventory_surf.blit(item.icon, (constants['margin'], vertical))
@@ -180,6 +209,16 @@ def render_cargo(inventory_surf, cargo, vertical, constants):
 
 
 def render_cargo_info(surface, field, font, color, horizontal, vertical):
+    """
+    Render float weight and volume fields for a type of cargo
+    :param surface: Surface to render on
+    :param field: id of which field to render (weight, volume)
+    :param font: Font used to render
+    :param color: tuple of color values
+    :param horizontal: int x in pixels for render location
+    :param vertical: int y in pixels for render location
+    :return: None
+    """
     text = font.render("{:10.2f}".format(field), True, color)
     # print(horizontal, vertical)
     text_rect = text.get_rect(topright=(horizontal, vertical))
@@ -187,6 +226,12 @@ def render_cargo_info(surface, field, font, color, horizontal, vertical):
 
 
 def render_messages(message_log, constants):
+    """
+    Render the messages in the message panel - adjusted by view
+    :param message_log: the MessageLog with messages to render
+    :param constants: constants
+    :return: bordered Surface to render on main display
+    """
     message_surf = pygame.Surface((constants['message_width'] - 2 * constants['margin'],
                                    constants['message_height'] - 2 * constants['margin']))
     message_surf.fill(constants['colors']['dark_gray'])
@@ -207,6 +252,17 @@ def render_messages(message_log, constants):
 
 
 def render_board(game_map, player, entities, constants, game_state, game_time, game_weather):
+    """
+    Generate the surface containing the play area information
+    :param game_map: map information
+    :param player: player Entity information (mostly for centering camera)
+    :param entities: list of Entity objects to render
+    :param constants: constants
+    :param game_state: rendering switches depending on GameState value
+    :param game_time: current time of the game
+    :param game_weather: current weather in the map
+    :return: bordered Surface to render on main display
+    """
     game_map_surf = pygame.Surface((constants['board_width'] * constants['tile_size'] - 2 * constants['margin'],
                                     constants['board_height'] * constants['tile_size'] - constants['half_tile']))
     game_map_surf.fill(constants['colors']['dark_gray'])
@@ -304,7 +360,7 @@ def render_board(game_map, player, entities, constants, game_state, game_time, g
     
     render_time(game_time=game_time, view_surf=view_surf, constants=constants)
     render_weather(game_time=game_time, game_weather=game_weather, view_surf=view_surf, constants=constants)
-    render_wind(game_map=game_map, view_surf=view_surf, constants=constants)
+    render_wind(direction=game_map.wind_direction, view_surf=view_surf, constants=constants)
     
     border_panel = pygame.Surface((constants['view_width'],
                                    constants['view_height']))
@@ -312,29 +368,24 @@ def render_board(game_map, player, entities, constants, game_state, game_time, g
     
     border_panel.blit(view_surf, (constants['margin'], constants['margin']))
     return border_panel
-    
-    # # wind direction
-    # direction_text = constants['font'].render('Wind Direction:', True, constants['colors'].get('text'))
-    # status_panel.blit(direction_text, (constants['half_tile'], constants['half_tile']))
-    # status_panel.blit(constants['icons']['compass'],
-    #                   (constants['status_width'] - 2 * constants['tile_size'] + constants['margin'],
-    #                    2 * constants['margin']))
-    # if game_map.wind_direction is not None:
-    #     status_panel.blit(rot_center(constants['icons']['pointer'], direction_angle[game_map.wind_direction]),
-    #                       (constants['status_width'] - 2 * constants['tile_size'] + constants['margin'],
-    #                        2 * constants['margin']))
-    # vertical = constants['tile_size'] + constants['margin']
 
 
-def render_wind(game_map, view_surf, constants):
+def render_wind(direction, view_surf, constants):
+    """
+    Render the wind information
+    :param direction: direction the wind is blowing
+    :param view_surf: Surface to render on
+    :param constants: constants
+    :return: None
+    """
     wind_dir = {0: 'North',
                 1: 'Northwest',
                 2: 'Southwest',
                 3: 'South',
                 4: 'Southeast',
                 5: 'Northeast'}
-    if game_map.wind_direction is not None:
-        text = 'Wind to {}'.format(wind_dir[game_map.wind_direction])
+    if direction is not None:
+        text = 'Wind to {}'.format(wind_dir[direction])
     else:
         text = 'No Wind'
     (width, height) = constants['font'].size(text)
@@ -346,8 +397,8 @@ def render_wind(game_map, view_surf, constants):
     wind_surf.blit(wind_text, (0, (wind_surf.get_height() - constants['font'].get_height()) // 2 + 1))
     wind_surf.blit(compass, (wind_surf.get_width() - compass.get_width(), 0))
     
-    if game_map.wind_direction is not None:
-        wind_surf.blit(rot_center(image=constants['icons']['pointer'], angle=direction_angle[game_map.wind_direction]),
+    if direction is not None:
+        wind_surf.blit(rot_center(image=constants['icons']['pointer'], angle=direction_angle[direction]),
                        (wind_surf.get_width() - compass.get_width(), 0))
     
     border_panel = pygame.Surface((wind_surf.get_width() + 2 * constants['margin'],
@@ -359,6 +410,13 @@ def render_wind(game_map, view_surf, constants):
 
 
 def render_time(game_time, view_surf, constants):
+    """
+    Render the time information
+    :param game_time: current game Time
+    :param view_surf: Surface to render on
+    :param constants: constants
+    :return: None
+    """
     text = '{}.{:02d}.{} {:02d}:{:02d}'.format(game_time.year, game_time.month, game_time.day, game_time.hrs,
                                                game_time.min)
     (width, height) = constants['font'].size(text)
@@ -379,6 +437,14 @@ def render_time(game_time, view_surf, constants):
 
 
 def render_weather(game_time, game_weather, view_surf, constants):
+    """
+    Render the weather information
+    :param game_time: current game Time
+    :param game_weather: current map Weather
+    :param view_surf: Surface to render on
+    :param constants: constants
+    :return: None
+    """
     weather_dict = game_weather.get_weather_info
     time_dict = game_time.get_time_of_day_info
     
@@ -423,9 +489,9 @@ def render_weather(game_time, game_weather, view_surf, constants):
             offset = 1
         sky_surf.blit(moon_shadow_icon, (icon_x - abs(game_time.day - 15 - offset) - 8, icon_y))
     
-    # icon = constants['icons'][weather_dict['name'].lower()]
-    # for x in range(sky_surf.get_width() // icon.get_width()):
-    #     sky_surf.blit(icon, (x * icon.get_width(), (x + 1) % 2))
+    icon = constants['icons'][weather_dict['name'].lower()]
+    for x in range(sky_surf.get_width() // icon.get_width()):
+        sky_surf.blit(icon, (x * icon.get_width(), (x + 1) % 2))
     
     weather_surf = pygame.Surface((width + constants['margin'] + sky_surf.get_width(), constants['tile_size']))
     weather_surf.fill(constants['colors']['dark_gray'])
@@ -459,6 +525,12 @@ def colorize(image, new_color):
 
 
 def render_status(player, constants):
+    """
+    Render the player status panel
+    :param player: the Player Entity
+    :param constants: constants
+    :return: bordered Player Status panel
+    """
     # Status Panel
     status_panel = pygame.Surface((constants['status_width'] - 2 * constants['margin'],
                                    constants['status_height'] - 2 * constants['margin']))
@@ -482,6 +554,15 @@ def render_status(player, constants):
 
 
 def render_control(game_map, player, entities, constants, game_state):
+    """
+    Render the currently available keys depending on Game State
+    :param game_map: GameMap
+    :param player: the player Entity
+    :param entities: list of Entities in play area
+    :param constants: constants
+    :param game_state: current GameState
+    :return: bordered Surface to render
+    """
     control_panel = pygame.Surface((constants['control_width'] - 2 * constants['margin'],
                                     constants['control_height'] - 2 * constants['margin']))
     control_panel.fill(constants['colors']['dark_gray'])
@@ -691,6 +772,19 @@ def render_control(game_map, player, entities, constants, game_state):
 #     status_panel.blit(xy_text, xy_rect)
 
 def make_arrow_button(panel, split, margin, rotation, text, icon, font, color, vertical):
+    """
+    Creates and renders an arrow button and description in control panel
+    :param panel: Surface to render on
+    :param split: vertical line - render button on one side, text on the other
+    :param margin: int spacing in pixels
+    :param rotation: degrees to rotate icon
+    :param text: str action corresponding to the arrow button
+    :param icon: arrow icon
+    :param font: Font for rendering name
+    :param color: color of the text to render
+    :param vertical: int y value to render at
+    :return: current vertical value
+    """
     panel.blit(rot_center(image=icon, angle=rotation),
                (split - margin - icon.get_width(), vertical))
     panel.blit(font.render(text, True, color),
@@ -700,6 +794,19 @@ def make_arrow_button(panel, split, margin, rotation, text, icon, font, color, v
 
 
 def make_text_button(panel, split, margin, name, text, font, color, bkg_color, vertical):
+    """
+    Creates and renders the key button and description in control panel
+    :param panel: Surface to render on
+    :param split: vertical line - render button on one side, text on the other
+    :param margin: int spacing in pixels
+    :param name: str name of the key
+    :param text: str action corresponding to the text button
+    :param font: Font for rendering name and key
+    :param color: color of the text to render
+    :param bkg_color: background color (for reversing the colors of the key name)
+    :param vertical: int y value to render at
+    :return: current vertical value
+    """
     key_text = font.render(name, True, bkg_color)
     w, h = font.size(name)
     key_surf = pygame.Surface((w + 3, h))
@@ -713,6 +820,12 @@ def make_text_button(panel, split, margin, name, text, font, color, bkg_color, v
 
 
 def render_border(panel, color):
+    """
+    Draws a border around the edge of the given panel
+    :param panel: Surface to draw on
+    :param color: color of the border
+    :return: None
+    """
     pygame.draw.lines(panel, color, True,
                       ((2, 2),
                        (panel.get_width() - 3, 2),
@@ -721,6 +834,16 @@ def render_border(panel, color):
 
 
 def render_entity_info(panel, entity, font, colors, margin, vertical):
+    """
+    Renders entity information on a given panel
+    :param panel: Surface to draw on
+    :param entity: list of Entity Objects
+    :param font: Font for rendering
+    :param colors: dict of color values
+    :param margin: int pixel spacing
+    :param vertical: int y position for rendering
+    :return: int current vertical value
+    """
     # ship name
     name_text = font.render(entity.name, True, colors['text'])
     panel.blit(name_text, (0, vertical + 1))
@@ -809,6 +932,15 @@ def render_entity_info(panel, entity, font, colors, margin, vertical):
 
 
 def render_weapons(panel, entity, font, colors, vertical):
+    """
+    Render the Weapons of an entity - name, location, current cooldown, and HPs
+    :param panel: Surface to draw on
+    :param entity: list of Entity Objects
+    :param font: Font for rendering
+    :param colors: dict of color values
+    :param vertical: int y position for rendering
+    :return: int current vertical value
+    """
     for weapon in entity.weapons.weapon_list:
         if weapon.current_cd == 0:
             color = colors['text']
@@ -823,6 +955,18 @@ def render_weapons(panel, entity, font, colors, vertical):
 
 
 def make_bar(text, font, font_color, current, maximum, top_color, bottom_color, bar_width):
+    """
+    Renders a visual meter
+    :param text: name of the values to render
+    :param font: Font for rendering
+    :param font_color: text color to render
+    :param current: current value
+    :param maximum: maximum value
+    :param top_color: brighter top color of bar
+    :param bottom_color: darker background color of bar
+    :param bar_width: width of the bar surface
+    :return: Surface to render
+    """
     max_bar = pygame.Surface((bar_width, font.get_height()))
     max_bar.fill(bottom_color)
     if maximum > 0:
@@ -841,7 +985,13 @@ def make_bar(text, font, font_color, current, maximum, top_color, bottom_color, 
 
 
 def rot_center(image, angle):
-    """rotate an image while keeping its center and size"""
+    """
+    Rotate an image while keeping its center and size - counter clockwise rotation
+    :param image: Surface icon
+    :param angle: how much to rotate image
+    :return: rotated icon as a Surface
+    
+    """
     orig_rect = image.get_rect()
     rot_image = pygame.transform.rotate(image, angle)
     rot_rect = orig_rect.copy()
@@ -851,6 +1001,14 @@ def rot_center(image, angle):
 
 
 def render_map(game_map, player, entities, constants):
+    """
+    Render the current play area
+    :param game_map: the current GameMap
+    :param player: player Entity
+    :param entities: list of Entity objects
+    :param constants: constants
+    :return: bordered panel to render
+    """
     map_surf = pygame.Surface((constants['map_width'] - 2 * constants['margin'],
                                constants['map_height'] - 2 * constants['margin']))
     map_surf.fill(constants['colors']['dark_gray'])
@@ -914,6 +1072,16 @@ def render_map(game_map, player, entities, constants):
 
 
 def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants):
+    """
+    Returns a surface of information under mouse location, including terrain, decorations, entity information
+    :param game_map: current GameMap
+    :param player: player Entity
+    :param entities: list of Entity Objects
+    :param mouse_x: int x value of mouse location in pixels
+    :param mouse_y: int y value of mouse location in pixels
+    :param constants: constants
+    :return: bordered Surface of information under mouse location
+    """
     grid_x, grid_y = get_grid_from_coords(coords=(mouse_x, mouse_y),
                                           player_coords=(player.x, player.y),
                                           constants=constants)
@@ -1048,6 +1216,13 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
 
 
 def create_ship_icon(entity, constants):
+    """
+    Create ship icon from a spritesheet
+    TODO: actually use the ship entity's icon, rather than just counting the size/masts
+    :param entity: Entity's icon to be generated
+    :param constants: constants
+    :return: created ship icon
+    """
     size = constants['tile_size']
     icon = pygame.Surface((size, size))
     icon.set_colorkey(constants['colors']['black'])

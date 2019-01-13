@@ -1,8 +1,8 @@
 from queue import Queue
 from random import randint
 
-from src.map_objects.map_utils import hex_directions, get_hex_land_neighbors
-from src.map_objects.tile import Terrain, Decoration, Elevation
+from map_objects.map_utils import hex_directions, get_hex_land_neighbors
+from map_objects.tile import Terrain, Decoration, Elevation
 
 
 def generate_terrain(game_map, island_size: int, max_seeds: int):

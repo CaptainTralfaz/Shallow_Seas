@@ -1,8 +1,8 @@
 from random import randint
 
-from src.components.mobile import can_move_direction
-from src.death_functions import kill_player
-from src.map_objects.map_utils import get_hex_neighbors, hex_to_cube, Hex, get_spatial_relation, \
+from components.mobile import can_move_direction
+from death_functions import kill_player
+from map_objects.map_utils import get_hex_neighbors, hex_to_cube, Hex, get_spatial_relation, \
     cube_add, cube_direction, cube_to_hex
 
 

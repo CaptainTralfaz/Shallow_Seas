@@ -1,5 +1,5 @@
-from src.game_states import GameStates
-from src.render_functions import RenderOrder
+from game_states import GameStates
+from render_functions import RenderOrder
 
 
 def kill_player(player, icons):

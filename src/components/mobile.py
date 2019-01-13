@@ -1,6 +1,6 @@
-from src.map_objects.map_utils import hex_directions
-from src.map_objects.tile import Elevation
-from src.death_functions import kill_player, kill_monster
+from map_objects.map_utils import hex_directions
+from map_objects.tile import Elevation
+# from death_functions import kill_player, kill_monster
 
 
 class Mobile:

@@ -1,18 +1,18 @@
 from random import randint
 
-from src.components.ai import PeacefulMonster, MeleeMonster
-from src.components.cargo import Cargo, ItemCategory, Item
-from src.components.fighter import Fighter
-from src.components.mobile import Mobile
-from src.components.size import Size
-from src.components.view import View
-from src.components.wings import Wings
-from src.entity import Entity
-from src.map_objects.map_generator import generate_terrain
-from src.map_objects.map_utils import hex_directions
-from src.map_objects.tile import Decoration, Elevation
-from src.render_functions import RenderOrder
-from src.weather import weather_effects
+from components.ai import PeacefulMonster, MeleeMonster
+from components.cargo import Cargo, ItemCategory, Item
+from components.fighter import Fighter
+from components.mobile import Mobile
+from components.size import Size
+from components.view import View
+from components.wings import Wings
+from entity import Entity
+from map_objects.map_generator import generate_terrain
+from map_objects.map_utils import hex_directions
+from map_objects.tile import Decoration, Elevation
+from render_functions import RenderOrder
+from weather import weather_effects
 
 
 class GameMap:
