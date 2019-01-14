@@ -63,47 +63,50 @@ def get_grid_from_coords(coords, player_coords, constants):
 
 def get_hex_land_neighbors(height_map, x, y):
     """
-    Returns neighboring land tiles of a given (x, y) map coordinate TODO: this should use cubes
+    Returns neighboring land tiles of a given (x, y) map coordinate
     :param height_map: elevation grid of the neighboring hexes
     :param x: int x of the game map coordinate
     :param y: int y of the game map coordinate
     :return: list of tile coordinate (x, y) tuples
     """
     neighbors = []
-    for direction in hex_directions:
-        dx, dy = direction
-        if height_map[dx + x][dy + y + (x % 2) * (dx % 2)] >= Elevation.DUNES.value:
-            neighbors.append((dx + x, dy + y + (x % 2) * (dx % 2)))
+    for direction in cube_directions:
+        start_cube = hex_to_cube(hexagon=Hex(column=x, row=y))
+        neighbor_hex = cube_to_hex(cube=cube_add(cube1=start_cube, cube2=direction))
+        if height_map[neighbor_hex.col][neighbor_hex.row] >= Elevation.DUNES.value:
+            neighbors.append((neighbor_hex.col, neighbor_hex.row))
     return neighbors
 
 
 def get_hex_water_neighbors(height_map, x, y):
     """
-    Returns neighboring water tiles of a given (x, y) map coordinate TODO: this should use cubes
+    Returns neighboring water tiles of a given (x, y) map coordinate
     :param height_map: elevation grid of the neighboring hexes
     :param x: int x of the game map coordinate
     :param y: int y of the game map coordinate
     :return: list of tile coordinate (x, y) tuples
     """
     neighbors = []
-    for direction in hex_directions:
-        dx, dy = direction
-        if height_map[dx + x][dy + y + (x % 2) * (dx % 2)] < Elevation.DUNES.value:
-            neighbors.append((dx + x, dy + y + (x % 2) * (dx % 2)))
+    for direction in cube_directions:
+        start_cube = hex_to_cube(hexagon=Hex(column=x, row=y))
+        neighbor_hex = cube_to_hex(cube=cube_add(cube1=start_cube, cube2=direction))
+        if height_map[neighbor_hex.col][neighbor_hex.row] < Elevation.DUNES.value:
+            neighbors.append((neighbor_hex.col, neighbor_hex.row))
     return neighbors
 
 
 def get_hex_neighbors(x, y):
     """
-    Returns all neighboring tiles of a given (x, y) map coordinate TODO: this should use cubes
+    Returns all neighboring tiles of a given (x, y) map coordinate
     :param x: int x of the game map coordinate
     :param y: int y of the game map coordinate
     :return: list of tile coordinate (x, y) tuples
     """
     neighbors = []
-    for direction in hex_directions:
-        dx, dy = direction
-        neighbors.append((dx + x, dy + y + (x % 2) * (dx % 2)))
+    for direction in cube_directions:
+        start_cube = hex_to_cube(hexagon=Hex(column=x, row=y))
+        neighbor_hex = cube_to_hex(cube=cube_add(cube1=start_cube, cube2=direction))
+        neighbors.append((neighbor_hex.col, neighbor_hex.row))
     return neighbors
 
 

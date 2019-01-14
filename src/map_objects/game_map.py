@@ -9,7 +9,7 @@ from components.view import View
 from components.wings import Wings
 from entity import Entity
 from map_objects.map_generator import generate_terrain
-from map_objects.map_utils import hex_directions
+from map_objects.map_utils import hex_directions, hex_to_cube, Hex, cube_to_hex, cube_directions, cube_add
 from map_objects.tile import Decoration, Elevation
 from render_functions import RenderOrder
 from weather import weather_effects
@@ -67,7 +67,7 @@ class GameMap:
     
     def roll_fog(self, game_time, game_weather):
         """
-        Moves the fog in the direction of the wind TODO change to cubic coordinates
+        Moves the fog in the direction of the wind
         :param game_time: current time of day (effects amount of fog)
         :param game_weather: current weather (effects amount of fog)
         :return: None - modifies list of lists object directly
@@ -78,9 +78,12 @@ class GameMap:
             for x in range(self.width):
                 for y in range(self.height):
                     if self.fog[x][y]:
-                        dx, dy = hex_directions[self.wind_direction]
-                        if self.in_bounds(dx + x, dy + y + (x % 2) * (dx % 2), margin=-1):
-                            grid[dx + x][dy + y + (x % 2) * (dx % 2)] = True
+                        start_cube = hex_to_cube(Hex(x, y))
+                        neighbor_cube = cube_directions[self.wind_direction]
+                        # dx, dy = hex_directions[self.wind_direction]
+                        neighbor_hex = cube_to_hex(cube_add(start_cube, neighbor_cube))
+                        if self.in_bounds(neighbor_hex.col, neighbor_hex.row, margin=-1):
+                            grid[neighbor_hex.col][neighbor_hex.row] = True
             self.fog = grid
             self.add_fog_at_border(game_time, game_weather)
     

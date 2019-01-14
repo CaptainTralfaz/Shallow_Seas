@@ -1,13 +1,14 @@
 from queue import Queue
 from random import randint
 
-from map_objects.map_utils import hex_directions, get_hex_land_neighbors
+from map_objects.map_utils import hex_directions, get_hex_land_neighbors, cube_directions, hex_to_cube, cube_to_hex, \
+    cube_add, Hex
 from map_objects.tile import Terrain, Decoration, Elevation
 
 
 def generate_terrain(game_map, island_size: int, max_seeds: int):
     """
-    Generates the terrain on the map, and add the location of the port TODO: change to cubic coordinates
+    Generates the terrain on the map, and add the location of the port
     :param game_map: GameMap - the current map
     :param island_size: int - maximum steps for walking
     :param max_seeds: maximum number of paths that will be drunk-walked to create island chains
@@ -20,16 +21,17 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
     for seed in seeds:
         size = randint(island_size // 2, island_size)
         x, y = seed
+        cube_seed = hex_to_cube(Hex(column=x, row=y))
         for i in range(size):
-            move = randint(0, len(hex_directions))
-            if move == len(hex_directions):
-                dx = 0
-                dy = 0
+            direction = randint(0, len(cube_directions))
+            if direction == len(cube_directions):
+                new_cube = cube_seed
             else:
-                dx, dy = hex_directions[move]
-                if dx != 0:
-                    dy += x % 2
+                new_cube = cube_directions[direction]
             # make sure direction is not out of bounds (leaving a 1 tile margin around map)
+            new_hex = cube_to_hex(new_cube)
+            dx = new_hex.col
+            dy = new_hex.row
             if game_map.in_bounds(x=x + dx, y=y + dy, margin=1):
                 x = x + dx
                 y = y + dy
@@ -41,17 +43,17 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
     port_x = None
     port_y = None
     for island in islands:
+        print(island)
         for tile in island:
             tile_x, tile_y = tile
-            for direction in hex_directions:
-                dx, dy = direction
-                x = dx + tile_x
-                if dx == 0:
-                    y = dy + tile_y
-                else:
-                    y = dy + tile_y + tile_x % 2
-                if (0 <= x < game_map.width) and (0 <= y < game_map.height) and height_map[x][y] == 0:
-                    height_map[x][y] += 1
+            cube_tile = hex_to_cube(Hex(column=tile_x, row=tile_y))
+            # surround each island tile with at least elevation 1
+            for direction in cube_directions:
+                new_hex = cube_to_hex(cube_add(cube_tile, direction))
+                x = new_hex.col
+                y = new_hex.row
+                if game_map.in_bounds(x=x, y=y) and height_map[x][y] < Elevation.SHALLOWS.value:
+                    height_map[x][y] = Elevation.SHALLOWS.value
         
         if len(island) == largest and not (port_x or port_y):
             valid_tiles = remove_bad_tiles(height_map, island)
@@ -60,8 +62,8 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
     
     for x in range(game_map.width):
         for y in range(game_map.height):
-            if height_map[x][y] > 7:
-                height_map[x][y] = 7
+            if height_map[x][y] > Elevation.VOLCANO.value:
+                height_map[x][y] = Elevation.VOLCANO.value
             game_map.terrain[x][y] = Terrain(elevation=Elevation(height_map[x][y]))
             if x == port_x and y == port_y:
                 game_map.terrain[port_x][port_y].decoration = Decoration('Port')
@@ -78,7 +80,8 @@ def remove_bad_tiles(height_map, island):
     choices = []
     for (x, y) in island:
         # make sure elevation is sand, grass, or jungle, and make sure there is at least 1 water next to tile
-        if (3 <= height_map[x][y] <= 5) and len(get_hex_land_neighbors(height_map, x, y)) < 6:
+        if (Elevation.DUNES.value <= height_map[x][y] <= Elevation.JUNGLE.value) \
+                and len(get_hex_land_neighbors(height_map, x, y)) < 6:  # not surrounded by 6 land tiles
             choices.append((x, y))
     return choices
 
@@ -131,7 +134,7 @@ def find_all_islands(height_map, width, height):
     island_list = []
     for x in range(1, width - 2):
         for y in range(1, height - 2):
-            if (x, y) not in island_tiles and (x, y) not in explored and height_map[x][y] > Elevation.DUNES.value:
+            if (x, y) not in island_tiles and (x, y) not in explored and height_map[x][y] >= Elevation.DUNES.value:
                 # found a land tile, so...
                 #  get all tiles in this island
                 new_island_tiles = explore_hex_island_iterative(height_map=height_map, x=x, y=y)
@@ -143,7 +146,7 @@ def find_all_islands(height_map, width, height):
 
 def explore_hex_island_iterative(height_map, x, y):
     """
-    Finds all "islands" on the game map ("islands" are sets of adjacent land tiles)
+    Finds all "islands" on the game map. "islands" are sets of adjacent land tiles. "land tiles" have elevation > 2
     :param height_map: list of lists of int "elevation" values
     :param x: int x coordinate
     :param y: int y coordinate
