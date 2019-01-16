@@ -43,7 +43,7 @@ def generate_terrain(game_map, island_size: int, max_seeds: int):
     port_x = None
     port_y = None
     for island in islands:
-        print(island)
+        # print(island)
         for tile in island:
             tile_x, tile_y = tile
             cube_tile = hex_to_cube(Hex(column=tile_x, row=tile_y))
