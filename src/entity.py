@@ -1,4 +1,5 @@
 from render_functions import RenderOrder
+from components.size import Size
 
 
 class Entity:
@@ -6,7 +7,7 @@ class Entity:
     A generic object to represent ships, enemies, containers, etc.
     """
     
-    def __init__(self, name, x, y, icon, render_order=RenderOrder.CORPSE, ai=None, block_view=None, elevation=None,
+    def __init__(self, name, x, y, icon, render_order=RenderOrder.CORPSE, ai=None, block_view=None,
                  mobile=None, size=None, view=None, crew=None, mast_sail=None, weapons=None, wings=None,
                  cargo=None, sprite_sheet=None, fighter=None):
         # generics
@@ -18,7 +19,6 @@ class Entity:
         
         self.ai = ai
         self.block_view = block_view
-        self.elevation = elevation
         self.mobile = mobile
         self.size = size
         self.view = view
@@ -35,8 +35,6 @@ class Entity:
             self.ai.owner = self
         if self.block_view is not None:
             self.block_view.owner = self
-        if self.elevation is not None:
-            self.elevation.owner = self
         if self.mobile is not None:
             self.mobile.owner = self
         if self.size is not None:
@@ -57,3 +55,48 @@ class Entity:
             self.sprite_sheet.owner = self
         if self.fighter is not None:
             self.fighter.owner = self
+
+    def to_json(self):
+        return {
+            'name': self.name,
+            'x': self.x,
+            'y': self.y,
+            'icon': self.icon,
+            'render_order': self.render_order.value,
+            'ai': self.ai if self.ai else None,
+            'block_view': self.block_view if self.block_view else None,
+            'mobile': self.mobile if self.mobile else None,
+            'size': self.size.value if self.size else None,
+            'view': self.view.view if self.view else None,
+            'crew': self.crew if self.crew else None,
+            'mast_sail': self.mast_sail if self.mast_sail else None,
+            'weapons': self.weapons if self.weapons else None,
+            'wings': self.wings if self.wings else None,
+            'cargo': self.cargo if self.cargo else None,
+            'sprite_sheet': self.sprite_sheet if self.sprite_sheet else None,
+            'fighter': self.fighter if self.fighter else None
+        }
+
+    @staticmethod
+    def from_json(json_data):
+        name = json_data.get('name')
+        x = json_data.get('x')
+        y = json_data.get('y')
+        icon = json_data.get('icon')
+        render_order = json_data.get('render_order')
+        ai = json_data.get('ai')
+        block_view = json_data.get('block_view')
+        mobile = json_data.get('mobile')
+        size = json_data.get('size')
+        view = json_data.get('view')
+        crew = json_data.get('crew')
+        mast_sail = json_data.get('mast_sail')
+        weapons = json_data.get('weapons')
+        wings = json_data.get('wings')
+        cargo = json_data.get('cargo')
+        sprite_sheet = json_data.get('sprite_sheet')
+        fighter = json_data.get('fighter')
+
+        return Entity(name, x, y, icon, render_order=RenderOrder(render_order), ai=None, block_view=block_view,
+                      mobile=None, size=Size(size), view=None, crew=None, mast_sail=None, weapons=None, wings=None,
+                      cargo=None, sprite_sheet=None, fighter=None)

@@ -4,28 +4,64 @@ from map_objects.tile import Elevation
 
 
 class Mobile:
-    def __init__(self, direction, max_momentum, max_speed=2, speed=0):
+    def __init__(self, direction, max_momentum, current_momentum=None, max_speed=2, current_speed=0,
+                 rowing=False):
         """
         Component detailing movement for Entities that can do so
         :param direction: int direction Entity will travel (aka facing)
         :param max_momentum: int maximum size of momentum that can be built up before speed change
+        :param current_momentum: current momentum of entity
         :param max_speed: int maximum number of tiles an Entity can travel in a turn
-        :param speed: int current number of tiles an Entity will travel each turn
+        :param current_speed: int current number of tiles an Entity will travel each turn
+        :param rowing: denotes whether a mobile entity is rowing / swimming / generating momentum
+        :param catching_wind: denotes whether a mobile entity is using wind propulsion
         """
         self.direction = direction
         self.max_momentum = max_momentum
-        self.current_momentum = self.max_momentum
+        if current_momentum is None:
+            self.current_momentum = self.max_momentum
+        else:
+            self.current_momentum = current_momentum
         self.max_speed = max_speed
-        self.current_speed = speed
-        self.rowing = False
-        self.catching_wind = False
+        self.current_speed = current_speed
+        self.rowing = rowing
     
-    def move(self, game_map, player, icons):
+    def to_json(self):
+        """
+        Serialize Mobile component to json
+        :return: json serialized Mobile component
+        """
+        return {
+            'direction': self.direction,
+            'max_momentum': self.max_momentum,
+            'current_momentum': self.current_momentum,
+            'max_speed': self.max_speed,
+            'current_speed': self.current_speed,
+            'rowing': self.rowing
+        }
+
+    @staticmethod
+    def from_json(json_data):
+        """
+        Convert serialized json to Mobile component
+        :param json_data: serialized json Mobile component
+        :return: Mobile component
+        """
+        direction = json_data.get('direction')
+        max_momentum = json_data.get('max_momentum')
+        current_momentum = json_data.get('current_momentum')
+        max_speed = json_data.get('max_speed')
+        current_speed = json_data.get('current_speed')
+        rowing = json_data.get('rowing')
+
+        return Mobile(direction=direction, max_momentum=max_momentum, current_momentum=current_momentum,
+                      max_speed=max_speed, current_speed=current_speed, rowing=rowing)
+
+    def move(self, game_map, player):
         """
         Change tile coordinates in a line (determined by speed and direction of travel)
         :param game_map: current game map
         :param player: player entity
-        :param icons: for death functions
         :return: None
         """
         # Move the entity by their current_speed
@@ -57,20 +93,6 @@ class Mobile:
                     and not self.owner.wings:
                 if (self.owner.x, self.owner.y) in player.view.fov:
                     message = "{} crashed into island".format(self.owner.name)
-                    # if self.owner.fighter:
-                    #     death_result, details = self.owner.fighter.take_damage(self.current_speed)
-                    #                                                            # * self.owner.size.value)
-                    #     message += (' and takes {} {} damage!'.format(self.owner.name,
-                    #                                                   self.current_speed,  # * self.owner.size.value,
-                    #                                                   self.owner.fighter.name))
-                    #     if death_result:
-                    #         if self.owner.name == 'player':
-                    #             death_message, death_state = kill_player(player=player, icons=icons)
-                    #             results.append(death_message)
-                    #         else:
-                    #             kill_monster(entity=self.owner, icons=icons)
-                    # else:
-                    #     message += '!'
                     results.append(message)
                     results.append('{} speed and momentum reduced to 0'.format(self.owner.name))
                 self.current_speed = 0

@@ -2,25 +2,70 @@ from map_objects.map_utils import hex_directions
 
 
 class Masts:
-    def __init__(self, name, masts, size):
+    def __init__(self, name, masts, size=None, max_sails=None, current_sails=0, catching_wind=False, mast_hp_max=None,
+                 mast_hp=None, sail_hp_max=None, sail_hp=None):
         """
         Component detailing a ship's masts and sails
         TODO: methods for new mast / sail built in port
         :param name: string name of component (was going to use this for wings too, but made seperate compnent)
         :param masts: int number of masts ship starts with
-        :param size: int Size of the Entity (used to determine number of masts possible)
+        :param size: int Size of the Entity (used to determine number of masts possible & mast/sail HPs)
+        :param max_sails: int maximum number of sails
+        :param current_sails: int current number of sails raised
+        :param catching_wind: boolean using wind propulsion (to prevent drag)
+        :param mast_hp_max: int maximum hp of each mast
+        :param mast_hp: int current hp of mast
+        :param sail_hp_max: int maximum hp of each sail
+        :param sail_hp: int current hp of sail
         """
         self.name = name
-        self.size = size
         self.masts = masts
-        self.max_sails = masts
-        self.current_sails = 0
-        self.catching_wind = False
-        self.mast_hp_max = size + 3
-        self.mast_hp = self.mast_hp_max
-        self.sail_hp_max = size * 2 + 2
-        self.sail_hp = self.sail_hp_max
+        self.max_sails = max_sails if max_sails is not None else masts
+        self.current_sails = current_sails
+        self.catching_wind = catching_wind
+        self.mast_hp_max = mast_hp_max if mast_hp_max is not None else size + 3
+        self.mast_hp = mast_hp if mast_hp is not None else self.mast_hp_max
+        self.sail_hp_max = sail_hp_max if sail_hp_max is not None else size * 2 + 2
+        self.sail_hp = sail_hp if sail_hp is not None else size * 2 + 2
+
+    def to_json(self):
+        """
+        Serialize Masts component to json
+        :return: json serialized Masts component
+        """
+        return {
+            'name': self.name,
+            'masts': self.masts,
+            'max_sails': self.max_sails,
+            'current_sails': self.current_sails,
+            'catching_wind': self.catching_wind,
+            'mast_hp_max': self.mast_hp_max,
+            'mast_hp': self.mast_hp,
+            'sail_hp_max': self.sail_hp_max,
+            'sail_hp': self.sail_hp
+        }
     
+    @staticmethod
+    def from_json(json_data):
+        """
+        Convert json serialized Masts data to Masts component
+        :param json_data: serialized Masts data
+        :return: Masts component
+        """
+        name = json_data.get('name')
+        masts = json_data.get('masts')
+        max_sails = json_data.get('max_sails')
+        current_sails = json_data.get('current_sails')
+        catching_wind = json_data.get('catching_wind')
+        mast_hp_max = json_data.get('mast_hp_max')
+        mast_hp = json_data.get('mast_hp')
+        sail_hp_max = json_data.get('sail_hp_max')
+        sail_hp = json_data.get('sail_hp')
+        
+        return Masts(name=name, masts=masts, max_sails=max_sails, current_sails=current_sails,
+                     catching_wind=catching_wind, mast_hp_max=mast_hp_max, mast_hp=mast_hp, sail_hp_max=sail_hp_max,
+                     sail_hp=sail_hp)
+
     def adjust_sails(self, amount: int):
         """
         Raise or Lower sails
@@ -55,7 +100,7 @@ class Masts:
             if self.current_sails > self.max_sails:
                 self.current_sails = self.max_sails
             if self.max_sails > 0:
-                self.sail_hp = self.size * 2 + 2
+                self.sail_hp = self.owner.size * 2 + 2
         elif self.max_sails < 1:
             self.current_sails = 0
             self.max_sails = 0
@@ -84,7 +129,7 @@ class Masts:
             message += '!'
             results.append(message)
             if self.masts > 0 and self.max_sails > 0:
-                self.mast_hp += self.size + 3
+                self.mast_hp += self.owner.size + 3
         else:
             self.sail_hp -= amount
             results.append('A mast took {} damage'.format(amount))
@@ -97,8 +142,8 @@ class Masts:
         """
         results = []
         message = ""
-        if self.sail_hp + amount >= self.size * 2 + 2:
-            amount = self.size * 2 + 2 - self.sail_hp
+        if self.sail_hp + amount >= self.owner.size * 2 + 2:
+            amount = self.owner.size * 2 + 2 - self.sail_hp
             message = "fully "
         self.sail_hp += amount
         results.append("Sail {}repaired for {}".format(message, amount))
@@ -111,8 +156,8 @@ class Masts:
         """
         results = []
         message = ""
-        if self.mast_hp + amount >= self.size + 3:
-            amount = self.size + 3 - self.mast_hp
+        if self.mast_hp + amount >= self.owner.size + 3:
+            amount = self.owner.size + 3 - self.mast_hp
             message = "fully "
         self.mast_hp += amount
         results.append("Mast {}repaired for {}".format(message, amount))

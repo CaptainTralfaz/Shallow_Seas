@@ -418,7 +418,7 @@ def render_time(game_time, view_surf, constants):
     :return: None
     """
     text = '{}.{:02d}.{} {:02d}:{:02d}'.format(game_time.year, game_time.month, game_time.day, game_time.hrs,
-                                               game_time.min)
+                                               game_time.mins)
     (width, height) = constants['font'].size(text)
     time_text = constants['font'].render(text, True, constants['colors'].get('text'))
     time_surf = pygame.Surface((width, height * 2))
@@ -457,7 +457,7 @@ def render_weather(game_time, game_weather, view_surf, constants):
     else:
         icon = constants['icons']['moon']
     
-    numeric_time = 100 * game_time.hrs + 100 * game_time.min // 60  # Example: 6:45 = 675, 21:30 = 2150
+    numeric_time = 100 * game_time.hrs + 100 * game_time.mins // 60  # Example: 6:45 = 675, 21:30 = 2150
     if numeric_time < 600:
         relative_time = 600 + numeric_time
     elif 600 <= numeric_time < 1800:
@@ -913,7 +913,7 @@ def render_entity_info(panel, entity, font, colors, margin, vertical):
     if entity.crew:
         panel.blit(make_bar(text='Crew'.format(entity.fighter.name.capitalize()), font=font,
                             font_color=colors['text'],
-                            current=len(entity.crew.crew),
+                            current=len(entity.crew.crew_list),
                             maximum=entity.crew.max_crew,
                             top_color=colors['light_red'],
                             bottom_color=colors['dark_red'],

@@ -10,26 +10,86 @@ from components.wings import Wings
 from entity import Entity
 from map_objects.map_generator import generate_terrain
 from map_objects.map_utils import hex_directions, hex_to_cube, Hex, cube_to_hex, cube_directions, cube_add
-from map_objects.tile import Decoration, Elevation
+from map_objects.tile import Decoration, Elevation, Terrain
 from render_functions import RenderOrder
 from weather import weather_effects
 
 
 class GameMap:
-    def __init__(self, width: int, height: int):
+    def __init__(self, width, height, wind_turn_count=0, max_wind_count=50, terrain=None, wind_dir=6, fog=None):
         """
         The GameMap object, which holds the game map, map width, map height, wind information, fog map, elevation map
         :param width: width of the game map
         :param height: height of the game map
+        :param wind_turn_count: int current count of turns since last wind change
+        :param max_wind_count: int maximum turn count before wind change
+        :param terrain: list of lists of Terrain tiles
+        :param wind_dir: direction of wind; if 6+ run starting wind function
+        :param fog: list of lists of Booleans; if None run starting fog function
         """
         self.width = width
         self.height = height
-        self.wind_direction = self.starting_wind
-        self.wind_turn_count = 0
-        self.max_wind_count = 50
-        self.terrain = [[None for y in range(height)] for x in range(width)]
-        self.fog = self.starting_fog  # Two fogs obscure line of sight
-    
+        self.wind_turn_count = wind_turn_count
+        self.max_wind_count = max_wind_count
+        
+        if terrain:
+            self.terrain = terrain
+        else:
+            self.terrain = [[None for y in range(height)] for x in range(width)]
+        
+        if wind_dir:
+            if wind_dir < 6:
+                self.wind_direction = wind_dir
+            else:
+                self.wind_direction = self.starting_wind
+        else:
+            self.wind_direction = None
+            
+        if fog:
+            self.fog = fog
+        else:
+            self.fog = self.starting_fog
+
+    def to_json(self):
+        """
+        Serialize GameMap to json
+        :return: json serialized GameMap
+        """
+        return {
+            'width': self.width,
+            'height': self.height,
+            'wind_direction': self.wind_direction,
+            'wind_turn_count': self.wind_turn_count,
+            'max_wind_count': self.max_wind_count,
+            'terrain': [[terrain.to_json() for terrain in terrain_rows] for terrain_rows in self.terrain],
+            'fog': self.fog,
+        }
+
+    @staticmethod
+    def from_json(json_data):
+        """
+        Convert GameMap object from serialized json
+        :param json_data: GameMap serialized json object
+        :return: GameMap object
+        """
+        width = json_data.get('width')
+        height = json_data.get('height')
+        wind_dir = json_data.get('wind_direction')
+        wind_turn_count = json_data.get('wind_turn_count')
+        max_wind_count = json_data.get('max_wind_count')
+        terrain_json = json_data.get('terrain')
+        fog = json_data.get('fog')
+
+        terrain = [[Terrain.from_json(json_tile=tile) for tile in tile_list] for tile_list in terrain_json]
+        
+        return GameMap(width=width,
+                       height=height,
+                       wind_turn_count=wind_turn_count,
+                       max_wind_count=max_wind_count,
+                       terrain=terrain,
+                       wind_dir=wind_dir,
+                       fog=fog)
+
     @property
     def starting_wind(self):
         """
@@ -365,9 +425,9 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                                          volume=size_component.value, quantity=1))
                     cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
                                             max_weight=size_component.value * 10 + 5, manifest=manifest)
-                    view_component = View(size_component.value + 3)
+                    view_component = View(view=size_component.value + 3)
                     mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
-                    fighter_component = Fighter("body", size_component.value * 10 + 5)
+                    fighter_component = Fighter(name="body", max_hps=size_component.value * 10 + 5)
                     ai_component = PeacefulMonster()
                     npc_icon = icons['sea_turtle']
                     npc = Entity(name='Sea Turtle', x=x, y=y,
@@ -391,10 +451,10 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                                          quantity=(size_component.value + 1) * 2))
                     cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
                                             max_weight=size_component.value * 10 + 5, manifest=manifest)
-                    view_component = View(size_component.value + 3)
+                    view_component = View(view=size_component.value + 3)
                     mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
-                    fighter_component = Fighter("body", size_component.value * 10 + 5)
-                    wing_component = Wings("wings", 2, size_component.value)
+                    fighter_component = Fighter(name="body", max_hps=size_component.value * 10 + 5)
+                    wing_component = Wings(name="wings", wings=2, size=size_component.value)
                     ai_component = MeleeMonster()
                     npc_icon = icons['giant_bat']
                     npc = Entity(name='Giant Bat', x=x, y=y,
@@ -419,9 +479,9 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                                          quantity=size_component.value + 1))
                     cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
                                             max_weight=size_component.value * 10 + 5, manifest=manifest)
-                    view_component = View(size_component.value + 3)
+                    view_component = View(view=size_component.value + 3)
                     mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
-                    fighter_component = Fighter("body", size_component.value * 10 + 5)
+                    fighter_component = Fighter(name="body", max_hps=size_component.value * 10 + 5)
                     ai_component = MeleeMonster()
                     npc_icon = icons['sea_serpent']
                     npc = Entity(name='Sea Serpent', x=x, y=y,

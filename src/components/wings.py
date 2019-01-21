@@ -2,21 +2,61 @@ from components.masts import with_wind, against_wind, cross_wind
 
 
 class Wings:
-    def __init__(self, name: str, wings: int, size: int):
+    def __init__(self, name: str, wings: int, size: int=None, max_wing_power: int=None, current_wing_power: int=0,
+                 catching_wind: bool=False, wing_hp_max: int=None, wing_hp: int=None):
         """
-        Component detailing a ship's masts and sails
+        Component detailing Entity Wing component
         TODO: methods for new mast / sail built in port
-        :param name: string name of component (was going to use this for wings too, but made seperate compnent)
-        :param wings: int number of masts ship starts with
-        :param size: int Size of the Entity (used to determine number of masts possible)
+        :param name: string name of component
+        :param wings: int number of wings Entity starts with
+        :param size: int Size of the Entity (used to determine HPs of wings)
+        :param max_wing_power: int maximum amount of power put into wings
+        :param current_wing_power: int current amount of power put into wings
+        :param catching_wind: boolean if wings are catching wind
+        :param wing_hp_max: int maximum HPs of wing
+        :param wing_hp: int current HPs of wing
         """
         self.name = name
-        self.size = size
-        self.max_wing_power = wings
-        self.current_wing_power = 0
-        self.catching_wind = False
-        self.wing_hp = size + 3
+        self.wings = wings
+        self.max_wing_power = max_wing_power if max_wing_power is not None else wings          # max_sails
+        self.current_wing_power = current_wing_power                                           # current_sails
+        self.catching_wind = catching_wind
+        self.wing_hp_max = wing_hp_max if wing_hp_max is not None else size + 3                # sail_hp_max
+        self.wing_hp = wing_hp if wing_hp is not None else wing_hp_max                         # sail_hp
+
+    def to_json(self):
+        """
+        Serialize Wings component to json
+        :return: json serialized Wings component
+        """
+        return {
+            'name': self.name,
+            'wings': self.wings,
+            'max_wing_power': self.max_wing_power,
+            'current_wing_power': self.current_wing_power,
+            'catching_wind': self.catching_wind,
+            'wing_hp_max': self.wing_hp_max,
+            'wing_hp': self.wing_hp
+        }
+
+    @staticmethod
+    def from_json(json_data):
+        """
+        Convert json serialized Wings data to Masts component
+        :param json_data: serialized Wings data
+        :return: Wings component
+        """
+        name = json_data.get('name')
+        wings = json_data.get('wings')
+        max_wing_power = json_data.get('max_wing_power')
+        current_wing_power = json_data.get('current_wing_power')
+        catching_wind = json_data.get('catching_wind')
+        wing_hp_max = json_data.get('wing_hp_max')
+        wing_hp = json_data.get('wing_hp')
     
+        return Wings(name=name, wings=wings, max_wing_power=max_wing_power, current_wing_power=current_wing_power,
+                     catching_wind=catching_wind, wing_hp_max=wing_hp_max, wing_hp=wing_hp)
+
     def adjust_wings(self, amount: int):
         """
         Raise or Lower wing power
@@ -41,7 +81,7 @@ class Wings:
             if self.current_wing_power > self.max_wing_power:
                 self.current_wing_power = self.max_wing_power
             if self.max_wing_power > 0:
-                self.wing_hp = self.size * 2 + 2
+                self.wing_hp = self.owner.size * 2 + 2
     
     def repair_wings(self, amount):
         """
@@ -50,8 +90,8 @@ class Wings:
         :return: list of str for message log
         """
         self.wing_hp += amount
-        if self.wing_hp > self.size * 2 + 2:
-            self.wing_hp = self.size * 2 + 2
+        if self.wing_hp > self.owner.size * 2 + 2:
+            self.wing_hp = self.owner.size * 2 + 2
     
     def momentum_due_to_wind(self, wind_direction: int,  message_log, color):
         """

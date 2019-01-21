@@ -2,16 +2,15 @@ from enum import Enum
 
 
 class Terrain:
-    def __init__(self, elevation):
+    def __init__(self, elevation, seen=False, decoration=None):
         """
         Height of terrain determines the terrain Enum value, name, mini-map color, and icon
         This class will also track if the tile has been seen, contains fog, or contains a decoration
         :param elevation: int elevation height
         """
         self.elevation = Elevation(elevation)
-        self.seen = False
-        self.fog = False
-        self.decoration = None
+        self.seen = seen
+        self.decoration = decoration
         
         if self.elevation == Elevation.DEEPS:
             self.name = 'Deep Sea'
@@ -46,16 +45,31 @@ class Terrain:
             self.icon = 'volcano'
             self.color = 'light_red'
 
-
+    def to_json(self):
+        return {
+            'elevation': self.elevation.value,
+            'seen': self.seen,
+            'decoration': self.decoration.name if self.decoration else None
+        }
+    
+    @staticmethod
+    def from_json(json_tile):
+        elevation = json_tile.get('elevation')
+        seen = json_tile.get('seen')
+        decoration = Decoration(json_tile.get('decoration')) if json_tile.get('decoration') else None
+        
+        return Terrain(elevation=elevation, seen=seen, decoration=decoration)
+        
+        
 class Decoration:
-    def __init__(self, name):
+    def __init__(self, name, icon=None, color=None):
         """
         Decoration name, icon, and mini-map color
         :param name: determines the icon and mini-map color
         """
         self.name = name
-        self.icon = None
-        self.color = None
+        self.icon = icon
+        self.color = color
         
         if self.name == 'Rocks':
             self.icon = 'rocks'

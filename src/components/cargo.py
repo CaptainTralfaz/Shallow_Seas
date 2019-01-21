@@ -16,6 +16,21 @@ class Cargo:
         self.max_weight = max_weight
         self.manifest = manifest
     
+    def to_json(self):
+        return {
+            'max_volume': self.max_volume,
+            'max_weight': self.max_weight,
+            'manifest': [item.to_json() for item in self.manifest]
+        }
+    
+    @staticmethod
+    def from_json(json_data):
+        max_volume = json_data.get('max_volume')
+        max_weight = json_data.get('max_weight')
+        manifest = [Item.from_json(item) for item in json_data.get('manifest')]
+    
+        return Cargo(max_volume=max_volume, max_weight=max_weight, manifest=manifest)
+    
     @property
     def weight(self):
         """
@@ -69,7 +84,7 @@ class Cargo:
 
 
 class Item:
-    def __init__(self, name, icon, category, weight, volume, quantity=0):
+    def __init__(self, name: str, icon: str, category, weight: float, volume: float, quantity: int=0):
         """
         Object holding an Item
         :param name: str name of the object
@@ -86,6 +101,37 @@ class Item:
         self.icon = icon
         self.category = category
     
+    def to_json(self):
+        """
+        Serialize Item object to json
+        :return: json representation of Item object
+        """
+        return {
+            'name': self.name,
+            'weight': self.weight,
+            'volume': self.volume,
+            'quantity': self.quantity,
+            'icon': self.icon,
+            'category': self.category.value
+        }
+    
+    @staticmethod
+    def from_json(json_data):
+        """
+        Deserialize Item object from json
+        :param json_data: json representation of Item object
+        :return: Item Object
+        """
+        name = json_data.get('name')
+        weight = json_data.get('weight')
+        volume = json_data.get('volume')
+        quantity = json_data.get('quantity')
+        icon = json_data.get('icon')
+        category = json_data.get('category')
+        
+        return Item(name=name, weight=weight, volume=volume, quantity=quantity, icon=icon,
+                    category=ItemCategory(category))
+
     def get_item_weight(self):
         """
         Determines the total weight of an Item

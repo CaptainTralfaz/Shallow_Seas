@@ -2,11 +2,36 @@ class Message:
     def __init__(self, text, color=(200, 200, 200)):
         """
         Holds a message, and that message's color
-        :param text: the text of the message
-        :param color: default color value of the text (basic text color)
+        :param text: str text of the message
+        :param color: tuple color value of the text
         """
         self.text = text
         self.color = color
+
+    def to_json(self):
+        """
+        Serialize Message object to json
+        :return: Serialized json of Message object
+        """
+        return {
+            'text': self.text,
+            'color': self.color
+        }
+
+    @staticmethod
+    def from_json(json_data):
+        """
+        Convert serialized json back to message object
+        :param json_data: Serialized json of Message object
+        :return: Message object
+        """
+        text = json_data.get('text')
+        color = json_data.get('color')
+
+        if color:
+            return Message(text, color)
+        else:
+            return Message(text)
 
 
 class MessageLog:
@@ -21,6 +46,35 @@ class MessageLog:
         self.height = height
         self.view_pointer = 0
         self.message_panel_size = panel_size
+    
+    def to_json(self):
+        """
+        Serialize MessageLog to json
+        :return: Serialized json of MessageLog
+        """
+        return {
+            'height': self.height,
+            'panel_size': self.message_panel_size,
+            'messages': [message.to_json() for message in self.messages]
+        }
+
+    @staticmethod
+    def from_json(json_data):
+        """
+        Convert serialized json to MessageLog object with messages
+        :param json_data: Serialized json of MessageLog
+        :return: MessageLog object with messages
+        """
+        height = json_data.get('height')
+        panel_size = json_data.get('panel_size')
+        messages_json = json_data.get('messages')
+
+        message_log = MessageLog(height=height, panel_size=panel_size)
+
+        for message_json in messages_json:
+            message_log.add_message(Message.from_json(message_json))
+
+        return message_log
     
     def add_message(self, message, color=(200, 200, 200)):
         """
