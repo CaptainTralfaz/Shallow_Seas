@@ -39,7 +39,7 @@ class Time:
         tick = json_data.get('tick')
         
         return Time(tick=tick, hrs=hrs, mins=mins, day=day, month=month, year=year)
-
+    
     def roll_min(self):
         """
         

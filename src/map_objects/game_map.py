@@ -44,12 +44,12 @@ class GameMap:
                 self.wind_direction = self.starting_wind
         else:
             self.wind_direction = None
-            
+        
         if fog:
             self.fog = fog
         else:
             self.fog = self.starting_fog
-
+    
     def to_json(self):
         """
         Serialize GameMap to json
@@ -64,7 +64,7 @@ class GameMap:
             'terrain': [[terrain.to_json() for terrain in terrain_rows] for terrain_rows in self.terrain],
             'fog': self.fog,
         }
-
+    
     @staticmethod
     def from_json(json_data):
         """
@@ -79,7 +79,7 @@ class GameMap:
         max_wind_count = json_data.get('max_wind_count')
         terrain_json = json_data.get('terrain')
         fog = json_data.get('fog')
-
+        
         terrain = [[Terrain.from_json(json_tile=tile) for tile in tile_list] for tile_list in terrain_json]
         
         return GameMap(width=width,
@@ -89,7 +89,7 @@ class GameMap:
                        terrain=terrain,
                        wind_dir=wind_dir,
                        fog=fog)
-
+    
     @property
     def starting_wind(self):
         """
@@ -408,7 +408,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                     manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'],
                                          category=ItemCategory.SUPPLIES, weight=1, volume=2,
                                          quantity=randint(0, 1) + 1))
-                    cargo_component = Cargo(max_volume=5,  max_weight=10, manifest=manifest)
+                    cargo_component = Cargo(max_volume=5, max_weight=10, manifest=manifest)
                     npc_icon = icons['salvage']
                     npc = Entity(name='Chest', x=x, y=y,
                                  icon=npc_icon,

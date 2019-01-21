@@ -6,10 +6,27 @@ from map_objects.map_utils import get_hex_neighbors, hex_to_cube, Hex, get_spati
     cube_add, cube_direction, cube_to_hex
 
 
+def ai_from_json(json_data):
+    name = json_data.get('name')
+    if name == 'PeacefulMonster':
+        return PeacefulMonster()
+    elif name == 'MeleeMonster':
+        return MeleeMonster()
+    else:
+        return None
+
+
 class PeacefulMonster:
     """
     A peaceful entity that wanders the map randomly
     """
+    
+    @staticmethod
+    def to_json():
+        return {
+            'name': 'PeacefulMonster'
+        }
+    
     def take_turn(self, game_map, target, message_log, colors, icons):
         entity = self.owner
         neighbors = get_hex_neighbors(x=entity.x, y=entity.y)
@@ -36,6 +53,13 @@ class MeleeMonster:  # Sea Serpent and Giant Bat
     """
     An entity that tries to get next to the player to attack
     """
+    
+    @staticmethod
+    def to_json():
+        return {
+            'name': 'MeleeMonster'
+        }
+    
     # TODO: find a way to implement last known location (last_seen) as a target hex - add state? need dijkstra maps
     def take_turn(self, game_map, target, message_log, colors, icons):
         state = None

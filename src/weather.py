@@ -34,7 +34,7 @@ class Weather:
         max_turn_count = json_weather.get('max_turn_count')
         
         return Weather(conditions=conditions, turn_count=turn_count, max_turn_count=max_turn_count)
-        
+    
     def calms(self, message_log, color):
         """
         Weather calms - lower condition value

@@ -28,7 +28,7 @@ class Cargo:
         max_volume = json_data.get('max_volume')
         max_weight = json_data.get('max_weight')
         manifest = [Item.from_json(item) for item in json_data.get('manifest')]
-    
+        
         return Cargo(max_volume=max_volume, max_weight=max_weight, manifest=manifest)
     
     @property
@@ -84,7 +84,7 @@ class Cargo:
 
 
 class Item:
-    def __init__(self, name: str, icon: str, category, weight: float, volume: float, quantity: int=0):
+    def __init__(self, name: str, icon: str, category, weight: float, volume: float, quantity: int = 0):
         """
         Object holding an Item
         :param name: str name of the object
@@ -131,7 +131,7 @@ class Item:
         
         return Item(name=name, weight=weight, volume=volume, quantity=quantity, icon=icon,
                     category=ItemCategory(category))
-
+    
     def get_item_weight(self):
         """
         Determines the total weight of an Item

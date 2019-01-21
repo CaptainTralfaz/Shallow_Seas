@@ -7,7 +7,7 @@ class Message:
         """
         self.text = text
         self.color = color
-
+    
     def to_json(self):
         """
         Serialize Message object to json
@@ -17,7 +17,7 @@ class Message:
             'text': self.text,
             'color': self.color
         }
-
+    
     @staticmethod
     def from_json(json_data):
         """
@@ -27,7 +27,7 @@ class Message:
         """
         text = json_data.get('text')
         color = json_data.get('color')
-
+        
         if color:
             return Message(text, color)
         else:
@@ -57,7 +57,7 @@ class MessageLog:
             'panel_size': self.message_panel_size,
             'messages': [message.to_json() for message in self.messages]
         }
-
+    
     @staticmethod
     def from_json(json_data):
         """
@@ -68,12 +68,12 @@ class MessageLog:
         height = json_data.get('height')
         panel_size = json_data.get('panel_size')
         messages_json = json_data.get('messages')
-
+        
         message_log = MessageLog(height=height, panel_size=panel_size)
-
+        
         for message_json in messages_json:
             message_log.add_message(Message.from_json(message_json))
-
+        
         return message_log
     
     def add_message(self, message, color=(200, 200, 200)):

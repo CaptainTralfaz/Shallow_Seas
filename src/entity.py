@@ -1,5 +1,8 @@
-from render_functions import RenderOrder
+from enum import Enum
+
+from components.ai import ai_from_json
 from components.size import Size
+from render_functions import RenderOrder
 
 
 class Entity:
@@ -7,9 +10,29 @@ class Entity:
     A generic object to represent ships, enemies, containers, etc.
     """
     
-    def __init__(self, name, x, y, icon, render_order=RenderOrder.CORPSE, ai=None, block_view=None,
-                 mobile=None, size=None, view=None, crew=None, mast_sail=None, weapons=None, wings=None,
-                 cargo=None, sprite_sheet=None, fighter=None):
+    def __init__(self, name: str, x: int, y: int, icon: str, render_order: Enum = RenderOrder.CORPSE, ai=None,
+                 block_view=None, mobile=None, size=None, view=None, crew=None, mast_sail=None, weapons=None,
+                 wings=None, cargo=None, sprite_sheet: str = None, fighter=None):
+        """
+        Initialize Entity object
+        :param name: str name of the object
+        :param x: int x location
+        :param y: int y location
+        :param icon: str name of icon
+        :param render_order: enum render order
+        :param ai: object AI component
+        :param block_view: boolean
+        :param mobile: object Mobile component
+        :param size: enum Size component
+        :param view: object View component
+        :param crew: object Crew component
+        :param mast_sail: object Masts component
+        :param weapons: object WeaponsList component
+        :param wings: object Wings component
+        :param cargo: object Cargo component
+        :param sprite_sheet: string name of SpriteSheet component  # Not used yet
+        :param fighter: object Fighter component
+        """
         # generics
         self.name = name
         self.x = x
@@ -55,7 +78,7 @@ class Entity:
             self.sprite_sheet.owner = self
         if self.fighter is not None:
             self.fighter.owner = self
-
+    
     def to_json(self):
         return {
             'name': self.name,
@@ -76,7 +99,7 @@ class Entity:
             'sprite_sheet': self.sprite_sheet if self.sprite_sheet else None,
             'fighter': self.fighter if self.fighter else None
         }
-
+    
     @staticmethod
     def from_json(json_data):
         name = json_data.get('name')
@@ -96,7 +119,7 @@ class Entity:
         cargo = json_data.get('cargo')
         sprite_sheet = json_data.get('sprite_sheet')
         fighter = json_data.get('fighter')
-
-        return Entity(name, x, y, icon, render_order=RenderOrder(render_order), ai=None, block_view=block_view,
-                      mobile=None, size=Size(size), view=None, crew=None, mast_sail=None, weapons=None, wings=None,
-                      cargo=None, sprite_sheet=None, fighter=None)
+        
+        return Entity(name, x, y, icon, render_order=RenderOrder(render_order), ai=ai_from_json(ai),
+                      block_view=block_view, mobile=mobile, size=Size(size), view=view, crew=crew, mast_sail=mast_sail,
+                      weapons=weapons, wings=wings, cargo=cargo, sprite_sheet=None, fighter=fighter)

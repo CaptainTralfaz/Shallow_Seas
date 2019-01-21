@@ -13,11 +13,11 @@ from components.weapon import WeaponList
 from entity import Entity
 from game_messages import MessageLog
 from game_states import GameStates
+from game_time import Time
 from input_handlers import handle_keys
 from loader_functions.initialize_new_game import get_constants
 from map_objects.game_map import make_map, change_wind, adjust_fog
 from render_functions import render_display, RenderOrder
-from game_time import Time
 from weather import Weather, change_weather
 
 
@@ -226,7 +226,7 @@ def main():
                         for weapon in entity.weapons.weapon_list:
                             if weapon.current_cd > 0:
                                 weapon.current_cd -= 1
-
+                
                 # ATTACKS ---------------------------------------------------------------------------------------------
                 if attack == 'Arrows':
                     message_log.add_message(message='Player attacks with {}!'.format(attack),
@@ -340,17 +340,17 @@ def main():
                                 message_log.add_message(message=detail, color=constants['colors']['aqua'])
                         if state:
                             game_state = state
-                            
+                
                 # SAILS / ROTATE --------------------------------------------------------------------------------------
                 if sails:
                     details = player.mast_sail.adjust_sails(amount=sails)
                     message_log.unpack(details=details, color=constants['colors']['aqua'])
-
+                
                 # rotate boat last
                 if rotate:
                     details = player.mobile.rotate(rotate=rotate)
                     message_log.unpack(details=details, color=constants['colors']['aqua'])
-
+                
                 if exit_screen:
                     game_quit = True
                 

@@ -1,5 +1,7 @@
 from map_objects.map_utils import hex_directions
 from map_objects.tile import Elevation
+
+
 # from death_functions import kill_player, kill_monster
 
 
@@ -39,7 +41,7 @@ class Mobile:
             'current_speed': self.current_speed,
             'rowing': self.rowing
         }
-
+    
     @staticmethod
     def from_json(json_data):
         """
@@ -53,10 +55,10 @@ class Mobile:
         max_speed = json_data.get('max_speed')
         current_speed = json_data.get('current_speed')
         rowing = json_data.get('rowing')
-
+        
         return Mobile(direction=direction, max_momentum=max_momentum, current_momentum=current_momentum,
                       max_speed=max_speed, current_speed=current_speed, rowing=rowing)
-
+    
     def move(self, game_map, player):
         """
         Change tile coordinates in a line (determined by speed and direction of travel)

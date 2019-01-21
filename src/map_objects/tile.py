@@ -44,7 +44,7 @@ class Terrain:
             self.name = 'Volcano'
             self.icon = 'volcano'
             self.color = 'light_red'
-
+    
     def to_json(self):
         return {
             'elevation': self.elevation.value,
@@ -59,8 +59,8 @@ class Terrain:
         decoration = Decoration(json_tile.get('decoration')) if json_tile.get('decoration') else None
         
         return Terrain(elevation=elevation, seen=seen, decoration=decoration)
-        
-        
+
+
 class Decoration:
     def __init__(self, name, icon=None, color=None):
         """

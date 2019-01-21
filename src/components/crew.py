@@ -5,7 +5,7 @@ from map_objects.map_utils import get_hex_neighbors
 
 
 class Crew:
-    def __init__(self, size: int, crew_size: int=None, crew_list=None):
+    def __init__(self, size: int, crew_size: int = None, crew_list=None):
         """
         Component detailing crew
         :param size: Entity Size to determine maximum number of crew
@@ -41,7 +41,7 @@ class Crew:
                      for crewman in json_crew_list]
         
         return Crew(size=max_crew, crew_list=crew_list)
-        
+    
     @staticmethod
     def starting_crew(crew_size):
         """
@@ -126,7 +126,7 @@ class Crew:
 
 
 class Crewman:
-    def __init__(self, name: str=None, profession: str=None):
+    def __init__(self, name: str = None, profession: str = None):
         """
         container for crew member
         :param name: str name of crewman

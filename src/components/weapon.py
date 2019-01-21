@@ -119,7 +119,7 @@ class WeaponList:
             if dead_result:  # entity is dead
                 details = kill_monster(entity=entity,
                                        icons=icons,
-                                       elevation = terrain[entity.x][entity.y].elevation.value)
+                                       elevation=terrain[entity.x][entity.y].elevation.value)
                 message_log.unpack(details=details, color=colors['amber'])
     
     def verify_target_at_location(self, attack, entities):
@@ -205,11 +205,11 @@ class Weapon:
         cool_down = json_data.get('cool_down')
         current_cd = json_data.get('current_cd')
         effects = json_data.get('effects')
-
+        
         return Weapon(name=name, location=location, min_range=min_range, max_range=max_range, hps=hps,
                       structure_points=max_hps, damage=damage, cool_down=cool_down, current_cd=current_cd,
                       effects=effects)
-
+    
     def take_damage(self, amount):
         """
         Adjust Weapon HP value if it is damaged

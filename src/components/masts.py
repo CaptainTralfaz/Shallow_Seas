@@ -27,7 +27,7 @@ class Masts:
         self.mast_hp = mast_hp if mast_hp is not None else self.mast_hp_max
         self.sail_hp_max = sail_hp_max if sail_hp_max is not None else size * 2 + 2
         self.sail_hp = sail_hp if sail_hp is not None else size * 2 + 2
-
+    
     def to_json(self):
         """
         Serialize Masts component to json
@@ -65,7 +65,7 @@ class Masts:
         return Masts(name=name, masts=masts, max_sails=max_sails, current_sails=current_sails,
                      catching_wind=catching_wind, mast_hp_max=mast_hp_max, mast_hp=mast_hp, sail_hp_max=sail_hp_max,
                      sail_hp=sail_hp)
-
+    
     def adjust_sails(self, amount: int):
         """
         Raise or Lower sails

@@ -2,8 +2,8 @@ from components.masts import with_wind, against_wind, cross_wind
 
 
 class Wings:
-    def __init__(self, name: str, wings: int, size: int=None, max_wing_power: int=None, current_wing_power: int=0,
-                 catching_wind: bool=False, wing_hp_max: int=None, wing_hp: int=None):
+    def __init__(self, name: str, wings: int, size: int = None, max_wing_power: int = None, current_wing_power: int = 0,
+                 catching_wind: bool = False, wing_hp_max: int = None, wing_hp: int = None):
         """
         Component detailing Entity Wing component
         TODO: methods for new mast / sail built in port
@@ -18,12 +18,12 @@ class Wings:
         """
         self.name = name
         self.wings = wings
-        self.max_wing_power = max_wing_power if max_wing_power is not None else wings          # max_sails
-        self.current_wing_power = current_wing_power                                           # current_sails
+        self.max_wing_power = max_wing_power if max_wing_power is not None else wings  # max_sails
+        self.current_wing_power = current_wing_power  # current_sails
         self.catching_wind = catching_wind
-        self.wing_hp_max = wing_hp_max if wing_hp_max is not None else size + 3                # sail_hp_max
-        self.wing_hp = wing_hp if wing_hp is not None else wing_hp_max                         # sail_hp
-
+        self.wing_hp_max = wing_hp_max if wing_hp_max is not None else size + 3  # sail_hp_max
+        self.wing_hp = wing_hp if wing_hp is not None else wing_hp_max  # sail_hp
+    
     def to_json(self):
         """
         Serialize Wings component to json
@@ -38,7 +38,7 @@ class Wings:
             'wing_hp_max': self.wing_hp_max,
             'wing_hp': self.wing_hp
         }
-
+    
     @staticmethod
     def from_json(json_data):
         """
@@ -53,10 +53,10 @@ class Wings:
         catching_wind = json_data.get('catching_wind')
         wing_hp_max = json_data.get('wing_hp_max')
         wing_hp = json_data.get('wing_hp')
-    
+        
         return Wings(name=name, wings=wings, max_wing_power=max_wing_power, current_wing_power=current_wing_power,
                      catching_wind=catching_wind, wing_hp_max=wing_hp_max, wing_hp=wing_hp)
-
+    
     def adjust_wings(self, amount: int):
         """
         Raise or Lower wing power
@@ -93,7 +93,7 @@ class Wings:
         if self.wing_hp > self.owner.size * 2 + 2:
             self.wing_hp = self.owner.size * 2 + 2
     
-    def momentum_due_to_wind(self, wind_direction: int,  message_log, color):
+    def momentum_due_to_wind(self, wind_direction: int, message_log, color):
         """
         Adjust momentum due to wind: +2 per wing power if traveling with wind,
                                      +1 per wing power if direction is off by 1 facing

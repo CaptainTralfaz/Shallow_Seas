@@ -1,5 +1,5 @@
 class Fighter:
-    def __init__(self, name: str, max_hps: int, hps: int=None):
+    def __init__(self, name: str, max_hps: int, hps: int = None):
         """
         Component detailing HPs
         :param name: str name of part with HPs (ex: 'hull', 'body', 'structure', etc.
