@@ -1,7 +1,7 @@
 from queue import Queue
 from random import randint
 
-from map_objects.map_utils import hex_directions, get_hex_land_neighbors, cube_directions, hex_to_cube, cube_to_hex, \
+from map_objects.map_utils import get_hex_land_neighbors, cube_directions, hex_to_cube, cube_to_hex, \
     cube_add, Hex
 from map_objects.tile import Terrain, Decoration, Elevation
 

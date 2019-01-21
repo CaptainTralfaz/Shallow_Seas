@@ -13,11 +13,11 @@ from components.weapon import WeaponList
 from entity import Entity
 from game_messages import MessageLog
 from game_states import GameStates
+from game_time import Time
 from input_handlers import handle_keys
 from loader_functions.initialize_new_game import get_constants
 from map_objects.game_map import make_map, change_wind, adjust_fog
 from render_functions import render_display, RenderOrder
-from game_time import Time
 from weather import Weather, change_weather
 
 
@@ -40,7 +40,7 @@ def main():
     message_log = MessageLog(height=constants['log_size'], panel_size=constants['message_panel_size'])
     
     player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.SMALL
+    size_component = Size.MEDIUM
     manifest = []
     manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))
@@ -64,12 +64,12 @@ def main():
                             max_weight=size_component.value * 10 + 5,
                             manifest=manifest)
     view_component = View(view=size_component.value + 3)
-    fighter_component = Fighter("hull", size_component.value * 10 + 10)
+    fighter_component = Fighter(name="hull", max_hps=size_component.value * 10 + 10)
     weapons_component = WeaponList()
     weapons_component.add_all(size=str(size_component))  # Hacky for now
     mast_component = Masts(name="Mast", masts=size_component.value, size=size_component.value)
     mobile_component = Mobile(direction=0, max_momentum=int(size_component.value) * 2 + 2)
-    crew_component = Crew(size=size_component.value, crew=50)
+    crew_component = Crew(size=size_component.value, crew_size=50)
     player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
                     y=constants['board_height'] - 1, icon=player_icon, render_order=RenderOrder.PLAYER,
                     view=view_component, size=size_component, mast_sail=mast_component, mobile=mobile_component,
@@ -226,7 +226,7 @@ def main():
                         for weapon in entity.weapons.weapon_list:
                             if weapon.current_cd > 0:
                                 weapon.current_cd -= 1
-
+                
                 # ATTACKS ---------------------------------------------------------------------------------------------
                 if attack == 'Arrows':
                     message_log.add_message(message='Player attacks with {}!'.format(attack),
@@ -334,23 +334,23 @@ def main():
                 # MOVEMENT --------------------------------------------------------------------------------------------
                 for entity in entities:
                     if entity.mobile:
-                        details, state = entity.mobile.move(game_map=game_map, player=player, icons=constants['icons'])
+                        details, state = entity.mobile.move(game_map=game_map, player=player)
                         for detail in details:
                             if (entity.x, entity.y) in player.view.fov:
                                 message_log.add_message(message=detail, color=constants['colors']['aqua'])
                         if state:
                             game_state = state
-                            
+                
                 # SAILS / ROTATE --------------------------------------------------------------------------------------
                 if sails:
                     details = player.mast_sail.adjust_sails(amount=sails)
                     message_log.unpack(details=details, color=constants['colors']['aqua'])
-
+                
                 # rotate boat last
                 if rotate:
                     details = player.mobile.rotate(rotate=rotate)
                     message_log.unpack(details=details, color=constants['colors']['aqua'])
-
+                
                 if exit_screen:
                     game_quit = True
                 

@@ -1,13 +1,38 @@
 class Fighter:
-    def __init__(self, name: str, hps: int):
+    def __init__(self, name: str, max_hps: int, hps: int = None):
         """
         Component detailing HPs
         :param name: str name of part with HPs (ex: 'hull', 'body', 'structure', etc.
-        :param hps: int amount of maximum HPs
+        :param max_hps: int amount of maximum HPs
+        :param hps: int amount of current HPs
         """
         self.name = name
-        self.max_hps = hps
-        self.hps = hps
+        self.max_hps = max_hps
+        self.hps = hps if hps is not None else max_hps
+    
+    def to_json(self):
+        """
+        Serialize Fighter Object to json
+        :return: json Fighter representation
+        """
+        return {
+            'name': self.name,
+            'max_hps': self.max_hps,
+            'hps': self.hps
+        }
+    
+    @staticmethod
+    def from_json(json_data):
+        """
+        Convert json Fighter object representation to Fighter Object
+        :param json_data: json Fighter object representation
+        :return: Fighter object
+        """
+        name = json_data.get('name')
+        max_hps = json_data.get('max_hps')
+        hps = json_data.get('hps')
+        
+        return Fighter(name=name, max_hps=max_hps, hps=hps)
     
     def take_damage(self, amount: int):
         """

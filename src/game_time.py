@@ -2,23 +2,52 @@ from enum import Enum
 
 
 class Time:
-    def __init__(self, tick):
+    def __init__(self, tick, hrs=12, mins=00, day=1, month=1, year=1111):
         """
         Object holding game time information
         12 months per year, 30 days per month, 24 hrs per day, 60 minutes per hour
         
         """
-        self.hrs = 12
-        self.min = 00
-        self.day = 1
-        self.month = 1
-        self.year = 1111  # Year of Steve
+        self.hrs = hrs
+        self.mins = mins
+        self.day = day
+        self.month = month
+        self.year = year  # Year of Steve
         self.tick = tick
     
+    def to_json(self):
+        """
+        json serialized Time class
+        :return: json representation of Time
+        """
+        return {
+            'hrs': self.hrs,
+            'mins': self.mins,
+            'day': self.day,
+            'month': self.month,
+            'year': self.year,
+            'tick': self.tick
+        }
+    
+    @staticmethod
+    def from_json(json_data):
+        hrs = json_data.get('hrs')
+        mins = json_data.get('mins')
+        day = json_data.get('day')
+        month = json_data.get('month')
+        year = json_data.get('year')
+        tick = json_data.get('tick')
+        
+        return Time(tick=tick, hrs=hrs, mins=mins, day=day, month=month, year=year)
+    
     def roll_min(self):
-        self.min += self.tick
-        if self.min >= 60:
-            self.min -= 60
+        """
+        
+        :return: None
+        """
+        self.mins += self.tick
+        if self.mins >= 60:
+            self.mins -= 60
             self.roll_hrs()
     
     def roll_hrs(self):

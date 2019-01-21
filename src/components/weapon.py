@@ -32,6 +32,13 @@ class WeaponList:
         """
         self.weapon_list = []
     
+    def to_json(self):
+        return [weapon.to_json() for weapon in self.weapon_list]
+    
+    @staticmethod
+    def from_json(json_data):
+        return [Weapon.from_json(weapon) for weapon in json_data]
+    
     def add_all(self, size):  # TODO remove this later - just here to initialize a ship's weapons
         """
         Quick and dirty way to initial all ship weapons to ballistas
@@ -112,7 +119,7 @@ class WeaponList:
             if dead_result:  # entity is dead
                 details = kill_monster(entity=entity,
                                        icons=icons,
-                                       elevation = terrain[entity.x][entity.y].elevation.value)
+                                       elevation=terrain[entity.x][entity.y].elevation.value)
                 message_log.unpack(details=details, color=colors['amber'])
     
     def verify_target_at_location(self, attack, entities):
@@ -139,28 +146,69 @@ class WeaponList:
 
 
 class Weapon:
-    def __init__(self, name, location, min_range, max_range, structure_points, damage, cool_down=None, effects=None):
+    def __init__(self, name: str, location: str, min_range: int, max_range: int, structure_points: int, damage: int,
+                 hps=None, cool_down=None, current_cd=0, effects=None):
         """
-        
+        Object detailing Weapon components
         :param name: str name of Weapon
-        :param location: location of Weapon on Entity
+        :param location: str location of Weapon on Entity
         :param min_range: int minimum tile range for Weapon
         :param max_range: int maximum tile range for Weapon
-        :param structure_points: HP's of Weapon
+        :param structure_points: int HP's of Weapon
         :param damage: int damage dealt by Weapon
         :param cool_down: int cooldown in turns of Weapon
-        :param effects: any special effects caused by Weapon
+        :param effects: str any special effects caused by Weapon
         """
         self.name = name
         self.location = location
         self.min_range = min_range
         self.max_range = max_range
-        self.hps = structure_points
+        self.hps = hps if hps else structure_points
         self.max_hps = structure_points
         self.damage = damage
         self.cool_down = cool_down
-        self.current_cd = 0
+        self.current_cd = current_cd
         self.effects = effects
+    
+    def to_json(self):
+        """
+        Serialize Weapon Object to json
+        :return: json Weapon representation
+        """
+        return {
+            'name': self.name,
+            'location': self.location,
+            'min_range': self.min_range,
+            'max_range': self.max_range,
+            'hps': self.hps,
+            'max_hps': self.max_hps,
+            'damage': self.damage,
+            'cool_down': self.cool_down,
+            'current_cd': self.current_cd,
+            'effects': self.effects
+        }
+    
+    @staticmethod
+    def from_json(json_data):
+        """
+        Convert json representation of Weapon to Weapon Object
+        :param json_data: json representation of Weapon Object
+        :return: Weapon Object
+        """
+        name = json_data.get('name')
+        location = json_data.get('location')
+        min_range = json_data.get('min_range')
+        max_range = json_data.get('max_range')
+        hps = json_data.get('hps')
+        max_hps = json_data.get('max_hps')
+        damage = json_data.get('damage')
+        cool_down = json_data.get('cool_down')
+        current_cd = json_data.get('current_cd')
+        effects = json_data.get('effects')
+        
+        return Weapon(name=name, location=location, min_range=min_range, max_range=max_range, hps=hps,
+                      structure_points=max_hps, damage=damage, cool_down=cool_down, current_cd=current_cd,
+                      effects=effects)
     
     def take_damage(self, amount):
         """
