@@ -27,7 +27,7 @@ class PeacefulMonster:
             'name': 'PeacefulMonster'
         }
     
-    def take_turn(self, game_map, target, message_log, colors, icons):
+    def take_turn(self, game_map, target, message_log, colors):
         entity = self.owner
         neighbors = get_hex_neighbors(x=entity.x, y=entity.y)
         if entity.mobile.current_speed < 1 \
@@ -61,7 +61,7 @@ class MeleeMonster:  # Sea Serpent and Giant Bat
         }
     
     # TODO: find a way to implement last known location (last_seen) as a target hex - add state? need dijkstra maps
-    def take_turn(self, game_map, target, message_log, colors, icons):
+    def take_turn(self, game_map, target, message_log, colors):
         state = None
         entity = self.owner
         neighbors = get_hex_neighbors(x=entity.x, y=entity.y)
@@ -88,7 +88,7 @@ class MeleeMonster:  # Sea Serpent and Giant Bat
                     message_log.unpack(details=details, color=colors['amber'])
                 
                 if death_result:  # entity is dead
-                    message, state = kill_player(player=target, icons=icons)
+                    message, state = kill_player(player=target)
                     message_log.add_message(message=message, color=colors['red'])
                 return state
             

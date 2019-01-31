@@ -16,9 +16,10 @@ from game_states import GameStates
 from game_time import Time
 from input_handlers import handle_keys
 from loader_functions.initialize_new_game import get_constants
-from map_objects.game_map import make_map, change_wind, adjust_fog
+from map_objects.game_map import make_map, change_wind, adjust_fog, roll_fog
 from render_functions import render_display, RenderOrder
 from weather import Weather, change_weather
+from loader_functions.json_loaders import entity_test_dump, map_test_dump, time_test_dump, weather_test_dump, log_test_dump
 
 
 def main():
@@ -39,7 +40,7 @@ def main():
     
     message_log = MessageLog(height=constants['log_size'], panel_size=constants['message_panel_size'])
     
-    player_icon = constants['icons']['ship_1_mast']
+    player_icon = 'ship_1_mast'
     size_component = Size.MEDIUM
     manifest = []
     manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], category=ItemCategory.GOODS,
@@ -74,14 +75,13 @@ def main():
                     y=constants['board_height'] - 1, icon=player_icon, render_order=RenderOrder.PLAYER,
                     view=view_component, size=size_component, mast_sail=mast_component, mobile=mobile_component,
                     weapons=weapons_component, fighter=fighter_component, crew=crew_component, cargo=cargo_component)
-    
+        
     entities = [player]
     
     game_map = make_map(width=constants['board_width'],
                         height=constants['board_height'],
                         entities=entities,
                         max_entities=constants['max_entities'],
-                        icons=constants['icons'],
                         islands=constants['island_size'],
                         seeds=constants['island_seeds'],
                         constants=constants,
@@ -214,8 +214,7 @@ def main():
                         result = entity.ai.take_turn(game_map=game_map,
                                                      target=player,
                                                      message_log=message_log,
-                                                     colors=constants['colors'],
-                                                     icons=constants['icons'])
+                                                     colors=constants['colors'])
                         if result:
                             game_state = GameStates.PLAYER_DEAD
                 
@@ -247,7 +246,7 @@ def main():
                                           colors=constants['colors'])
                 
                 # after attacks made, update fog (not before, due to FOV changes)
-                game_map.roll_fog(game_time=game_time, game_weather=game_weather)
+                roll_fog(game_map=game_map, game_time=game_time, game_weather=game_weather)
                 
                 if other_action:
                     for entity in entities:
@@ -357,7 +356,7 @@ def main():
                 change_wind(game_map=game_map, message_log=message_log, color=constants['colors']['yellow'])
                 game_time.roll_min()
                 change_weather(weather=game_weather, message_log=message_log, color=constants['colors']['yellow'])
-                adjust_fog(fog=game_map.fog,
+                adjust_fog(terrain=game_map.terrain,
                            width=game_map.width,
                            height=game_map.height,
                            game_time=game_time,
@@ -366,7 +365,13 @@ def main():
                     if entity.view:
                         entity.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
                 message_log.reset_view()
-            
+
+                entity_test_dump(entities)
+                map_test_dump(game_map)
+                weather_test_dump(game_weather)
+                time_test_dump(game_time)
+                log_test_dump(message_log)
+
             elif scroll:
                 if constants['map_width'] <= mouse_x < constants['display_width'] \
                         and constants['view_height'] <= mouse_y < constants['display_height']:

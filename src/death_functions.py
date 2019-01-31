@@ -2,18 +2,18 @@ from game_states import GameStates
 from render_functions import RenderOrder
 
 
-def kill_player(player, icons):
+def kill_player(player):
     """
     Kill the player by changing game state to PLAYER_DEAD and changing the player icon
     :param player: the player entity
     :param icons: a sunken ship
     :return: death message, game state
     """
-    player.icon = icons['sunken_ship']
+    player.icon = 'sunken_ship'
     return 'You have died!', GameStates.PLAYER_DEAD
 
 
-def kill_monster(entity, icons, elevation=0):
+def kill_monster(entity, elevation=0):
     """
     Kill an entity by changing the entity information and icon
     :param elevation: to see if the creature is on land
@@ -30,7 +30,7 @@ def kill_monster(entity, icons, elevation=0):
     entity.render_order = RenderOrder.CORPSE
     if elevation < 3:
         entity.name = 'Dead {}'.format(entity.name)
-        entity.icon = icons['carcass']
+        entity.icon = 'carcass'
     else:
         entity.name = ''
         entity.icon = None

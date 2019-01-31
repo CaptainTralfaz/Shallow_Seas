@@ -16,7 +16,6 @@ class Mobile:
         :param max_speed: int maximum number of tiles an Entity can travel in a turn
         :param current_speed: int current number of tiles an Entity will travel each turn
         :param rowing: denotes whether a mobile entity is rowing / swimming / generating momentum
-        :param catching_wind: denotes whether a mobile entity is using wind propulsion
         """
         self.direction = direction
         self.max_momentum = max_momentum
@@ -177,7 +176,7 @@ class Mobile:
             if self.current_momentum < 0:
                 self.current_momentum += self.max_momentum + 1
                 self.current_speed -= 1
-                results.append('{} loses speed due to {}'.format(self.owner.name, reason))
+                results.append('{} looses speed due to {}'.format(self.owner.name, reason))
         return results
 
 

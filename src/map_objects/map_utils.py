@@ -304,7 +304,7 @@ def get_fov(entity, game_map, game_time, game_weather, fog_view=0):
             fog = 0
             for cube in cube_line:
                 hx = cube_to_hex(cube)
-                if game_map.in_bounds(hx.col, hx.row) and game_map.fog[hx.col][hx.row]:
+                if game_map.in_bounds(hx.col, hx.row) and game_map.terrain[hx.col][hx.row].fog:
                     fog += 1
                 if hx not in viewed_hexes[1:]:
                     viewed_hexes.append(hx)

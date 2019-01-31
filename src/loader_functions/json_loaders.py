@@ -23,6 +23,51 @@ def save_game(player, entities, game_map, message_log, game_state, game_weather,
         json.dump(data, save_file, indent=4)
 
 
+def entity_test_dump(entities):
+    data = {
+        'entities': [entity.to_json() for entity in entities]
+    }
+
+    with open('saved_entities.json', 'w') as save_file:
+        json.dump(data, save_file, indent=4)
+
+
+def map_test_dump(game_map):
+    data = {
+        'game_map': game_map.to_json()
+    }
+    
+    with open('saved_map.json', 'w') as save_file:
+        json.dump(data, save_file, indent=4)
+
+
+def weather_test_dump(game_weather):
+    data = {
+        'weather': game_weather.to_json()
+    }
+
+    with open('saved_weather.json', 'w') as save_file:
+        json.dump(data, save_file, indent=4)
+
+
+def time_test_dump(game_time):
+    data = {
+        'time': game_time.to_json()
+    }
+
+    with open('saved_time.json', 'w') as save_file:
+        json.dump(data, save_file, indent=4)
+
+
+def log_test_dump(message_log):
+    data = {
+        'log': message_log.to_json()
+    }
+
+    with open('saved_log.json', 'w') as save_file:
+        json.dump(data, save_file, indent=4)
+
+
 def load_game():
     with open('save_game.json') as save_file:
         data = json.load(save_file)

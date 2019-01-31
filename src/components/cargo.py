@@ -111,7 +111,7 @@ class Item:
             'weight': self.weight,
             'volume': self.volume,
             'quantity': self.quantity,
-            'icon': self.icon,
+            # 'icon': self.icon,
             'category': self.category.value
         }
     

@@ -118,7 +118,6 @@ class WeaponList:
             message_log.unpack(details=details, color=colors['amber'])
             if dead_result:  # entity is dead
                 details = kill_monster(entity=entity,
-                                       icons=icons,
                                        elevation=terrain[entity.x][entity.y].elevation.value)
                 message_log.unpack(details=details, color=colors['amber'])
     

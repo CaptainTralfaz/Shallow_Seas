@@ -312,11 +312,14 @@ def render_board(game_map, player, entities, constants, game_state, game_time, g
         if (0 <= entity.x < game_map.width) \
                 and (0 <= entity.y < game_map.height) \
                 and (entity.x, entity.y) in player.view.fov:
-            if entity.mast_sail and not game_state == GameStates.PLAYER_DEAD:
-                icon = create_ship_icon(entity=entity, constants=constants)
+            if entity.icon:
+                if entity.mast_sail and not game_state == GameStates.PLAYER_DEAD:
+                    icon = create_ship_icon(entity=entity, constants=constants)
+                else:
+                    icon = constants['icons'][entity.icon]
             else:
-                icon = entity.icon
-            
+                icon = None
+                
             if icon and entity.mobile and not game_state == GameStates.PLAYER_DEAD:
                 game_map_surf.blit(rot_center(image=icon, angle=direction_angle[entity.mobile.direction]),
                                    (entity.x * constants['tile_size'] - constants['margin'],
@@ -340,7 +343,7 @@ def render_board(game_map, player, entities, constants, game_state, game_time, g
                                     - constants['half_tile'] - 2 * constants['margin']))  # -10 due to larger tile size
             if (0 <= x < game_map.width) \
                     and (0 <= y < game_map.height) \
-                    and game_map.fog[x][y] \
+                    and game_map.terrain[x][y].fog \
                     and (x, y) in player.view.fov:
                 game_map_surf.blit(constants['icons']['fog'],
                                    (x * constants['tile_size'] - 2 * constants['margin'],
@@ -1131,7 +1134,7 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
                 decor_surf.fill(constants['colors']['dark_gray'])
                 decor_surf.blit(decor_text, (0, 0))
             
-            if game_map.fog[grid_x][grid_y] and (grid_x, grid_y) in player.view.fov:
+            if game_map.terrain[grid_x][grid_y].fog and (grid_x, grid_y) in player.view.fov:
                 fog_name = 'Fog'
                 fog_text = constants['font'].render('Fog', True, constants['colors']['text'])
                 w, h = constants['font'].size(fog_name)

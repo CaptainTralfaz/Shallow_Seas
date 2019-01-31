@@ -108,7 +108,7 @@ class Crew:
             dead_result, details = entity.fighter.take_damage(amount)
             message_log.unpack(details=details, color=colors['amber'])
             if dead_result:  # entity is dead
-                details = kill_monster(entity, icons, terrain[entity.x][entity.y].elevation.value)
+                details = kill_monster(entity, terrain[entity.x][entity.y].elevation.value)
                 message_log.unpack(details=details, color=colors['amber'])
     
     def verify_arrow_target(self, entities):
