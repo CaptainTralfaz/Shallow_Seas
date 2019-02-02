@@ -16,7 +16,7 @@ from weather import weather_effects
 
 
 class GameMap:
-    def __init__(self, width, height, wind_turn_count=0, max_wind_count=50, terrain=None, wind_dir=6, fog=None):
+    def __init__(self, width, height, wind_turn_count=0, max_wind_count=50, terrain=None, wind_dir=6):
         """
         The GameMap object, which holds the game map, map width, map height, wind information, fog map, elevation map
         :param width: width of the game map
@@ -25,7 +25,7 @@ class GameMap:
         :param max_wind_count: int maximum turn count before wind change
         :param terrain: list of lists of Terrain tiles
         :param wind_dir: direction of wind; if 6+ run starting wind function
-        :param fog: list of lists of Booleans; if None run starting fog function
+        :param fog: list of lists of Booleans; if None run starting fog function TODO: Move to Tile Class
         """
         self.width = width
         self.height = height
@@ -45,10 +45,10 @@ class GameMap:
         else:
             self.wind_direction = None
         
-        if fog:
-            self.fog = fog
-        else:
-            self.fog = self.starting_fog
+        # if fog:
+        #     self.fog = fog
+        # else:
+        #     self.fog = self.starting_fog
     
     def to_json(self):
         """
@@ -61,8 +61,7 @@ class GameMap:
             'wind_direction': self.wind_direction,
             'wind_turn_count': self.wind_turn_count,
             'max_wind_count': self.max_wind_count,
-            'terrain': [[terrain.to_json() for terrain in terrain_rows] for terrain_rows in self.terrain],
-            'fog': self.fog,
+            'terrain': [[terrain.to_json() for terrain in terrain_rows] for terrain_rows in self.terrain]
         }
     
     @staticmethod
@@ -78,7 +77,6 @@ class GameMap:
         wind_turn_count = json_data.get('wind_turn_count')
         max_wind_count = json_data.get('max_wind_count')
         terrain_json = json_data.get('terrain')
-        fog = json_data.get('fog')
         
         terrain = [[Terrain.from_json(json_tile=tile) for tile in tile_list] for tile_list in terrain_json]
         
@@ -87,8 +85,7 @@ class GameMap:
                        wind_turn_count=wind_turn_count,
                        max_wind_count=max_wind_count,
                        terrain=terrain,
-                       wind_dir=wind_dir,
-                       fog=fog)
+                       wind_dir=wind_dir)
     
     @property
     def starting_wind(self):
@@ -110,85 +107,6 @@ class GameMap:
         else:
             return wind
     
-    @property
-    def starting_fog(self):
-        """
-        Determine starting fog map, with a 5% chance for each tile to contain fog
-        :return: fog grid of booleans - True where fog is placed
-        """
-        grid = [[False for y in range(self.height)] for x in range(self.width)]
-        base_fog = 5
-        for xx in range(self.width):
-            for yy in range(self.height):
-                fog_chance = randint(0, 99)
-                if fog_chance < base_fog:
-                    grid[xx][yy] = True
-        return grid
-    
-    def roll_fog(self, game_time, game_weather):
-        """
-        Moves the fog in the direction of the wind
-        :param game_time: current time of day (effects amount of fog)
-        :param game_weather: current weather (effects amount of fog)
-        :return: None - modifies list of lists object directly
-        """
-        # move fog with wind direction:
-        grid = [[False for y in range(self.height)] for x in range(self.width)]
-        if self.wind_direction is not None:
-            for x in range(self.width):
-                for y in range(self.height):
-                    if self.fog[x][y]:
-                        start_cube = hex_to_cube(Hex(x, y))
-                        neighbor_cube = cube_directions[self.wind_direction]
-                        # dx, dy = hex_directions[self.wind_direction]
-                        neighbor_hex = cube_to_hex(cube_add(start_cube, neighbor_cube))
-                        if self.in_bounds(neighbor_hex.col, neighbor_hex.row, margin=-1):
-                            grid[neighbor_hex.col][neighbor_hex.row] = True
-            self.fog = grid
-            self.add_fog_at_border(game_time, game_weather)
-    
-    def add_fog_at_border(self, game_time, game_weather):
-        """
-        Adds fog at each border, percentage chance dependent on weather and time of day
-        :param game_time: current Time of day
-        :param game_weather: current Weather conditions
-        :return: None - modifies list of lists object directly
-        """
-        north = False
-        south = False
-        west = False
-        east = False
-        base_fog = get_base_fog(game_time, game_weather)
-        
-        if self.wind_direction in [0, 1, 5]:  # wind blowing north, add fog to bottom border
-            north = True
-        if self.wind_direction in [2, 3, 4]:  # wind blowing south, add fog to top border
-            south = True
-        if self.wind_direction in [1, 2]:
-            west = True
-        if self.wind_direction in [4, 5]:
-            east = True
-        if north:
-            for x in range(self.width):
-                fog_chance = randint(0, 99)
-                if fog_chance < base_fog:
-                    self.fog[x][self.height - 1] = True
-        if south:
-            for x in range(self.width):
-                fog_chance = randint(0, 99)
-                if fog_chance < base_fog:
-                    self.fog[x][0] = True
-        if west:
-            for y in range(self.height):
-                fog_chance = randint(0, 99)
-                if fog_chance < base_fog:
-                    self.fog[self.width - 1][y] = True
-        if east:
-            for y in range(self.height):
-                fog_chance = randint(0, 99)
-                if fog_chance < base_fog:
-                    self.fog[0][y] = True
-    
     def in_bounds(self, x: int, y: int, margin=0):
         """
         Makes sure a tile (x, y) coordinate is not outside of the map width and height
@@ -203,7 +121,7 @@ class GameMap:
         return False
 
 
-def make_map(width: int, height: int, entities: list, max_entities: int, icons: dict, islands: int, seeds: int,
+def make_map(width: int, height: int, entities: list, max_entities: int, islands: int, seeds: int,
              constants: dict, game_time, game_weather):
     """
     Generate map with islands and port
@@ -211,7 +129,6 @@ def make_map(width: int, height: int, entities: list, max_entities: int, icons: 
     :param height: int height of game map
     :param entities: list of entities
     :param max_entities: Maximum number of entities placed by default
-    :param icons: dict of icons
     :param islands: maximum number of islands to create
     :param seeds: list of seeds for the islands
     :param constants: icons, colors, etc.
@@ -222,15 +139,100 @@ def make_map(width: int, height: int, entities: list, max_entities: int, icons: 
     game_map = GameMap(width=width, height=height)
     generate_terrain(game_map=game_map, island_size=islands, max_seeds=seeds)
     decorate(game_map=game_map)
-    place_entities(game_map=game_map, entities=entities, max_entities=max_entities, icons=icons, constants=constants,
+    starting_fog(game_map=game_map)
+    place_entities(game_map=game_map, entities=entities, max_entities=max_entities, constants=constants,
                    game_time=game_time, game_weather=game_weather)
     return game_map
 
 
-def remove_fog(fog, fog_list, width, height):
+def starting_fog(game_map):
+    """
+    Determine starting fog map, with a 5% chance for each tile to contain fog
+    :return: fog grid of booleans - True where fog is placed
+    """
+    # grid = [[False for y in range(game_map.height)] for x in range(game_map.width)]
+    base_fog = 5
+    for x in range(game_map.width):
+        for y in range(game_map.height):
+            fog_chance = randint(0, 99)
+            if fog_chance < base_fog:
+                game_map.terrain[x][y].fog = True
+
+
+def roll_fog(game_map, game_time, game_weather):
+    """
+    Moves the fog in the direction of the wind
+    :param game_map: current GameMap
+    :param game_time: current time of day (effects amount of fog)
+    :param game_weather: current weather (effects amount of fog)
+    :return: None - modifies list of lists object directly
+    """
+    # move fog with wind direction:
+    grid = [[False for y in range(game_map.height)] for x in range(game_map.width)]
+    if game_map.wind_direction is not None:
+        for x in range(game_map.width):
+            for y in range(game_map.height):
+                if game_map.terrain[x][y].fog:
+                    start_cube = hex_to_cube(Hex(x, y))
+                    neighbor_cube = cube_directions[game_map.wind_direction]
+                    neighbor_hex = cube_to_hex(cube_add(start_cube, neighbor_cube))
+                    if game_map.in_bounds(neighbor_hex.col, neighbor_hex.row, margin=-1):
+                        grid[neighbor_hex.col][neighbor_hex.row] = True
+        for x in range(game_map.width):
+            for y in range(game_map.height):
+                game_map.terrain[x][y].fog = grid[x][y]
+
+        add_fog_at_border(game_map=game_map, game_time=game_time, game_weather=game_weather)
+
+
+def add_fog_at_border(game_map, game_time, game_weather):
+    """
+    Adds fog at each border, percentage chance dependent on weather and time of day
+    :param game_map: current GameMap
+    :param game_time: current Time of day
+    :param game_weather: current Weather conditions
+    :return: None - modifies list of lists object directly
+    """
+    north = False
+    south = False
+    west = False
+    east = False
+    base_fog = get_base_fog(game_time=game_time, weather=game_weather)
+
+    if game_map.wind_direction in [0, 1, 5]:  # wind blowing north, add fog to bottom border
+        north = True
+    if game_map.wind_direction in [2, 3, 4]:  # wind blowing south, add fog to top border
+        south = True
+    if game_map.wind_direction in [1, 2]:
+        west = True
+    if game_map.wind_direction in [4, 5]:
+        east = True
+    if north:
+        for x in range(game_map.width):
+            fog_chance = randint(0, 99)
+            if fog_chance < base_fog:
+                game_map.terrain[x][game_map.height - 1].fog = True
+    if south:
+        for x in range(game_map.width):
+            fog_chance = randint(0, 99)
+            if fog_chance < base_fog:
+                game_map.terrain[x][0].fog = True
+    if west:
+        for y in range(game_map.height):
+            fog_chance = randint(0, 99)
+            if fog_chance < base_fog:
+                game_map.terrain[game_map.width - 1][y].fog = True
+    if east:
+        for y in range(game_map.height):
+            fog_chance = randint(0, 99)
+            if fog_chance < base_fog:
+                game_map.terrain[0][y].fog = True
+
+
+def remove_fog(terrain, fog_list, width, height):
     """
     randomly removes ~0.5% of fog from the fog map
-    :param fog: the fog map coordinate grid
+    :param terrain: terrain map of GameMap Tiles
     :param fog_list: list of tiles containing fog
     :param width: width of the fog map
     :param height: height of the fog map
@@ -242,13 +244,13 @@ def remove_fog(fog, fog_list, width, height):
         target = randint(0, len(fog_list) - 1)
         removal_list.append(fog_list[target])
     for (x, y) in removal_list:
-        fog[x][y] = False
+        terrain[x][y].fog = False
 
 
-def add_fog(fog, width, height):
+def add_fog(terrain, width, height):
     """
     randomly add ~ .5 % of fog to the fog map
-    :param fog: the fog map coordinate grid
+    :param terrain: terrain map of GameMap Tiles
     :param width: width of the fog map
     :param height: height of the fog map
     :return: None - modifies fog map directly
@@ -258,13 +260,13 @@ def add_fog(fog, width, height):
     for count in range(fog_add_count):
         fog_add_list.append((randint(0, width - 1), randint(0, height - 1)))
     for (x, y) in fog_add_list:
-        fog[x][y] = True
+        terrain[x][y].fog = True
 
 
-def adjust_fog(fog, width, height, game_time, weather):
+def adjust_fog(terrain, width, height, game_time, weather):
     """
     Determines if fog should be added or removed from the map depending on Time of day and current Weather conditions
-    :param fog: boolean fog map
+    :param terrain: terrain map of GameMap Tiles
     :param width: width of fog map
     :param height: height of fog map
     :param game_time: current Time of day
@@ -272,12 +274,12 @@ def adjust_fog(fog, width, height, game_time, weather):
     :return: None - simply directs fog map to correct add/remove method
     """
     target_fog_pct = get_base_fog(game_time=game_time, weather=weather)
-    fog_list = [(x, y) for x in range(width) for y in range(height) if fog[x][y]]
+    fog_list = [(x, y) for x in range(width) for y in range(height) if terrain[x][y].fog]
     fog_pct = 100 * len(fog_list) // (width * height)
     if target_fog_pct < fog_pct:
-        remove_fog(fog=fog, fog_list=fog_list, width=width, height=height)
+        remove_fog(terrain=terrain, fog_list=fog_list, width=width, height=height)
     elif target_fog_pct > fog_pct:
-        add_fog(fog=fog, width=width, height=height)
+        add_fog(terrain=terrain, width=width, height=height)
 
 
 def get_base_fog(game_time, weather):
@@ -363,8 +365,7 @@ def decorate(game_map: GameMap):
                 #     game_map.terrain[x][y].decoration = Decoration('salvage')
 
 
-def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: dict, constants: dict,
-                   game_time, game_weather):
+def place_entities(game_map: GameMap, entities: list, max_entities: int, constants: dict, game_time, game_weather):
     """
     Adds entities to the game map
     TODO: add sunken ships, floating chests, new creatures, etc.
@@ -372,7 +373,6 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
     :param game_map: the current game map
     :param entities: current list of entities
     :param max_entities: maximum number of entities to add
-    :param icons: icons for the generated entities (will be moved to factory)
     :param constants: dict of constants
     :param game_time: current game Time
     :param game_weather: current map Weather
@@ -396,20 +396,16 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                 random_val = randint(0, 100)
                 if random_val < 5:
                     manifest = []
-                    manifest.append(Item(name='Pearls', icon=constants['icons']['pearl'],
-                                         category=ItemCategory.EXOTICS, weight=.01, volume=.01,
-                                         quantity=randint(10, 20) + randint(10, 20)))
-                    manifest.append(Item(name='Rope', icon=constants['icons']['pearl'],
-                                         category=ItemCategory.SUPPLIES, weight=1, volume=2,
-                                         quantity=randint(0, 2) + randint(0, 2) + 1))
-                    manifest.append(Item(name='Wood', icon=constants['icons']['wood'],
-                                         category=ItemCategory.SUPPLIES, weight=2, volume=2,
-                                         quantity=randint(0, 2) + 1))
-                    manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'],
-                                         category=ItemCategory.SUPPLIES, weight=1, volume=2,
-                                         quantity=randint(0, 1) + 1))
+                    manifest.append(Item(name='Pearls', icon='pearl', category=ItemCategory.EXOTICS, weight=.01,
+                                         volume=.01, quantity=randint(10, 20) + randint(10, 20)))
+                    manifest.append(Item(name='Rope', icon='rope', category=ItemCategory.SUPPLIES, weight=1,
+                                         volume=2, quantity=randint(0, 2) + randint(0, 2) + 1))
+                    manifest.append(Item(name='Wood', icon='wood', category=ItemCategory.SUPPLIES, weight=2,
+                                         volume=2, quantity=randint(0, 2) + 1))
+                    manifest.append(Item(name='Canvas', icon='canvas', category=ItemCategory.SUPPLIES, weight=1,
+                                         volume=2, quantity=randint(0, 1) + 1))
                     cargo_component = Cargo(max_volume=5, max_weight=10, manifest=manifest)
-                    npc_icon = icons['salvage']
+                    npc_icon = 'salvage'
                     npc = Entity(name='Chest', x=x, y=y,
                                  icon=npc_icon,
                                  render_order=RenderOrder.FLOATING,
@@ -417,19 +413,17 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                 elif random_val < 40:
                     size_component = Size.MEDIUM
                     manifest = []
-                    manifest.append(Item(name='Turtle Meat', icon=constants['icons']['meat'],
-                                         category=ItemCategory.SUPPLIES, weight=.5, volume=.5,
-                                         quantity=size_component.value + 1))
-                    manifest.append(Item(name='Turtle Shell', icon=constants['icons']['turtle_shell'],
-                                         category=ItemCategory.SUPPLIES, weight=2 * size_component.value,
-                                         volume=size_component.value, quantity=1))
+                    manifest.append(Item(name='Turtle Meat', icon='meat', category=ItemCategory.SUPPLIES, weight=.5,
+                                         volume=.5, quantity=size_component.value + 1))
+                    manifest.append(Item(name='Turtle Shell', icon='turtle_shell', category=ItemCategory.SUPPLIES,
+                                         weight=2 * size_component.value, volume=size_component.value, quantity=1))
                     cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
                                             max_weight=size_component.value * 10 + 5, manifest=manifest)
                     view_component = View(view=size_component.value + 3)
                     mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
                     fighter_component = Fighter(name="body", max_hps=size_component.value * 10 + 5)
                     ai_component = PeacefulMonster()
-                    npc_icon = icons['sea_turtle']
+                    npc_icon = 'sea_turtle'
                     npc = Entity(name='Sea Turtle', x=x, y=y,
                                  size=size_component,
                                  icon=npc_icon,
@@ -443,12 +437,10 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                 elif random_val < 70:
                     size_component = Size.TINY
                     manifest = []
-                    manifest.append(Item(name='Bat Meat', icon=constants['icons']['meat'],
-                                         category=ItemCategory.SUPPLIES, weight=.5, volume=.5,
-                                         quantity=size_component.value + 1))
-                    manifest.append(Item(name='Bat Wing', icon=constants['icons']['bat_wing'],
-                                         category=ItemCategory.EXOTICS, weight=.5, volume=.5,
-                                         quantity=(size_component.value + 1) * 2))
+                    manifest.append(Item(name='Bat Meat', icon='meat', category=ItemCategory.SUPPLIES, weight=.5,
+                                         volume=.5, quantity=size_component.value + 1))
+                    manifest.append(Item(name='Bat Wing', icon='bat_wing', category=ItemCategory.EXOTICS, weight=.5,
+                                         volume=.5, quantity=(size_component.value + 1) * 2))
                     cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
                                             max_weight=size_component.value * 10 + 5, manifest=manifest)
                     view_component = View(view=size_component.value + 3)
@@ -456,7 +448,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                     fighter_component = Fighter(name="body", max_hps=size_component.value * 10 + 5)
                     wing_component = Wings(name="wings", wings=2, size=size_component.value)
                     ai_component = MeleeMonster()
-                    npc_icon = icons['giant_bat']
+                    npc_icon = 'giant_bat'
                     npc = Entity(name='Giant Bat', x=x, y=y,
                                  size=size_component,
                                  icon=npc_icon,
@@ -471,19 +463,17 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, icons: 
                 else:
                     size_component = Size.SMALL
                     manifest = []
-                    manifest.append(Item(name='Serpent Meat', icon=constants['icons']['meat'],
-                                         category=ItemCategory.SUPPLIES, weight=.5, volume=.5,
-                                         quantity=size_component.value + 1))
-                    manifest.append(Item(name='Serpent Scale', icon=constants['icons']['serpent_scale'],
-                                         category=ItemCategory.EXOTICS, weight=.5, volume=.5,
-                                         quantity=size_component.value + 1))
+                    manifest.append(Item(name='Serpent Meat', icon='meat', category=ItemCategory.SUPPLIES, weight=.5,
+                                         volume=.5, quantity=size_component.value + 1))
+                    manifest.append(Item(name='Serpent Scale', icon='serpent_scale', category=ItemCategory.EXOTICS,
+                                         weight=.5, volume=.5, quantity=size_component.value + 1))
                     cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
                                             max_weight=size_component.value * 10 + 5, manifest=manifest)
                     view_component = View(view=size_component.value + 3)
                     mobile_component = Mobile(direction=randint(0, 5), max_momentum=size_component.value * 2 + 2)
                     fighter_component = Fighter(name="body", max_hps=size_component.value * 10 + 5)
                     ai_component = MeleeMonster()
-                    npc_icon = icons['sea_serpent']
+                    npc_icon = 'sea_serpent'
                     npc = Entity(name='Sea Serpent', x=x, y=y,
                                  size=size_component,
                                  icon=npc_icon,

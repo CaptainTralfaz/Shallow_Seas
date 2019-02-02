@@ -184,10 +184,10 @@ def render_cargo(inventory_surf, cargo, vertical, constants):
     """
     for item in cargo.manifest:
         horizontal = constants['margin']
-        inventory_surf.blit(item.icon, (constants['margin'], vertical))
+        inventory_surf.blit(constants['icons'][item.icon], (constants['margin'], vertical))
         
         item_name = constants['font'].render(item.name, True, constants['colors']['text'])
-        inventory_surf.blit(item_name, (item.icon.get_width() + 2 * constants['margin'], vertical))
+        inventory_surf.blit(item_name, (constants['icons'][item.icon].get_width() + 2 * constants['margin'], vertical))
         horizontal += 2 * constants['tab']
         
         item_qty = constants['font'].render(str(item.quantity), True, constants['colors']['text'])
@@ -196,7 +196,6 @@ def render_cargo(inventory_surf, cargo, vertical, constants):
         
         for field in [item.weight, item.volume, item.get_item_weight(), item.get_item_volume()]:
             horizontal += constants['tab']
-            # print(item.name, field)
             render_cargo_info(surface=inventory_surf,
                               field=field,
                               font=constants['font'],
@@ -312,11 +311,14 @@ def render_board(game_map, player, entities, constants, game_state, game_time, g
         if (0 <= entity.x < game_map.width) \
                 and (0 <= entity.y < game_map.height) \
                 and (entity.x, entity.y) in player.view.fov:
-            if entity.mast_sail and not game_state == GameStates.PLAYER_DEAD:
-                icon = create_ship_icon(entity=entity, constants=constants)
+            if entity.icon:
+                if entity.mast_sail and not game_state == GameStates.PLAYER_DEAD:
+                    icon = create_ship_icon(entity=entity, constants=constants)
+                else:
+                    icon = constants['icons'][entity.icon]
             else:
-                icon = entity.icon
-            
+                icon = None
+                
             if icon and entity.mobile and not game_state == GameStates.PLAYER_DEAD:
                 game_map_surf.blit(rot_center(image=icon, angle=direction_angle[entity.mobile.direction]),
                                    (entity.x * constants['tile_size'] - constants['margin'],
@@ -340,7 +342,7 @@ def render_board(game_map, player, entities, constants, game_state, game_time, g
                                     - constants['half_tile'] - 2 * constants['margin']))  # -10 due to larger tile size
             if (0 <= x < game_map.width) \
                     and (0 <= y < game_map.height) \
-                    and game_map.fog[x][y] \
+                    and game_map.terrain[x][y].fog \
                     and (x, y) in player.view.fov:
                 game_map_surf.blit(constants['icons']['fog'],
                                    (x * constants['tile_size'] - 2 * constants['margin'],
@@ -1131,7 +1133,7 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
                 decor_surf.fill(constants['colors']['dark_gray'])
                 decor_surf.blit(decor_text, (0, 0))
             
-            if game_map.fog[grid_x][grid_y] and (grid_x, grid_y) in player.view.fov:
+            if game_map.terrain[grid_x][grid_y].fog and (grid_x, grid_y) in player.view.fov:
                 fog_name = 'Fog'
                 fog_text = constants['font'].render('Fog', True, constants['colors']['text'])
                 w, h = constants['font'].size(fog_name)
@@ -1251,5 +1253,47 @@ def create_ship_icon(entity, constants):
         sprite_col.append(3)  # emblems
         for col in sprite_col:
             icon.blit(sheet.subsurface(size * col, size * row, size, size), (0, 0))
-    
     return icon
+
+
+def render_main_menu(display, constants, error=None):
+    display.fill(constants['colors']['black'])
+
+    border_panel = pygame.Surface((constants['display_width'], constants['display_height']))
+    render_border(panel=border_panel, color=constants['colors']['text'])
+
+    menu_surf = pygame.Surface((constants['display_width'] - 2 * constants['margin'],
+                                constants['display_height'] - 2 * constants['margin']))
+    menu_surf.fill(constants['colors']['dark_gray'])
+
+    vertical = constants['display_width'] // 2
+    split = constants['display_height'] // 2
+    arrow_keys = [{'rotation': 90, 'text': 'New Game'},
+                  {'rotation': 270, 'text': 'Load Saved Game'}]
+    for key in arrow_keys:
+        vertical = make_arrow_button(panel=menu_surf,
+                                     split=split,
+                                     margin=constants['margin'],
+                                     rotation=key['rotation'],
+                                     text=key['text'],
+                                     icon=constants['icons']['arrow'],
+                                     font=constants['font'],
+                                     color=constants['colors']['text'],
+                                     vertical=vertical)
+    text_keys = [{'name': 'Esc', 'text': 'Exit Game'}]
+    for key in text_keys:
+        vertical = make_text_button(panel=menu_surf,
+                                    split=split,
+                                    margin=constants['margin'],
+                                    name=key['name'],
+                                    text=key['text'],
+                                    font=constants['font'],
+                                    color=constants['colors']['text'],
+                                    bkg_color=constants['colors']['dark_gray'],
+                                    vertical=vertical)
+    if error:
+        error_text = constants['font'].render('No Save Game to Load!', True, constants['colors']['text'])
+        menu_surf.blit(error_text, (0, 0))
+    border_panel.blit(menu_surf, (constants['margin'], constants['margin']))
+    display.blit(border_panel, (0, 0))
+    pygame.display.update()

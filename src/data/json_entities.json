@@ -1,0 +1,190 @@
+//    @staticmethod
+//    def from_json(json_data):
+//        name = json_data.get("name")
+//        x = json_data.get("x")
+//        y = json_data.get("y")
+//        icon = json_data.get("icon")
+//        render_order = json_data.get("render_order")
+//        ai = json_data.get("ai")
+//        block_view = json_data.get("block_view")
+//        mobile = json_data.get("mobile")
+//        size = json_data.get("size")
+//        view = json_data.get("view")
+//        crew = json_data.get("crew")
+//        mast_sail = json_data.get("mast_sail")
+//        weapons = json_data.get("weapons")
+//        wings = json_data.get("wings")
+//        cargo = json_data.get("cargo")
+//        sprite_sheet = json_data.get("sprite_sheet")
+//        fighter = json_data.get("fighter")
+
+//            "direction": self.direction,
+//            "max_momentum": self.max_momentum,
+//            "current_momentum": self.current_momentum,
+//            "max_speed": self.max_speed,
+//            "current_speed": self.current_speed,
+//            "rowing": self.rowing
+
+//{
+//  "rowboat": {
+//    "name": "Rowboat",
+//    "icon": "ship_0_mast",
+//    "size": 0,
+//    "mobile": {},
+//    "view": {},
+//    "crew": {},
+//    "fighter": {"name":"hull"},
+//    "cargo": {}
+//  },
+//  "longboat": {
+//    "name": "Longboat",
+//    "icon": "ship_1_mast",
+//    "size": 1,
+//    "mobile": {},
+//    "view": {},
+//    "mast_sail": {},
+//    "crew": {},
+//    "fighter": {"name": "hull"},
+//    "cargo": {}
+//  },
+//  "sloop": {
+//    "name": "Sloop",
+//    "icon": "ship_2_mast",
+//    "mobile": {},
+//    "size": 2,
+//    "view": {},
+//    "mast_sail": {},
+//    "crew": {},
+//    "fighter": {"name": "hull"},
+//    "cargo": {}
+//  },
+//  "galleon": {
+//    "name": "Galleon",
+//    "icon": "ship_3_mast",
+//    "size": 3,
+//    "mobile": {},
+//    "view": {},
+//    "mast_sail": {},
+//    "crew": {},
+//    "fighter": {"name": "hull"},
+//    "cargo": {}
+//  },
+//  "dreadnaught": {
+//    "name": "Dreadnaught",
+//    "icon": "ship_4_mast",
+//    "size": 4,
+//    "mobile": {},
+//    "view": {},
+//    "mast_sail": {},
+//    "crew": {},
+//    "fighter": {"name": "hull"},
+//    "cargo": {}
+//  },
+//  "giant_bat": {
+//    "name": "Giant Bat",
+//    "icon": "giant_bat",
+//    "size": 0,
+//    "mobile": {},
+//    "view": {},
+//    "wings": 2,
+//    "fighter": {"name": "body"},
+//    "cargo": {
+//      "max_volume": "",
+//      "max_weight": "",
+//      "manifest": {
+//          "name": "Bat Wing",
+//          "icon": "bat_wing",
+//          "category": "exotics",
+//          "weight": "",
+//          "volume": 25,
+//          "quantity": 1
+//        }
+//      }
+//    }
+//  }
+//}
+
+{"name": "player",
+  "x": 34,
+  "y": 63,
+  "icon": <Surface(128x64x32 SW)>,
+  "render_order": 5,
+  "ai": None,
+  "block_view": None,
+  "mobile": {
+    "direction": 0,
+    "max_momentum": 6,
+    "current_momentum": 6,
+    "max_speed": 2,
+    "current_speed": 0,
+    "rowing": False
+  },
+  "size": 2,
+  "view": 5,
+  "crew": {
+    "max_crew": 25,
+    "crew_list": [
+      {"name": "Lawrence Black", "profession": "Cook"},
+      {"name": "Porter Smythe", "profession": "Archer"},
+      {"name": "Lawrence White", "profession": "Seer"},
+      {"name": "Filmore Knox", "profession": "Woodworker"},
+      {"name": "Lawrence Percival", "profession": "Engineer"},
+      {"name": "Jones Black", "profession": "Archer"},
+      {"name": "Lawrence Smythe", "profession": "Engineer"},
+      {"name": "Jones Black", "profession": "Woodworker"},
+      {"name": "Filmore Black", "profession": "Engineer"},
+      {"name": "James Smythe", "profession": "Engineer"},
+      {"name": "Jones Smythe", "profession": "Seer"},
+      {"name": "Porter Carver", "profession": "Butcher"},
+      {"name": "Ham Knox", "profession": "Archer"},
+      {"name": "Jones Percival", "profession": "Sailor"},
+      {"name": "Jones Smythe", "profession": "Archer"},
+      {"name": "Ham Carver", "profession": "Vagrant"},
+      {"name": "Jones Black", "profession": "Engineer"},
+      {"name": "James Tanner", "profession": "Sailor"},
+      {"name": "Porter Smythe", "profession": "Woodworker"},
+      {"name": "Ham Knox", "profession": "Archer"},
+      {"name": "Filmore Carver", "profession": "Woodworker"},
+      {"name": "Filmore Percival", "profession": "Butcher"},
+      {"name": "Porter Percival", "profession": "Engineer"},
+      {"name": "Lawrence Black", "profession": "Vagrant"},
+      {"name": "Lawrence Smythe", "profession": "Cook"}
+    ]
+  },
+  "mast_sail": {
+    "name": "Mast",
+    "masts": 2,
+    "max_sails": 2,
+    "current_sails": 0,
+    "catching_wind": False,
+    "mast_hp_max": 5,
+    "mast_hp": 5,
+    "sail_hp_max": 6,
+    "sail_hp": 6
+  },
+  "weapons": [
+    {"name": "Ballista",
+      "location": "Port",
+      "min_range": 1,
+      "max_range": 4,
+      "hps": 5,
+      "max_hps": 5,
+      "damage": 3,
+      "cool_down": 4,
+      "current_cd": 0,
+      "effects": null,
+    },
+    {"name": "Ballista",
+      "location": "Port",
+      "min_range": 1,
+      "max_range": 4,
+      "hps": 5,
+      "max_hps": 5,
+      "damage": 3,
+      "cool_down": 4,
+      "current_cd": 0,
+      "effects": null,
+    },
+    {"name": "Ballista",
+      "location": "Stern",
+      "min_range": 1, "max_range": 4, "hps": 5, "max_hps": 5, "damage": 3, "cool_down": 4, "current_cd": 0, "effects": None}, {"name": "Ballista", "location": "Starboard", "min_range": 1, "max_range": 4, "hps": 5, "max_hps": 5, "damage": 3, "cool_down": 4, "current_cd": 0, "effects": None}, {"name": "Ballista", "location": "Starboard", "min_range": 1, "max_range": 4, "hps": 5, "max_hps": 5, "damage": 3, "cool_down": 4, "current_cd": 0, "effects": None}], "wings": None, "cargo": {"max_volume": 25, "max_weight": 25, "manifest": [{"name": "Canvas", "weight": 2.0, "volume": 2.0, "quantity": 2, "icon": <Surface(16x16x32 SW)>, "category": 1}, {"name": "Meat", "weight": 2.0, "volume": 2.0, "quantity": 2, "icon": <Surface(16x16x32 SW)>, "category": 2}, {"name": "Pearls", "weight": 0.01, "volume": 0.01, "quantity": 30, "icon": <Surface(16x16x32 SW)>, "category": 3}, {"name": "Rope", "weight": 2.0, "volume": 2.0, "quantity": 2, "icon": <Surface(16x16x32 SW)>, "category": 1}, {"name": "Rum", "weight": 0.1, "volume": 2.0, "quantity": 2, "icon": <Surface(16x16x32 SW)>, "category": 3}, {"name": "Fish", "weight": 0.1, "volume": 2.0, "quantity": 2, "icon": <Surface(16x16x32 SW)>, "category": 2}, {"name": "Fruit", "weight": 0.1, "volume": 2.0, "quantity": 2, "icon": <Surface(16x16x32 SW)>, "category": 2}, {"name": "Water", "weight": 2.0, "volume": 2.0, "quantity": 2, "icon": <Surface(16x16x32 SW)>, "category": 2}, {"name": "Wood", "weight": 2.0, "volume": 2.0, "quantity": 2, "icon": <Surface(16x16x32 SW)>, "category": 0}]}, "fighter": {"name": "hull", "max_hps": 30, "hps": 30}}

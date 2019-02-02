@@ -1,99 +1,29 @@
-from random import randint
 
 import pygame
 
-from components.cargo import Cargo, Item, ItemCategory
-from components.crew import Crew
-from components.fighter import Fighter
-from components.masts import Masts
-from components.mobile import Mobile
-from components.size import Size
-from components.view import View
-from components.weapon import WeaponList
-from entity import Entity
-from game_messages import MessageLog
 from game_states import GameStates
-from game_time import Time
 from input_handlers import handle_keys
-from loader_functions.initialize_new_game import get_constants
-from map_objects.game_map import make_map, change_wind, adjust_fog
-from render_functions import render_display, RenderOrder
-from weather import Weather, change_weather
+from loader_functions.initialize_new_game import get_constants, get_game_variables
+from map_objects.game_map import change_wind, adjust_fog, roll_fog
+from render_functions import render_display, render_main_menu
+from weather import change_weather
+from loader_functions.json_loaders import load_game, save_game
 
 
-def main():
-    pygame.init()
-    constants = get_constants()
-    pygame.key.set_repeat(2, 300)
-    global fps_clock
-    fps_clock = pygame.time.Clock()
-    
-    game_time = Time(constants['tick'])
-    game_weather = Weather()
-    
-    display_surface = pygame.display.set_mode((constants['display_width'], constants['display_height']))
-    pygame.display.set_caption("Shallow Seas")
-    pygame.display.set_icon(constants['icons']['game_icon'])
+def play_game(player, entities, game_map, message_log, game_state, game_weather, game_time, display_surface, constants):
     
     game_quit = False
-    
-    message_log = MessageLog(height=constants['log_size'], panel_size=constants['message_panel_size'])
-    
-    player_icon = constants['icons']['ship_1_mast']
-    size_component = Size.MEDIUM
-    manifest = []
-    manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], category=ItemCategory.GOODS,
-                         weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Meat', icon=constants['icons']['meat'], category=ItemCategory.SUPPLIES,
-                         weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Pearls', icon=constants['icons']['pearl'], category=ItemCategory.EXOTICS,
-                         weight=0.01, volume=0.01, quantity=30))
-    manifest.append(Item(name='Rope', icon=constants['icons']['rope'], category=ItemCategory.GOODS,
-                         weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Rum', icon=constants['icons']['rum'], category=ItemCategory.EXOTICS,
-                         weight=0.1, volume=2, quantity=2))
-    manifest.append(Item(name='Fish', icon=constants['icons']['fish'], category=ItemCategory.SUPPLIES,
-                         weight=0.1, volume=2, quantity=2))
-    manifest.append(Item(name='Fruit', icon=constants['icons']['fruit'], category=ItemCategory.SUPPLIES,
-                         weight=0.1, volume=2, quantity=2))
-    manifest.append(Item(name='Water', icon=constants['icons']['water'], category=ItemCategory.SUPPLIES,
-                         weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Wood', icon=constants['icons']['wood'], category=ItemCategory.MATERIALS,
-                         weight=2, volume=2, quantity=2))
-    cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
-                            max_weight=size_component.value * 10 + 5,
-                            manifest=manifest)
-    view_component = View(view=size_component.value + 3)
-    fighter_component = Fighter(name="hull", max_hps=size_component.value * 10 + 10)
-    weapons_component = WeaponList()
-    weapons_component.add_all(size=str(size_component))  # Hacky for now
-    mast_component = Masts(name="Mast", masts=size_component.value, size=size_component.value)
-    mobile_component = Mobile(direction=0, max_momentum=int(size_component.value) * 2 + 2)
-    crew_component = Crew(size=size_component.value, crew_size=50)
-    player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
-                    y=constants['board_height'] - 1, icon=player_icon, render_order=RenderOrder.PLAYER,
-                    view=view_component, size=size_component, mast_sail=mast_component, mobile=mobile_component,
-                    weapons=weapons_component, fighter=fighter_component, crew=crew_component, cargo=cargo_component)
-    
-    entities = [player]
-    
-    game_map = make_map(width=constants['board_width'],
-                        height=constants['board_height'],
-                        entities=entities,
-                        max_entities=constants['max_entities'],
-                        icons=constants['icons'],
-                        islands=constants['island_size'],
-                        seeds=constants['island_seeds'],
-                        constants=constants,
-                        game_time=game_time,
-                        game_weather=game_weather)
-    
-    player.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
-    game_state = GameStates.CURRENT_TURN
-    
+    pygame.event.clear()
+
     mouse_x = 0
     mouse_y = 0
-    
+
+    for entity in entities:
+        if entity.view:
+            entity.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
+        if entity.name == 'player':
+            player = entity
+
     render_display(display=display_surface,
                    game_map=game_map,
                    player=player,
@@ -139,11 +69,13 @@ def main():
             
             action = handle_keys(event=user_input, game_state=game_state)
             
+            exit_screen = action.get('exit')
+            if exit_screen:
+                break
             rowing = action.get('rowing')
             slowing = action.get('slowing')
             rotate = action.get('rotate')
             other_action = action.get('other_action')
-            exit_screen = action.get('exit')
             scroll = action.get('scroll')
             
             sails = action.get('sails')
@@ -203,8 +135,7 @@ def main():
             
             # PROCESS ACTION ------------------------------------------------------------------------------------------
             if (rowing or slowing or sails or attack or rotate or other_action) \
-                    and not game_state == GameStates.PLAYER_DEAD \
-                    or exit_screen:
+                    and not game_state == GameStates.PLAYER_DEAD:
                 
                 # reset game state
                 game_state = GameStates.CURRENT_TURN
@@ -214,8 +145,7 @@ def main():
                         result = entity.ai.take_turn(game_map=game_map,
                                                      target=player,
                                                      message_log=message_log,
-                                                     colors=constants['colors'],
-                                                     icons=constants['icons'])
+                                                     colors=constants['colors'])
                         if result:
                             game_state = GameStates.PLAYER_DEAD
                 
@@ -247,7 +177,7 @@ def main():
                                           colors=constants['colors'])
                 
                 # after attacks made, update fog (not before, due to FOV changes)
-                game_map.roll_fog(game_time=game_time, game_weather=game_weather)
+                roll_fog(game_map=game_map, game_time=game_time, game_weather=game_weather)
                 
                 if other_action:
                     for entity in entities:
@@ -351,22 +281,19 @@ def main():
                     details = player.mobile.rotate(rotate=rotate)
                     message_log.unpack(details=details, color=constants['colors']['aqua'])
                 
-                if exit_screen:
-                    game_quit = True
-                
                 change_wind(game_map=game_map, message_log=message_log, color=constants['colors']['yellow'])
                 game_time.roll_min()
                 change_weather(weather=game_weather, message_log=message_log, color=constants['colors']['yellow'])
-                adjust_fog(fog=game_map.fog,
+                adjust_fog(terrain=game_map.terrain,
                            width=game_map.width,
                            height=game_map.height,
                            game_time=game_time,
                            weather=game_weather)
                 for entity in entities:
-                    if entity.view:
+                    if entity.view is not None:
                         entity.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
                 message_log.reset_view()
-            
+
             elif scroll:
                 if constants['map_width'] <= mouse_x < constants['display_width'] \
                         and constants['view_height'] <= mouse_y < constants['display_height']:
@@ -386,7 +313,89 @@ def main():
             pygame.display.flip()
         
         fps_clock.tick(constants['FPS'])
+
+    save_game(player=player, entities=entities, game_map=game_map, message_log=message_log, game_state=game_state,
+              game_weather=game_weather, game_time=game_time)
     
+
+def main():
+    pygame.init()
+    global fps_clock
+    fps_clock = pygame.time.Clock()
+
+    constants = get_constants()
+    pygame.key.set_repeat(2, 300)
+
+    display_surface = pygame.display.set_mode((constants['display_width'], constants['display_height']))
+    pygame.display.set_caption("Shallow Seas")
+    pygame.display.set_icon(constants['icons']['game_icon'])
+
+    player = None
+    entities = []
+    game_map = None
+    message_log = None
+    game_state = GameStates.MAIN_MENU
+    game_weather = None
+    game_time = None
+    
+    show_main_menu = True
+    game_quit = False
+
+    render_main_menu(display=display_surface, constants=constants)
+
+    while not game_quit:
+        user_input = None
+        show_load_error_message = False
+
+        if show_main_menu:
+    
+            # Get Input -----------------------------------------------------------------------------------------------
+            event_list = pygame.event.get()
+            for event in event_list:
+                if event.type == pygame.QUIT:
+                    user_input = event
+                    game_quit = True
+                    break
+                elif event.type == pygame.KEYDOWN:
+                    user_input = event
+                else:
+                    user_input = None
+        
+            if not user_input:
+                continue
+        
+            if not game_quit:
+                
+                action = handle_keys(event=user_input, game_state=game_state)
+                
+                new_game = action.get('new_game')
+                load_save = action.get('load_save')
+                exit_game = action.get('exit')
+    
+                if new_game:
+                    player, entities, game_map, message_log, game_state, game_weather, game_time = get_game_variables(
+                        constants=constants)
+                    message_log.add_message("Welcome to Shallow Seas!")
+                    show_main_menu = False
+                elif load_save:
+                    try:
+                        player, entities, game_map, message_log, game_state, game_weather, game_time = load_game()
+                        show_main_menu = False
+                    except FileNotFoundError:
+                        show_load_error_message = True
+                elif exit_game:
+                    game_quit = True
+                
+                render_main_menu(display=display_surface, constants=constants, error=show_load_error_message)
+
+        else:
+            play_game(player=player, entities=entities, game_map=game_map, message_log=message_log,
+                      game_state=game_state, game_weather=game_weather, game_time=game_time,
+                      display_surface=display_surface, constants=constants)
+            show_main_menu = True
+            game_state = GameStates.MAIN_MENU
+            render_main_menu(display=display_surface, constants=constants, error=show_load_error_message)
+
     pygame.quit()
     exit()
 

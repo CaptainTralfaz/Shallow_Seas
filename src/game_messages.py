@@ -28,10 +28,7 @@ class Message:
         text = json_data.get('text')
         color = json_data.get('color')
         
-        if color:
-            return Message(text, color)
-        else:
-            return Message(text)
+        return text, color
 
 
 class MessageLog:
@@ -71,8 +68,9 @@ class MessageLog:
         
         message_log = MessageLog(height=height, panel_size=panel_size)
         
-        for message_json in messages_json:
-            message_log.add_message(Message.from_json(message_json))
+        for message in messages_json:
+            text, color = Message.from_json(json_data=message)
+            message_log.add_message(message=text, color=color)
         
         return message_log
     

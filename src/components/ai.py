@@ -6,8 +6,7 @@ from map_objects.map_utils import get_hex_neighbors, hex_to_cube, Hex, get_spati
     cube_add, cube_direction, cube_to_hex
 
 
-def ai_from_json(json_data):
-    name = json_data.get('name')
+def ai_from_json(name):
     if name == 'PeacefulMonster':
         return PeacefulMonster()
     elif name == 'MeleeMonster':
@@ -22,12 +21,10 @@ class PeacefulMonster:
     """
     
     @staticmethod
-    def to_json():
-        return {
-            'name': 'PeacefulMonster'
-        }
+    def get_ai_name():
+        return 'PeacefulMonster'
     
-    def take_turn(self, game_map, target, message_log, colors, icons):
+    def take_turn(self, game_map, target, message_log, colors):
         entity = self.owner
         neighbors = get_hex_neighbors(x=entity.x, y=entity.y)
         if entity.mobile.current_speed < 1 \
@@ -55,13 +52,11 @@ class MeleeMonster:  # Sea Serpent and Giant Bat
     """
     
     @staticmethod
-    def to_json():
-        return {
-            'name': 'MeleeMonster'
-        }
+    def get_ai_name():
+        return 'MeleeMonster'
     
     # TODO: find a way to implement last known location (last_seen) as a target hex - add state? need dijkstra maps
-    def take_turn(self, game_map, target, message_log, colors, icons):
+    def take_turn(self, game_map, target, message_log, colors):
         state = None
         entity = self.owner
         neighbors = get_hex_neighbors(x=entity.x, y=entity.y)
@@ -88,7 +83,7 @@ class MeleeMonster:  # Sea Serpent and Giant Bat
                     message_log.unpack(details=details, color=colors['amber'])
                 
                 if death_result:  # entity is dead
-                    message, state = kill_player(player=target, icons=icons)
+                    message, state = kill_player(player=target)
                     message_log.add_message(message=message, color=colors['red'])
                 return state
             

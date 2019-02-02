@@ -26,18 +26,18 @@ max_weapons = {
 
 
 class WeaponList:
-    def __init__(self):
+    def __init__(self, weapon_list: list=[]):
         """
         Component holding list of Weapon objects
         """
-        self.weapon_list = []
+        self.weapon_list = weapon_list
     
     def to_json(self):
         return [weapon.to_json() for weapon in self.weapon_list]
     
     @staticmethod
     def from_json(json_data):
-        return [Weapon.from_json(weapon) for weapon in json_data]
+        return WeaponList([Weapon.from_json(weapon) for weapon in json_data])
     
     def add_all(self, size):  # TODO remove this later - just here to initialize a ship's weapons
         """
@@ -118,7 +118,6 @@ class WeaponList:
             message_log.unpack(details=details, color=colors['amber'])
             if dead_result:  # entity is dead
                 details = kill_monster(entity=entity,
-                                       icons=icons,
                                        elevation=terrain[entity.x][entity.y].elevation.value)
                 message_log.unpack(details=details, color=colors['amber'])
     

@@ -5,17 +5,17 @@ from map_objects.map_utils import get_hex_neighbors
 
 
 class Crew:
-    def __init__(self, size: int, crew_size: int = None, crew_list=None):
+    def __init__(self, max_crew: int, crew_count: int = None, crew_list=None):
         """
         Component detailing crew
-        :param size: Entity Size to determine maximum number of crew
-        :paramn crew_size: int size of starting crew to add to crew list
+        :param max_crew: Entity Size to determine maximum number of crew
+        :paramn crew_count: int size of starting crew to add to crew list
         :param crew_list: list of current crewmen
         """
-        self.max_crew = size * 10 + 5
-        if crew_size > self.max_crew:
-            crew_size = self.max_crew
-        self.crew_list = crew_list if crew_list is not None else self.starting_crew(crew_size)
+        self.max_crew = max_crew
+        if crew_count is not None and crew_count > self.max_crew:
+            crew_count = self.max_crew
+        self.crew_list = crew_list if crew_list is not None else self.starting_crew(crew_count)
     
     def to_json(self):
         """
@@ -40,7 +40,7 @@ class Crew:
         crew_list = [Crewman(name=crewman.get('name'), profession=crewman.get('profession'))
                      for crewman in json_crew_list]
         
-        return Crew(size=max_crew, crew_list=crew_list)
+        return Crew(max_crew=max_crew, crew_list=crew_list)
     
     @staticmethod
     def starting_crew(crew_size):
@@ -108,7 +108,7 @@ class Crew:
             dead_result, details = entity.fighter.take_damage(amount)
             message_log.unpack(details=details, color=colors['amber'])
             if dead_result:  # entity is dead
-                details = kill_monster(entity, icons, terrain[entity.x][entity.y].elevation.value)
+                details = kill_monster(entity, terrain[entity.x][entity.y].elevation.value)
                 message_log.unpack(details=details, color=colors['amber'])
     
     def verify_arrow_target(self, entities):

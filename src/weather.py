@@ -23,15 +23,15 @@ class Weather:
         }
     
     @staticmethod
-    def from_json(json_weather):
+    def from_json(json_data):
         """
         Convert serialized json to Weather object
-        :param json_weather: serialized json Weather
+        :param json_data: serialized json Weather
         :return: Weather object
         """
-        conditions = json_weather.get('conditions')
-        turn_count = json_weather.get('turn_count')
-        max_turn_count = json_weather.get('max_turn_count')
+        conditions = json_data.get('conditions')
+        turn_count = json_data.get('turn_count')
+        max_turn_count = json_data.get('max_turn_count')
         
         return Weather(conditions=conditions, turn_count=turn_count, max_turn_count=max_turn_count)
     

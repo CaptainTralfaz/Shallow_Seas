@@ -1,22 +1,53 @@
 from enum import Enum
 
 
+class Decoration:
+    def __init__(self, name: str, icon: str = None, color: str = None):
+        """
+        Decoration name, icon, and mini-map color
+        :param name: determines the icon and mini-map color
+        """
+        self.name = name
+        self.icon = icon
+        self.color = color
+        
+        if self.name == 'Rocks':
+            self.icon = 'rocks'
+            self.color = 'text'
+        elif self.name == 'Coral':
+            self.icon = 'coral'
+            self.color = 'carnation'
+        elif self.name == 'Sandbar':
+            self.icon = 'sandbar'
+            self.color = 'cantaloupe'
+        elif self.name == 'Seaweed':
+            self.icon = 'seaweed'
+            self.color = 'medium_green'
+        elif self.name == 'Port':
+            self.icon = 'port'
+            self.color = 'white'
+
+
 class Terrain:
-    def __init__(self, elevation, seen=False, decoration=None):
+    def __init__(self, elevation: int, seen: bool=False, decoration: str=None, fog: bool=None):
         """
         Height of terrain determines the terrain Enum value, name, mini-map color, and icon
         This class will also track if the tile has been seen, contains fog, or contains a decoration
         :param elevation: int elevation height
+        :param seen: boolean if tile has been in player's fov
+        :param decoration: Decoration
+        :param fog: int elevation height
         """
         self.elevation = Elevation(elevation)
         self.seen = seen
         self.decoration = decoration
+        self.fog = fog
         
         if self.elevation == Elevation.DEEPS:
             self.name = 'Deep Sea'
             self.icon = 'deep_sea'
             self.color = 'light_blue'
-        elif elevation == Elevation.WATER:
+        elif self.elevation == Elevation.WATER:
             self.name = 'Sea'
             self.icon = 'sea'
             self.color = 'blue'
@@ -49,7 +80,8 @@ class Terrain:
         return {
             'elevation': self.elevation.value,
             'seen': self.seen,
-            'decoration': self.decoration.name if self.decoration else None
+            'decoration': self.decoration.name if self.decoration else None,
+            'fog': self.fog
         }
     
     @staticmethod
@@ -57,35 +89,9 @@ class Terrain:
         elevation = json_tile.get('elevation')
         seen = json_tile.get('seen')
         decoration = Decoration(json_tile.get('decoration')) if json_tile.get('decoration') else None
+        fog = json_tile.get('fog')
         
-        return Terrain(elevation=elevation, seen=seen, decoration=decoration)
-
-
-class Decoration:
-    def __init__(self, name, icon=None, color=None):
-        """
-        Decoration name, icon, and mini-map color
-        :param name: determines the icon and mini-map color
-        """
-        self.name = name
-        self.icon = icon
-        self.color = color
-        
-        if self.name == 'Rocks':
-            self.icon = 'rocks'
-            self.color = 'text'
-        elif self.name == 'Coral':
-            self.icon = 'coral'
-            self.color = 'carnation'
-        elif self.name == 'Sandbar':
-            self.icon = 'sandbar'
-            self.color = 'cantaloupe'
-        elif self.name == 'Seaweed':
-            self.icon = 'seaweed'
-            self.color = 'medium_green'
-        elif self.name == 'Port':
-            self.icon = 'port'
-            self.color = 'white'
+        return Terrain(elevation=elevation, seen=seen, decoration=decoration, fog=fog)
 
 
 class Elevation(Enum):
