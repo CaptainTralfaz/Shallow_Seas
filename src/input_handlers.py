@@ -22,6 +22,8 @@ def handle_keys(event, game_state):
         return handle_keys_cargo(event)
     elif game_state == GameStates.PLAYER_DEAD:
         return handle_keys_player_dead(event)
+    elif game_state == GameStates.MAIN_MENU:
+        return handle_keys_main_menu(event)
 
 
 def handle_keys_current_turn(event):
@@ -223,4 +225,27 @@ def handle_keys_player_dead(event):
         # mac shift    mod L:1    R:2     key L:304 R:303
         # if event.key in [307, 308]:
         #     return {'special': True}
+    return {}
+
+
+def handle_keys_main_menu(event):
+    """
+    Interaction translation for MAIN_MENU events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
+    if event:
+        if event.type == KEYDOWN and event.key == K_ESCAPE:
+            # Exit the game
+            return {'exit': True}
+        
+        if event.type == KEYDOWN:
+            # mac command  mod L:1024 R:2048  key L:310 R:309
+            # mac option   mod L:256  R:512   key L:308 R:307
+            # mac shift    mod L:1    R:2     key L:304 R:303
+            if event.key == K_LEFT:
+                return {'new_game': True}   # Start new game
+            elif event.key == K_RIGHT:
+                return {'load_save': True}  # Load old game
+
     return {}

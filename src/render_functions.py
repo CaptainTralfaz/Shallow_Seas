@@ -1253,5 +1253,47 @@ def create_ship_icon(entity, constants):
         sprite_col.append(3)  # emblems
         for col in sprite_col:
             icon.blit(sheet.subsurface(size * col, size * row, size, size), (0, 0))
-    
     return icon
+
+
+def render_main_menu(display, constants, error=None):
+    display.fill(constants['colors']['black'])
+
+    border_panel = pygame.Surface((constants['display_width'], constants['display_height']))
+    render_border(panel=border_panel, color=constants['colors']['text'])
+
+    menu_surf = pygame.Surface((constants['display_width'] - 2 * constants['margin'],
+                                constants['display_height'] - 2 * constants['margin']))
+    menu_surf.fill(constants['colors']['dark_gray'])
+
+    vertical = constants['display_width'] // 2
+    split = constants['display_height'] // 2
+    arrow_keys = [{'rotation': 90, 'text': 'New Game'},
+                  {'rotation': 270, 'text': 'Load Saved Game'}]
+    for key in arrow_keys:
+        vertical = make_arrow_button(panel=menu_surf,
+                                     split=split,
+                                     margin=constants['margin'],
+                                     rotation=key['rotation'],
+                                     text=key['text'],
+                                     icon=constants['icons']['arrow'],
+                                     font=constants['font'],
+                                     color=constants['colors']['text'],
+                                     vertical=vertical)
+    text_keys = [{'name': 'Esc', 'text': 'Exit Game'}]
+    for key in text_keys:
+        vertical = make_text_button(panel=menu_surf,
+                                    split=split,
+                                    margin=constants['margin'],
+                                    name=key['name'],
+                                    text=key['text'],
+                                    font=constants['font'],
+                                    color=constants['colors']['text'],
+                                    bkg_color=constants['colors']['dark_gray'],
+                                    vertical=vertical)
+    if error:
+        error_text = constants['font'].render('No Save Game to Load!', True, constants['colors']['text'])
+        menu_surf.blit(error_text, (0, 0))
+    border_panel.blit(menu_surf, (constants['margin'], constants['margin']))
+    display.blit(border_panel, (0, 0))
+    pygame.display.update()

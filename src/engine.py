@@ -1,4 +1,3 @@
-from random import randint
 
 import pygame
 
@@ -6,32 +5,25 @@ from game_states import GameStates
 from input_handlers import handle_keys
 from loader_functions.initialize_new_game import get_constants, get_game_variables
 from map_objects.game_map import change_wind, adjust_fog, roll_fog
-from render_functions import render_display
+from render_functions import render_display, render_main_menu
 from weather import change_weather
-from loader_functions.json_loaders import entity_test_dump, map_test_dump, time_test_dump, weather_test_dump, \
-    log_test_dump, log_test_load, time_test_load, weather_test_load, map_test_load, entities_test_load
+from loader_functions.json_loaders import load_game, save_game
 
 
-def main():
-    pygame.init()
-    constants = get_constants()
-    pygame.key.set_repeat(2, 300)
-    global fps_clock
-    fps_clock = pygame.time.Clock()
-
-    display_surface = pygame.display.set_mode((constants['display_width'], constants['display_height']))
-    pygame.display.set_caption("Shallow Seas")
-    pygame.display.set_icon(constants['icons']['game_icon'])
+def play_game(player, entities, game_map, message_log, game_state, game_weather, game_time, display_surface, constants):
     
     game_quit = False
-    
-    player, entities, game_map, message_log, game_state, game_weather, game_time = get_game_variables(constants=constants)
-    
-    message_log.add_message("Welcome to Shallow Seas!")
-    
+    pygame.event.clear()
+
     mouse_x = 0
     mouse_y = 0
-    
+
+    for entity in entities:
+        if entity.view:
+            entity.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
+        if entity.name == 'player':
+            player = entity
+
     render_display(display=display_surface,
                    game_map=game_map,
                    player=player,
@@ -77,11 +69,13 @@ def main():
             
             action = handle_keys(event=user_input, game_state=game_state)
             
+            exit_screen = action.get('exit')
+            if exit_screen:
+                break
             rowing = action.get('rowing')
             slowing = action.get('slowing')
             rotate = action.get('rotate')
             other_action = action.get('other_action')
-            exit_screen = action.get('exit')
             scroll = action.get('scroll')
             
             sails = action.get('sails')
@@ -141,8 +135,7 @@ def main():
             
             # PROCESS ACTION ------------------------------------------------------------------------------------------
             if (rowing or slowing or sails or attack or rotate or other_action) \
-                    and not game_state == GameStates.PLAYER_DEAD \
-                    or exit_screen:
+                    and not game_state == GameStates.PLAYER_DEAD:
                 
                 # reset game state
                 game_state = GameStates.CURRENT_TURN
@@ -288,9 +281,6 @@ def main():
                     details = player.mobile.rotate(rotate=rotate)
                     message_log.unpack(details=details, color=constants['colors']['aqua'])
                 
-                if exit_screen:
-                    game_quit = True
-                
                 change_wind(game_map=game_map, message_log=message_log, color=constants['colors']['yellow'])
                 game_time.roll_min()
                 change_weather(weather=game_weather, message_log=message_log, color=constants['colors']['yellow'])
@@ -304,24 +294,6 @@ def main():
                         entity.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
                 message_log.reset_view()
 
-                entity_test_dump(entities)
-                map_test_dump(game_map)
-                weather_test_dump(game_weather)
-                time_test_dump(game_time)
-                log_test_dump(message_log)
-                
-                entities = entities_test_load()
-                game_map = map_test_load()
-                game_weather = weather_test_load()
-                game_time = time_test_load()
-                message_log = log_test_load()
-                
-                for entity in entities:
-                    if entity.view:
-                        entity.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
-                    if entity.name == 'player':
-                        player = entity
-                
             elif scroll:
                 if constants['map_width'] <= mouse_x < constants['display_width'] \
                         and constants['view_height'] <= mouse_y < constants['display_height']:
@@ -341,7 +313,89 @@ def main():
             pygame.display.flip()
         
         fps_clock.tick(constants['FPS'])
+
+    save_game(player=player, entities=entities, game_map=game_map, message_log=message_log, game_state=game_state,
+              game_weather=game_weather, game_time=game_time)
     
+
+def main():
+    pygame.init()
+    global fps_clock
+    fps_clock = pygame.time.Clock()
+
+    constants = get_constants()
+    pygame.key.set_repeat(2, 300)
+
+    display_surface = pygame.display.set_mode((constants['display_width'], constants['display_height']))
+    pygame.display.set_caption("Shallow Seas")
+    pygame.display.set_icon(constants['icons']['game_icon'])
+
+    player = None
+    entities = []
+    game_map = None
+    message_log = None
+    game_state = GameStates.MAIN_MENU
+    game_weather = None
+    game_time = None
+    
+    show_main_menu = True
+    game_quit = False
+
+    render_main_menu(display=display_surface, constants=constants)
+
+    while not game_quit:
+        user_input = None
+        show_load_error_message = False
+
+        if show_main_menu:
+    
+            # Get Input -----------------------------------------------------------------------------------------------
+            event_list = pygame.event.get()
+            for event in event_list:
+                if event.type == pygame.QUIT:
+                    user_input = event
+                    game_quit = True
+                    break
+                elif event.type == pygame.KEYDOWN:
+                    user_input = event
+                else:
+                    user_input = None
+        
+            if not user_input:
+                continue
+        
+            if not game_quit:
+                
+                action = handle_keys(event=user_input, game_state=game_state)
+                
+                new_game = action.get('new_game')
+                load_save = action.get('load_save')
+                exit_game = action.get('exit')
+    
+                if new_game:
+                    player, entities, game_map, message_log, game_state, game_weather, game_time = get_game_variables(
+                        constants=constants)
+                    message_log.add_message("Welcome to Shallow Seas!")
+                    show_main_menu = False
+                elif load_save:
+                    try:
+                        player, entities, game_map, message_log, game_state, game_weather, game_time = load_game()
+                        show_main_menu = False
+                    except FileNotFoundError:
+                        show_load_error_message = True
+                elif exit_game:
+                    game_quit = True
+                
+                render_main_menu(display=display_surface, constants=constants, error=show_load_error_message)
+
+        else:
+            play_game(player=player, entities=entities, game_map=game_map, message_log=message_log,
+                      game_state=game_state, game_weather=game_weather, game_time=game_time,
+                      display_surface=display_surface, constants=constants)
+            show_main_menu = True
+            game_state = GameStates.MAIN_MENU
+            render_main_menu(display=display_surface, constants=constants, error=show_load_error_message)
+
     pygame.quit()
     exit()
 

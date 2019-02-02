@@ -23,6 +23,29 @@ def save_game(player, entities, game_map, message_log, game_state, game_weather,
         json.dump(data, save_file, indent=4)
 
 
+def load_game():
+    with open('save_game.json') as save_file:
+        data = json.load(save_file)
+    
+    player_index = data['player_index']
+    entities_json = data['entities']
+    game_map_json = data['game_map']
+    message_log_json = data['message_log']
+    game_state_json = data['game_state']
+    game_weather_json = data['game_weather']
+    game_time_json = data['game_time']
+    
+    entities = [Entity.from_json(json_data=entity_json) for entity_json in entities_json]
+    player = entities[player_index]
+    game_map = GameMap.from_json(json_data=game_map_json)
+    message_log = MessageLog.from_json(json_data=message_log_json)
+    game_state = GameStates(game_state_json)
+    game_weather = Weather.from_json(json_data=game_weather_json)
+    game_time = Time.from_json(json_data=game_time_json)
+    
+    return player, entities, game_map, message_log, game_state, game_weather, game_time
+
+
 def entity_test_dump(entities):
     data = {
         'entities': [entity.to_json() for entity in entities]
@@ -121,26 +144,3 @@ def log_test_load():
         message_log = MessageLog.from_json(json_data=message_log_json)
     
         return message_log
-
-
-def load_game():
-    with open('save_game.json') as save_file:
-        data = json.load(save_file)
-    
-    player_index = data['player_index']
-    entities_json = data['entities']
-    game_map_json = data['game_map']
-    message_log_json = data['message_log']
-    game_state_json = data['game_state']
-    game_weather_json = data['weather']
-    game_time_json = data['game_time']
-    
-    entities = [Entity.from_json(json_data=entity_json) for entity_json in entities_json]
-    player = entities[player_index]
-    game_map = GameMap.from_json(json_data=game_map_json)
-    message_log = MessageLog.from_json(json_data=message_log_json)
-    game_state = GameStates(game_state_json)
-    game_weather = Weather.from_json(json_data=game_weather_json)
-    game_time = Time.from_json(json_data=game_time_json)
-    
-    return player, entities, game_map, message_log, game_state, game_weather, game_time
