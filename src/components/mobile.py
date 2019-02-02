@@ -6,8 +6,7 @@ from map_objects.tile import Elevation
 
 
 class Mobile:
-    def __init__(self, direction, max_momentum, current_momentum=None, max_speed=2, current_speed=0,
-                 rowing=False):
+    def __init__(self, direction, max_momentum, current_momentum=None, max_speed=2, current_speed=0, rowing=False):
         """
         Component detailing movement for Entities that can do so
         :param direction: int direction Entity will travel (aka facing)
@@ -80,7 +79,7 @@ class Mobile:
             if game_map.in_bounds(new_x, new_y) \
                     and game_map.terrain[new_x][new_y].decoration \
                     and game_map.terrain[new_x][new_y].decoration.name == 'Port' \
-                    and self.owner.name is "player":
+                    and self.owner.name == "player":
                 results.append('{} sailed into Port'.format(self.owner.name))
                 self.owner.x = new_x
                 self.owner.y = new_y

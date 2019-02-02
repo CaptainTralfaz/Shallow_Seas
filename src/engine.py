@@ -2,24 +2,14 @@ from random import randint
 
 import pygame
 
-from components.cargo import Cargo, Item, ItemCategory
-from components.crew import Crew
-from components.fighter import Fighter
-from components.masts import Masts
-from components.mobile import Mobile
-from components.size import Size
-from components.view import View
-from components.weapon import WeaponList
-from entity import Entity
-from game_messages import MessageLog
 from game_states import GameStates
-from game_time import Time
 from input_handlers import handle_keys
-from loader_functions.initialize_new_game import get_constants
-from map_objects.game_map import make_map, change_wind, adjust_fog, roll_fog
-from render_functions import render_display, RenderOrder
-from weather import Weather, change_weather
-from loader_functions.json_loaders import entity_test_dump, map_test_dump, time_test_dump, weather_test_dump, log_test_dump
+from loader_functions.initialize_new_game import get_constants, get_game_variables
+from map_objects.game_map import change_wind, adjust_fog, roll_fog
+from render_functions import render_display
+from weather import change_weather
+from loader_functions.json_loaders import entity_test_dump, map_test_dump, time_test_dump, weather_test_dump, \
+    log_test_dump, log_test_load, time_test_load, weather_test_load, map_test_load, entities_test_load
 
 
 def main():
@@ -28,68 +18,16 @@ def main():
     pygame.key.set_repeat(2, 300)
     global fps_clock
     fps_clock = pygame.time.Clock()
-    
-    game_time = Time(constants['tick'])
-    game_weather = Weather()
-    
+
     display_surface = pygame.display.set_mode((constants['display_width'], constants['display_height']))
     pygame.display.set_caption("Shallow Seas")
     pygame.display.set_icon(constants['icons']['game_icon'])
     
     game_quit = False
     
-    message_log = MessageLog(height=constants['log_size'], panel_size=constants['message_panel_size'])
+    player, entities, game_map, message_log, game_state, game_weather, game_time = get_game_variables(constants=constants)
     
-    player_icon = 'ship_1_mast'
-    size_component = Size.MEDIUM
-    manifest = []
-    manifest.append(Item(name='Canvas', icon=constants['icons']['canvas'], category=ItemCategory.GOODS,
-                         weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Meat', icon=constants['icons']['meat'], category=ItemCategory.SUPPLIES,
-                         weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Pearls', icon=constants['icons']['pearl'], category=ItemCategory.EXOTICS,
-                         weight=0.01, volume=0.01, quantity=30))
-    manifest.append(Item(name='Rope', icon=constants['icons']['rope'], category=ItemCategory.GOODS,
-                         weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Rum', icon=constants['icons']['rum'], category=ItemCategory.EXOTICS,
-                         weight=0.1, volume=2, quantity=2))
-    manifest.append(Item(name='Fish', icon=constants['icons']['fish'], category=ItemCategory.SUPPLIES,
-                         weight=0.1, volume=2, quantity=2))
-    manifest.append(Item(name='Fruit', icon=constants['icons']['fruit'], category=ItemCategory.SUPPLIES,
-                         weight=0.1, volume=2, quantity=2))
-    manifest.append(Item(name='Water', icon=constants['icons']['water'], category=ItemCategory.SUPPLIES,
-                         weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Wood', icon=constants['icons']['wood'], category=ItemCategory.MATERIALS,
-                         weight=2, volume=2, quantity=2))
-    cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
-                            max_weight=size_component.value * 10 + 5,
-                            manifest=manifest)
-    view_component = View(view=size_component.value + 3)
-    fighter_component = Fighter(name="hull", max_hps=size_component.value * 10 + 10)
-    weapons_component = WeaponList()
-    weapons_component.add_all(size=str(size_component))  # Hacky for now
-    mast_component = Masts(name="Mast", masts=size_component.value, size=size_component.value)
-    mobile_component = Mobile(direction=0, max_momentum=int(size_component.value) * 2 + 2)
-    crew_component = Crew(size=size_component.value, crew_size=50)
-    player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
-                    y=constants['board_height'] - 1, icon=player_icon, render_order=RenderOrder.PLAYER,
-                    view=view_component, size=size_component, mast_sail=mast_component, mobile=mobile_component,
-                    weapons=weapons_component, fighter=fighter_component, crew=crew_component, cargo=cargo_component)
-        
-    entities = [player]
-    
-    game_map = make_map(width=constants['board_width'],
-                        height=constants['board_height'],
-                        entities=entities,
-                        max_entities=constants['max_entities'],
-                        islands=constants['island_size'],
-                        seeds=constants['island_seeds'],
-                        constants=constants,
-                        game_time=game_time,
-                        game_weather=game_weather)
-    
-    player.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
-    game_state = GameStates.CURRENT_TURN
+    message_log.add_message("Welcome to Shallow Seas!")
     
     mouse_x = 0
     mouse_y = 0
@@ -362,7 +300,7 @@ def main():
                            game_time=game_time,
                            weather=game_weather)
                 for entity in entities:
-                    if entity.view:
+                    if entity.view is not None:
                         entity.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
                 message_log.reset_view()
 
@@ -371,7 +309,19 @@ def main():
                 weather_test_dump(game_weather)
                 time_test_dump(game_time)
                 log_test_dump(message_log)
-
+                
+                entities = entities_test_load()
+                game_map = map_test_load()
+                game_weather = weather_test_load()
+                game_time = time_test_load()
+                message_log = log_test_load()
+                
+                for entity in entities:
+                    if entity.view:
+                        entity.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
+                    if entity.name == 'player':
+                        player = entity
+                
             elif scroll:
                 if constants['map_width'] <= mouse_x < constants['display_width'] \
                         and constants['view_height'] <= mouse_y < constants['display_height']:

@@ -88,7 +88,7 @@ class Item:
         """
         Object holding an Item
         :param name: str name of the object
-        :param icon: icon of the object
+        :param icon: str name for the icon of the object
         :param category: category of the item TODO: actually use this for sorting on the manifest display
         :param weight: float weight of each individual item
         :param volume: float volume of each individual item
@@ -111,7 +111,7 @@ class Item:
             'weight': self.weight,
             'volume': self.volume,
             'quantity': self.quantity,
-            # 'icon': self.icon,
+            'icon': self.icon,
             'category': self.category.value
         }
     

@@ -94,18 +94,18 @@ class Entity:
             'y': self.y,
             'icon': self.icon,
             'render_order': self.render_order.value,
-            'ai': self.ai.to_json() if self.ai else None,
+            'ai': self.ai.get_ai_name() if self.ai else None,
             'block_view': self.block_view.to_json() if self.block_view else None,
-            'mobile': self.mobile.to_json() if self.mobile else None,
             'size': self.size.value if self.size else None,
             'view': self.view.view if self.view else None,
-            'crew': self.crew.to_json() if self.crew else None,
+            'fighter': self.fighter.to_json() if self.fighter else None,
+            'mobile': self.mobile.to_json() if self.mobile else None,
             'mast_sail': self.mast_sail.to_json() if self.mast_sail else None,
             'weapons': self.weapons.to_json() if self.weapons else None,
             'wings': self.wings.to_json() if self.wings else None,
-            'cargo': self.cargo.to_json() if self.cargo else None,
-#            'sprite_sheet': self.sprite_sheet if self.sprite_sheet else None,
-            'fighter': self.fighter.to_json() if self.fighter else None
+            'crew': self.crew.to_json() if self.crew else None,
+            'cargo': self.cargo.to_json() if self.cargo else None
+            # 'sprite_sheet': self.sprite_sheet if self.sprite_sheet else None,
         }
     
     @staticmethod
@@ -115,19 +115,19 @@ class Entity:
         y = json_data.get('y')
         icon = json_data.get('icon')
         render_order = RenderOrder(json_data.get('render_order'))
-        ai = ai_from_json(json_data.get('ai'))
-        block_view = json_data.get('block_view')
-        mobile = Mobile.from_json(json_data.get('mobile'))
-        size = Size(json_data.get('size'))
-        view = View(json_data.get('view'))
-        crew = Crew.from_json(json_data.get('crew'))
-        mast_sail = Masts.from_json(json_data.get('mast_sail'))
-        weapons = WeaponList.from_json(json_data.get('weapons'))
-        wings = Wings.from_json(json_data.get('wings'))
-        cargo = Cargo.from_json(json_data.get('cargo'))
+        ai = ai_from_json(json_data.get('ai'))  # if json_data.get('ai') else None
+        block_view = json_data.get('block_view') if json_data.get('block_view') is not None else None
+        mobile = Mobile.from_json(json_data.get('mobile')) if json_data.get('mobile') is not None else None
+        size = Size(json_data.get('size')) if json_data.get('size') is not None else None
+        view = View(json_data.get('view')) if json_data.get('view') is not None else None
+        crew = Crew.from_json(json_data.get('crew')) if json_data.get('crew') is not None else None
+        mast_sail = Masts.from_json(json_data.get('mast_sail')) if json_data.get('mast_sail') is not None else None
+        weapons = WeaponList.from_json(json_data.get('weapons')) if json_data.get('weapons') is not None else None
+        wings = Wings.from_json(json_data.get('wings')) if json_data.get('wings') is not None else None
+        cargo = Cargo.from_json(json_data.get('cargo')) if json_data.get('cargo') is not None else None
         #        sprite_sheet = json_data.get('sprite_sheet')
-        fighter = Fighter.from_json(json_data.get('fighter'))
+        fighter = Fighter.from_json(json_data.get('fighter')) if json_data.get('fighter') is not None else None
         
-        return Entity(name, x, y, icon, render_order=RenderOrder(render_order), ai=ai_from_json(ai),
-                      block_view=block_view, mobile=mobile, size=Size(size), view=view, crew=crew, mast_sail=mast_sail,
+        return Entity(name, x, y, icon, render_order=RenderOrder(render_order), ai=ai,
+                      block_view=block_view, mobile=mobile, size=size, view=view, crew=crew, mast_sail=mast_sail,
                       weapons=weapons, wings=wings, cargo=cargo, fighter=fighter)

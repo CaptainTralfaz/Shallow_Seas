@@ -1,4 +1,21 @@
 import pygame
+from random import randint
+
+from components.cargo import Cargo, Item, ItemCategory
+from components.crew import Crew
+from components.fighter import Fighter
+from components.masts import Masts
+from components.mobile import Mobile
+from components.size import Size
+from components.view import View
+from components.weapon import WeaponList
+from entity import Entity
+from game_messages import MessageLog
+from weather import Weather
+from game_time import Time
+from render_functions import RenderOrder
+from game_states import GameStates
+from map_objects.game_map import make_map
 
 
 def get_constants():
@@ -180,30 +197,87 @@ def get_constants():
     
     return constants
 
-# def get_game_variables(constants):
-#     fighter_component = Fighter(hp=100, defense=1, power=2)
-#     inventory_component = Inventory(26)
-#     equipment_component = Equipment()
-#     level_component = Level()
-#     player = Entity(15, 5, 5, 'player_sprite', 'Player',
-#                     blocks=True,
-#                     render_order=RenderOrder.ACTOR,
-#                     fighter=fighter_component,
-#                     inventory=inventory_component,
-#                     level=level_component,
-#                     equipment=equipment_component)
-#     entities = [player]
-#
-#     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
-#     dagger = Entity(0, 0, 0, 'dagger_sprite', 'Dagger', equippable=equippable_component)
-#     player.inventory.add_item(dagger, constants['colors'])
-#     player.equipment.toggle_equip(dagger)
-#
-#     game_map = Map(constants['map_width'], constants['map_height'])
-#     make_map(game_map, constants['room_max_radius'], constants['max_rooms'], player, entities, constants['colors'])
-#
-#     message_log = MessageLog(constants['log_size'])
-#
-#     game_state = GameStates.PLAYER_TURN
-#
-#     return player, entities, game_map, message_log, game_state
+
+def get_game_variables(constants):
+    # fighter_component = Fighter(hp=100, defense=1, power=2)
+    # inventory_component = Inventory(26)
+    # equipment_component = Equipment()
+    # level_component = Level()
+    # player = Entity(15, 5, 5, 'player_sprite', 'Player',
+    #                 blocks=True,
+    #                 render_order=RenderOrder.ACTOR,
+    #                 fighter=fighter_component,
+    #                 inventory=inventory_component,
+    #                 level=level_component,
+    #                 equipment=equipment_component)
+    # entities = [player]
+    #
+    # equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
+    # dagger = Entity(0, 0, 0, 'dagger_sprite', 'Dagger', equippable=equippable_component)
+    # player.inventory.add_item(dagger, constants['colors'])
+    # player.equipment.toggle_equip(dagger)
+    #
+    # game_map = Map(constants['map_width'], constants['map_height'])
+    # make_map(game_map, constants['room_max_radius'], constants['max_rooms'], player, entities, constants['colors'])
+    #
+    # message_log = MessageLog(constants['log_size'])
+    #
+    # game_state = GameStates.PLAYER_TURN
+
+    game_time = Time(constants['tick'])
+    game_weather = Weather()
+
+    message_log = MessageLog(height=constants['log_size'], panel_size=constants['message_panel_size'])
+
+    player_icon = 'ship_1_mast'
+    size_component = Size.MEDIUM
+    manifest = []
+    manifest.append(Item(name='Canvas', icon='canvas', category=ItemCategory.GOODS,
+                         weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Meat', icon='meat', category=ItemCategory.SUPPLIES,
+                         weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Pearls', icon='pearl', category=ItemCategory.EXOTICS,
+                         weight=0, volume=0, quantity=30))
+    manifest.append(Item(name='Rope', icon='rope', category=ItemCategory.GOODS,
+                         weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Rum', icon='rum', category=ItemCategory.EXOTICS,
+                         weight=0.1, volume=2, quantity=2))
+    manifest.append(Item(name='Fish', icon='fish', category=ItemCategory.SUPPLIES,
+                         weight=0.1, volume=2, quantity=2))
+    manifest.append(Item(name='Fruit', icon='fruit', category=ItemCategory.SUPPLIES,
+                         weight=0.1, volume=2, quantity=2))
+    manifest.append(Item(name='Water', icon='water', category=ItemCategory.SUPPLIES,
+                         weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Wood', icon='wood', category=ItemCategory.MATERIALS,
+                         weight=2, volume=2, quantity=2))
+    cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
+                            max_weight=size_component.value * 10 + 5,
+                            manifest=manifest)
+    view_component = View(view=size_component.value + 3)
+    fighter_component = Fighter(name="hull", max_hps=size_component.value * 10 + 10)
+    weapons_component = WeaponList()
+    weapons_component.add_all(size=str(size_component))  # Hacky for now
+    mast_component = Masts(name="Mast", masts=size_component.value, size=size_component.value)
+    mobile_component = Mobile(direction=0, max_momentum=int(size_component.value) * 2 + 2)
+    crew_component = Crew(max_crew=size_component.value * 10 + 5, crew_count=50)
+    player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
+                    y=constants['board_height'] - 1, icon=player_icon, render_order=RenderOrder.PLAYER,
+                    view=view_component, size=size_component, mast_sail=mast_component, mobile=mobile_component,
+                    weapons=weapons_component, fighter=fighter_component, crew=crew_component, cargo=cargo_component)
+
+    entities = [player]
+
+    game_map = make_map(width=constants['board_width'],
+                        height=constants['board_height'],
+                        entities=entities,
+                        max_entities=constants['max_entities'],
+                        islands=constants['island_size'],
+                        seeds=constants['island_seeds'],
+                        constants=constants,
+                        game_time=game_time,
+                        game_weather=game_weather)
+
+    player.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
+    game_state = GameStates.CURRENT_TURN
+
+    return player, entities, game_map, message_log, game_state, game_weather, game_time

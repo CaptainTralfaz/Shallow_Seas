@@ -184,10 +184,10 @@ def render_cargo(inventory_surf, cargo, vertical, constants):
     """
     for item in cargo.manifest:
         horizontal = constants['margin']
-        inventory_surf.blit(item.icon, (constants['margin'], vertical))
+        inventory_surf.blit(constants['icons'][item.icon], (constants['margin'], vertical))
         
         item_name = constants['font'].render(item.name, True, constants['colors']['text'])
-        inventory_surf.blit(item_name, (item.icon.get_width() + 2 * constants['margin'], vertical))
+        inventory_surf.blit(item_name, (constants['icons'][item.icon].get_width() + 2 * constants['margin'], vertical))
         horizontal += 2 * constants['tab']
         
         item_qty = constants['font'].render(str(item.quantity), True, constants['colors']['text'])
@@ -196,7 +196,6 @@ def render_cargo(inventory_surf, cargo, vertical, constants):
         
         for field in [item.weight, item.volume, item.get_item_weight(), item.get_item_volume()]:
             horizontal += constants['tab']
-            # print(item.name, field)
             render_cargo_info(surface=inventory_surf,
                               field=field,
                               font=constants['font'],
