@@ -32,7 +32,7 @@ class Message:
 
 
 class MessageLog:
-    def __init__(self, height, panel_size):
+    def __init__(self, height, panel_size, view_pointer):
         """
         Holds the message log, max log size, current view pointer (top to display),
         and the number that can be displayed in the message panel
@@ -41,7 +41,7 @@ class MessageLog:
         """
         self.messages = []
         self.height = height
-        self.view_pointer = 0
+        self.view_pointer = view_pointer
         self.message_panel_size = panel_size
     
     def to_json(self):
@@ -52,6 +52,7 @@ class MessageLog:
         return {
             'height': self.height,
             'panel_size': self.message_panel_size,
+            'view_pointer': self.view_pointer,
             'messages': [message.to_json() for message in self.messages]
         }
     
@@ -64,13 +65,16 @@ class MessageLog:
         """
         height = json_data.get('height')
         panel_size = json_data.get('panel_size')
+        view_pointer = json_data.get('view_pointer')
         messages_json = json_data.get('messages')
         
-        message_log = MessageLog(height=height, panel_size=panel_size)
+        message_log = MessageLog(height=height, panel_size=panel_size, view_pointer=view_pointer)
         
         for message in messages_json:
             text, color = Message.from_json(json_data=message)
             message_log.add_message(message=text, color=color)
+        
+        message_log.view_pointer = view_pointer
         
         return message_log
     

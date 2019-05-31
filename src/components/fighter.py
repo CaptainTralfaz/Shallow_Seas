@@ -1,5 +1,5 @@
 class Fighter:
-    def __init__(self, name: str, max_hps: int, hps: int = None):
+    def __init__(self, name: str, max_hps: int, hps: int = None, can_hit_locations: list=None):
         """
         Component detailing HPs
         :param name: str name of part with HPs (ex: 'hull', 'body', 'structure', etc.
@@ -9,6 +9,7 @@ class Fighter:
         self.name = name
         self.max_hps = max_hps
         self.hps = hps if hps is not None else max_hps
+        self.can_hit_locations = can_hit_locations
     
     def to_json(self):
         """
@@ -18,7 +19,8 @@ class Fighter:
         return {
             'name': self.name,
             'max_hps': self.max_hps,
-            'hps': self.hps
+            'hps': self.hps,
+            'can_hit_locations': self.can_hit_locations
         }
     
     @staticmethod
@@ -31,8 +33,9 @@ class Fighter:
         name = json_data.get('name')
         max_hps = json_data.get('max_hps')
         hps = json_data.get('hps')
+        locations = json_data.get('can_hit_locations')
         
-        return Fighter(name=name, max_hps=max_hps, hps=hps)
+        return Fighter(name=name, max_hps=max_hps, hps=hps, can_hit_locations=locations)
     
     def take_damage(self, amount: int):
         """

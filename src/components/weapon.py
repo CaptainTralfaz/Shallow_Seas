@@ -146,7 +146,7 @@ class WeaponList:
 
 class Weapon:
     def __init__(self, name: str, location: str, min_range: int, max_range: int, structure_points: int, damage: int,
-                 hps=None, cool_down=None, current_cd=0, effects=None):
+                 hps=None, cool_down=None, current_cd=0, can_hit_locations=None, effects=None):
         """
         Object detailing Weapon components
         :param name: str name of Weapon
@@ -167,6 +167,10 @@ class Weapon:
         self.damage = damage
         self.cool_down = cool_down
         self.current_cd = current_cd
+        if can_hit_locations is not None:
+            self.can_hit = can_hit_locations
+        else:
+            self.can_hit = ['body', 'hull', 'mast', 'sail', 'wings', 'crew', 'weapons', 'cargo']
         self.effects = effects
     
     def to_json(self):
@@ -184,6 +188,7 @@ class Weapon:
             'damage': self.damage,
             'cool_down': self.cool_down,
             'current_cd': self.current_cd,
+            'can_hit': self.can_hit,
             'effects': self.effects
         }
     
@@ -203,11 +208,12 @@ class Weapon:
         damage = json_data.get('damage')
         cool_down = json_data.get('cool_down')
         current_cd = json_data.get('current_cd')
+        can_hit = json_data.get('can_hit')
         effects = json_data.get('effects')
         
         return Weapon(name=name, location=location, min_range=min_range, max_range=max_range, hps=hps,
                       structure_points=max_hps, damage=damage, cool_down=cool_down, current_cd=current_cd,
-                      effects=effects)
+                      can_hit_locations=can_hit, effects=effects)
     
     def take_damage(self, amount):
         """
@@ -239,3 +245,4 @@ class Weapon:
         else:
             results.append({'message': 'A {} was repaired {} points.'.format(self.name, amount)})
         return results
+

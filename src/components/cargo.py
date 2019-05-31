@@ -95,8 +95,8 @@ class Item:
         :param quantity: int number of items
         """
         self.name = name
-        self.weight = weight / 1.0
-        self.volume = volume / 1.0
+        self.weight = weight * 1.0
+        self.volume = volume * 1.0
         self.quantity = quantity
         self.icon = icon
         self.category = category

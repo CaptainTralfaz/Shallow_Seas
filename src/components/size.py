@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class Size(Enum):
+class Size(IntEnum):
     """
     Component Enum detailing Size of an Entity
     TODO: comparisons will be used for Ramming actions
@@ -41,3 +41,4 @@ class Size(Enum):
         if self.__class__ is other.__class__:
             return self.value != other.value
         return NotImplemented
+

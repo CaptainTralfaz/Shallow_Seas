@@ -294,6 +294,18 @@ def play_game(player, entities, game_map, message_log, game_state, game_weather,
                         entity.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
                 message_log.reset_view()
 
+                # Save and load every turn for debug purposes
+                save_game(player=player, entities=entities, game_map=game_map, message_log=message_log,
+                          game_state=game_state,
+                          game_weather=game_weather, game_time=game_time)
+                player, entities, game_map, message_log, game_state, game_weather, game_time = load_game()
+    
+                for entity in entities:
+                    if entity.view:
+                        entity.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
+                    if entity.name == 'player':
+                        player = entity
+
             elif scroll:
                 if constants['map_width'] <= mouse_x < constants['display_width'] \
                         and constants['view_height'] <= mouse_y < constants['display_height']:
@@ -311,9 +323,10 @@ def play_game(player, entities, game_map, message_log, game_state, game_weather,
                            message_log=message_log,
                            game_weather=game_weather)
             pygame.display.flip()
-        
+            
         fps_clock.tick(constants['FPS'])
 
+    # save before quitting
     save_game(player=player, entities=entities, game_map=game_map, message_log=message_log, game_state=game_state,
               game_weather=game_weather, game_time=game_time)
     

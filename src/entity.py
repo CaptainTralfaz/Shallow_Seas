@@ -96,14 +96,14 @@ class Entity:
             'render_order': self.render_order.value,
             'ai': self.ai.get_ai_name() if self.ai else None,
             'block_view': self.block_view.to_json() if self.block_view else None,
-            'size': self.size.value if self.size else None,
-            'view': self.view.view if self.view else None,
+            'size': self.size.value if self.size is not None else None,
+            'view': self.view.view if self.view is not None else None,
             'fighter': self.fighter.to_json() if self.fighter else None,
             'mobile': self.mobile.to_json() if self.mobile else None,
             'mast_sail': self.mast_sail.to_json() if self.mast_sail else None,
             'weapons': self.weapons.to_json() if self.weapons else None,
             'wings': self.wings.to_json() if self.wings else None,
-            'crew': self.crew.to_json() if self.crew else None,
+            'crew': self.crew.to_json() if self.crew is not None else None,
             'cargo': self.cargo.to_json() if self.cargo else None
             # 'sprite_sheet': self.sprite_sheet if self.sprite_sheet else None,
         }
@@ -131,3 +131,26 @@ class Entity:
         return Entity(name, x, y, icon, render_order=RenderOrder(render_order), ai=ai,
                       block_view=block_view, mobile=mobile, size=size, view=view, crew=crew, mast_sail=mast_sail,
                       weapons=weapons, wings=wings, cargo=cargo, fighter=fighter)
+
+    def damage_location(self, can_hit_locations: list):
+        location_list = {}
+        if self.fighter and self.fighter.name in can_hit_locations:
+            location_list['fighter'] = 50
+        if self.mast_sail:
+            if 'mast' in can_hit_locations:
+                location_list['mast'] = 10
+            if 'sail' in can_hit_locations:
+                location_list['sail'] = 15
+        if self.wings and 'wings' in can_hit_locations:
+            location_list['wings'] = 25
+        if self.crew and 'crew' in can_hit_locations:
+            location_list['crew'] = 15
+        if self.weapons and 'weapons' in can_hit_locations:
+            location_list['weapons'] = 15
+        if self.cargo and 'cargo' in can_hit_locations and self.cargo.volume > self.cargo.max_volume:
+            # Over volume max, cargo can be hit
+            location_list['cargo'] = self.cargo.volume - self.cargo.max_volume
+            if self.cargo.weight > self.cargo.max_weight and self.fighter:
+                # Over weight max, fighter component gets hit less
+                location_list['fighter'] = 50 - (self.cargo.weight - self.cargo.max_weight)
+
