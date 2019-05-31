@@ -53,7 +53,7 @@ class Crew:
         for i in range(0, crew_size):
             member = Crewman()
             crew_list.append(member)
-            print('Crewman {} the {} added'.format(member.name, member.profession))
+            # print('Crewman {} the {} added'.format(member.name, member.profession))
         return crew_list
     
     def take_damage(self, amount: int):

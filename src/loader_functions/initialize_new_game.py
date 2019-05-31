@@ -35,7 +35,7 @@ def get_constants():
     
     map_width = 202  # includes margins
     map_height = 200  # includes margins
-    block_size = 3
+    block_size = 4
     map_block = (block_size, block_size)
     
     view_width = display_width - map_width  # includes margins
@@ -50,9 +50,9 @@ def get_constants():
     message_width = display_width - map_width  # includes margins
     message_height = display_height - view_height  # includes margins
     message_panel_size = 9
-    log_size = 50
+    log_size = 100
     
-    board_width = 64
+    board_width = 48
     board_height = board_width
     island_size = board_height // 2
     island_seeds = board_height
@@ -199,38 +199,14 @@ def get_constants():
 
 
 def get_game_variables(constants):
-    # fighter_component = Fighter(hp=100, defense=1, power=2)
-    # inventory_component = Inventory(26)
-    # equipment_component = Equipment()
-    # level_component = Level()
-    # player = Entity(15, 5, 5, 'player_sprite', 'Player',
-    #                 blocks=True,
-    #                 render_order=RenderOrder.ACTOR,
-    #                 fighter=fighter_component,
-    #                 inventory=inventory_component,
-    #                 level=level_component,
-    #                 equipment=equipment_component)
-    # entities = [player]
-    #
-    # equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
-    # dagger = Entity(0, 0, 0, 'dagger_sprite', 'Dagger', equippable=equippable_component)
-    # player.inventory.add_item(dagger, constants['colors'])
-    # player.equipment.toggle_equip(dagger)
-    #
-    # game_map = Map(constants['map_width'], constants['map_height'])
-    # make_map(game_map, constants['room_max_radius'], constants['max_rooms'], player, entities, constants['colors'])
-    #
-    # message_log = MessageLog(constants['log_size'])
-    #
-    # game_state = GameStates.PLAYER_TURN
 
     game_time = Time(constants['tick'])
     game_weather = Weather()
 
-    message_log = MessageLog(height=constants['log_size'], panel_size=constants['message_panel_size'])
+    message_log = MessageLog(height=constants['log_size'], panel_size=constants['message_panel_size'], view_pointer=0)
 
     player_icon = 'ship_1_mast'
-    size_component = Size.MEDIUM
+    size_component = Size.SMALL
     manifest = []
     manifest.append(Item(name='Canvas', icon='canvas', category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))

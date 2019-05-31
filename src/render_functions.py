@@ -237,7 +237,7 @@ def render_messages(message_log, constants):
     
     y = constants['margin'] // 2
     for message in message_log.messages[message_log.view_pointer:message_log.view_pointer
-                                                                 + constants['message_panel_size']]:
+                                        + constants['message_panel_size']]:
         message_text = constants['font'].render(str(message.text), True, message.color)
         message_surf.blit(message_text, (0, y))
         y += constants['font'].get_height() + constants['margin'] // 2
@@ -318,7 +318,7 @@ def render_board(game_map, player, entities, constants, game_state, game_time, g
                     icon = constants['icons'][entity.icon]
             else:
                 icon = None
-                
+            
             if icon and entity.mobile and not game_state == GameStates.PLAYER_DEAD:
                 game_map_surf.blit(rot_center(image=icon, angle=direction_angle[entity.mobile.direction]),
                                    (entity.x * constants['tile_size'] - constants['margin'],
@@ -601,7 +601,8 @@ def render_control(game_map, player, entities, constants, game_state):
         else:
             for entity in entities:
                 if (player.x, player.y) == (entity.x, entity.y) \
-                        and not entity.ai and entity.name not in ['player', '']:
+                        and not entity.ai and not (entity.name == 'player'
+                                                   or entity.name == ''):
                     text_keys.append({'name': 'Space', 'text': 'Salvage'})
                     spacebar = True
         if not spacebar:
@@ -1146,7 +1147,7 @@ def get_info_under_mouse(game_map, player, entities, mouse_x, mouse_y, constants
         
         entities_under_mouse = []
         for entity in entities:
-            if entity.name is not 'player' \
+            if entity.name != 'player' \
                     and (0 <= entity.x < game_map.width) \
                     and (0 <= entity.y < game_map.height) \
                     and (entity.x, entity.y) in player.view.fov \
@@ -1258,14 +1259,14 @@ def create_ship_icon(entity, constants):
 
 def render_main_menu(display, constants, error=None):
     display.fill(constants['colors']['black'])
-
+    
     border_panel = pygame.Surface((constants['display_width'], constants['display_height']))
     render_border(panel=border_panel, color=constants['colors']['text'])
-
+    
     menu_surf = pygame.Surface((constants['display_width'] - 2 * constants['margin'],
                                 constants['display_height'] - 2 * constants['margin']))
     menu_surf.fill(constants['colors']['dark_gray'])
-
+    
     vertical = constants['display_width'] // 2
     split = constants['display_height'] // 2
     arrow_keys = [{'rotation': 90, 'text': 'New Game'},

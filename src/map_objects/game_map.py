@@ -44,12 +44,7 @@ class GameMap:
                 self.wind_direction = self.starting_wind
         else:
             self.wind_direction = None
-        
-        # if fog:
-        #     self.fog = fog
-        # else:
-        #     self.fog = self.starting_fog
-    
+   
     def to_json(self):
         """
         Serialize GameMap to json
@@ -140,7 +135,7 @@ def make_map(width: int, height: int, entities: list, max_entities: int, islands
     generate_terrain(game_map=game_map, island_size=islands, max_seeds=seeds)
     decorate(game_map=game_map)
     starting_fog(game_map=game_map)
-    place_entities(game_map=game_map, entities=entities, max_entities=max_entities, constants=constants,
+    place_entities(game_map=game_map, entities=entities, max_entities=max_entities,
                    game_time=game_time, game_weather=game_weather)
     return game_map
 
@@ -361,19 +356,16 @@ def decorate(game_map: GameMap):
                     game_map.terrain[x][y].decoration = Decoration('Sandbar')
                 elif 7 <= decor <= 10:
                     game_map.terrain[x][y].decoration = Decoration('Seaweed')
-                # elif decor == 500 and randint(0, 9) in [0, 1]:
-                #     game_map.terrain[x][y].decoration = Decoration('salvage')
 
 
-def place_entities(game_map: GameMap, entities: list, max_entities: int, constants: dict, game_time, game_weather):
+def place_entities(game_map: GameMap, entities: list, max_entities: int, game_time, game_weather):
     """
     Adds entities to the game map
-    TODO: add sunken ships, floating chests, new creatures, etc.
+    TODO: add sunken ships, new creatures, etc.
     TODO: move entity creation to appropriate factory
     :param game_map: the current game map
     :param entities: current list of entities
     :param max_entities: maximum number of entities to add
-    :param constants: dict of constants
     :param game_time: current game Time
     :param game_weather: current map Weather
     :return: None - modify entity list directly
@@ -416,7 +408,8 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, constan
                     manifest.append(Item(name='Turtle Meat', icon='meat', category=ItemCategory.SUPPLIES, weight=.5,
                                          volume=.5, quantity=size_component.value + 1))
                     manifest.append(Item(name='Turtle Shell', icon='turtle_shell', category=ItemCategory.SUPPLIES,
-                                         weight=2 * size_component.value, volume=size_component.value, quantity=1))
+                                         weight=2 * size_component.value, volume=float(size_component.value),
+                                         quantity=1))
                     cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
                                             max_weight=size_component.value * 10 + 5, manifest=manifest)
                     view_component = View(view=size_component.value + 3)
@@ -484,5 +477,4 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, constan
                                  fighter=fighter_component,
                                  cargo=cargo_component)
                     npc.view.set_fov(game_map=game_map, game_time=game_time, game_weather=game_weather)
-                print('{} placed at {}:{}'.format(npc.name, x, y))
                 entities.append(npc)
