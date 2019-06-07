@@ -1,0 +1,141 @@
+#    MATERIALS = 0
+#    GOODS = 1
+#    SUPPLIES = 2
+#    EXOTICS = 3
+#    ARMAMENTS = 4
+
+Bat Wing:
+  weight: 0.5
+  volume: 0.5
+  icon: bat_wing
+  category: exotics
+
+Bread:
+  weight: 0.5
+  volume: 1
+  icon: bread
+  category: supplies
+
+Brick:
+  weight: 2
+  volume: 1
+  icon: brick
+  category: goods
+
+Canvas:
+  weight: 2
+  volume: 2
+  icon: canvas
+  category: goods
+
+Fish:
+  weight: 1
+  volume: 2
+  icon: fish
+  category: supplies
+
+Fruit:
+  weight: 1
+  volume: 2
+  icon: fruit
+  category: supplies
+
+Grain:
+  weight: 0.5
+  volume: 1
+  icon: grain
+  category: materials
+
+Leather:
+  weight: 1
+  volume: 1
+  icon: leather
+  category: goods
+
+Log:
+  weight: 2
+  volume: 2
+  icon: log
+  category: materials
+
+Meat:
+  weight: 0.5
+  volume: 0.5
+  icon: meat
+  category: supplies
+
+Obsidian:
+  weight: .2
+  volume: .2
+  icon: obsidian
+  category: exotics
+
+Pearl:
+  weight: .01
+  volume: .01
+  icon: pearl
+  category: exotics
+
+Rock:
+  weight: 2
+  volume: 1
+  icon: rock
+  category: materials
+
+Rope:
+  weight: 1
+  volume: 2
+  icon: rope
+  category: goods
+
+Rum:
+  weight: 1
+  volume: 2
+  icon: rum
+  category: supplies
+
+Salt:
+  weight: 1
+  volume: 2
+  icon: salt
+  category: supplies
+
+Serpent Scale:
+  weight: 0.5
+  volume: 0.5
+  icon: serpent_scale
+  category: exotics
+
+Skins:
+  weight: 2
+  volume: 1
+  icon: skins
+  category: materials
+
+Stone:
+  weight: 2
+  volume: 2
+  icon: stone
+  category: goods
+
+Turtle Shell:
+  weight: 4
+  volume: 2
+  icon: turtle_shell
+  category: exotics
+
+Water:
+  weight: 2
+  volume: 2
+  icon: water
+  category: supplies
+
+Wood:
+  weight: 2
+  volume: 2
+  icon: wood
+  category: goods
+
+
+
+

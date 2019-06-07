@@ -1,4 +1,12 @@
-import json
+
+from yaml import load
+
+try:
+    from yaml import CLoader as Loader
+except ImportError:
+    from yaml import Loader
+
+
 from random import randint
 
 from random_utils import random_choice_from_dict
@@ -29,7 +37,7 @@ def entity_picker(entity_count: int, travels: int):
                    'black_dragon': travels - 20,
                    'kraken': travels - 25,
                    'red_dragon': travels - 30,
-    }
+                    }
     
     return [random_choice_from_dict(entity_dict) for count in range(entity_count + travels)]
     
@@ -91,3 +99,32 @@ def generate_entity(name):
                     cargo=cargo_component)
 
     return entity
+
+
+def generate_cargo():
+    data = None
+
+    with open('../data/items.yaml', 'r') as stream:
+
+        try:
+            data = load(stream, Loader=Loader)
+        except FileNotFoundError:
+            print("Load Error!")
+        
+    item = 'Turtle Shell'
+    thing = Item(name=item,
+                 weight=data[item]['weight'],
+                 volume=data[item]['volume'],
+                 icon=data[item]['icon'],
+                 category=data[item]['category'])
+
+    print(thing.name)
+    print(thing.weight)
+    print(thing.volume)
+    print(thing.icon)
+    print(thing.category)
+    print(thing.quantity)
+    
+    
+if __name__ == '__main__':
+    generate_cargo()

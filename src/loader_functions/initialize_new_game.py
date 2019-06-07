@@ -35,7 +35,7 @@ def get_constants():
     
     map_width = 202  # includes margins
     map_height = 200  # includes margins
-    block_size = 4
+    block_size = 3
     map_block = (block_size, block_size)
     
     view_width = display_width - map_width  # includes margins
@@ -52,7 +52,7 @@ def get_constants():
     message_panel_size = 9
     log_size = 100
     
-    board_width = 48
+    board_width = 64
     board_height = board_width
     island_size = board_height // 2
     island_seeds = board_height
@@ -142,10 +142,12 @@ def get_constants():
         'sunken_ship': pygame.image.load('icons/entities/SunkenShip.png'),
         # inventory icons 16x16
         'bat_wing': pygame.image.load('icons/inventory/BatWing.png'),
+        'bread': pygame.image.load('icons/inventory/Breads.png'),
         'brick': pygame.image.load('icons/inventory/Brick.png'),
         'canvas': pygame.image.load('icons/inventory/Canvas.png'),
         'fish': pygame.image.load('icons/inventory/Fish.png'),
         'fruit': pygame.image.load('icons/inventory/Fruit.png'),
+        'grain': pygame.image.load('icons/inventory/Grains.png'),
         'leather': pygame.image.load('icons/inventory/Leather.png'),
         'meat': pygame.image.load('icons/inventory/Meat.png'),
         'obsidian': pygame.image.load('icons/inventory/Obsidian.png'),
@@ -205,8 +207,8 @@ def get_game_variables(constants):
 
     message_log = MessageLog(height=constants['log_size'], panel_size=constants['message_panel_size'], view_pointer=0)
 
-    player_icon = 'ship_1_mast'
-    size_component = Size.SMALL
+    player_icon = 'ship_2_mast'
+    size_component = Size.MEDIUM
     manifest = []
     manifest.append(Item(name='Canvas', icon='canvas', category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))
@@ -224,7 +226,7 @@ def get_game_variables(constants):
                          weight=0.1, volume=2, quantity=2))
     manifest.append(Item(name='Water', icon='water', category=ItemCategory.SUPPLIES,
                          weight=2, volume=2, quantity=2))
-    manifest.append(Item(name='Wood', icon='wood', category=ItemCategory.MATERIALS,
+    manifest.append(Item(name='Wood', icon='wood', category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))
     cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
                             max_weight=size_component.value * 10 + 5,
