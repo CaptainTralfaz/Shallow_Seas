@@ -944,16 +944,25 @@ def render_weapons(panel, entity, font, colors, vertical):
     :param vertical: int y position for rendering
     :return: int current vertical value
     """
-    for weapon in entity.weapons.weapon_list:
-        if weapon.current_cd == 0:
+    slots = ["Bow", "Port", "Starboard", "Stern"]
+    for slot in slots:
+        location = [weapon for weapon in entity.weapons.weapon_list if weapon.location == slot]
+        if location:
             color = colors['text']
-        else:
-            color = colors['gray']
-        weapon_text = font.render("{} {}".format(weapon.location, weapon.name), True, color)
-        panel.blit(weapon_text, (0, vertical))
-        hp_text = font.render("[{}] {}/{}".format(weapon.current_cd, weapon.hps, weapon.max_hps), True, color)
-        panel.blit(hp_text, (panel.get_width() - hp_text.get_width(), vertical))
-        vertical += font.get_height()
+            location_text = font.render("{}".format(slot), True, color)
+            panel.blit(location_text, (0, vertical))
+            vertical += font.get_height()
+            for weapon in location:
+                if weapon.current_cd == 0:
+                    color = colors['text']
+                else:
+                    color = colors['gray']
+                # weapon_text = font.render("{} {}".format(weapon.location, weapon.name), True, color)
+                weapon_text = font.render("{}".format(weapon.name), True, color)
+                panel.blit(weapon_text, (0, vertical))
+                hp_text = font.render("[{}] {}/{}".format(weapon.current_cd, weapon.hps, weapon.max_hps), True, color)
+                panel.blit(hp_text, (panel.get_width() - hp_text.get_width(), vertical))
+                vertical += font.get_height()
     return vertical
 
 

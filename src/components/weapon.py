@@ -18,7 +18,7 @@ max_weapons = {
                    "Port": 3,
                    "Stern": 1,
                    "Starboard": 3},
-    "Size.HUGE": {"Bow": 2,
+    "Size.HUGE": {"Bow": 1,
                   "Port": 4,
                   "Stern": 2,
                   "Starboard": 4}
@@ -41,13 +41,14 @@ class WeaponList:
     
     def add_all(self, size):  # TODO remove this later - just here to initialize a ship's weapons
         """
-        Quick and dirty way to initial all ship weapons to ballistas
+        Quick and dirty way to initial all ship weapons to ballista
         :param size: Size of the entity
         :return: None
         """
         for slot in max_weapons[size]:
             for w in range(max_weapons[size][slot]):
-                self.weapon_list.append(Weapon("Ballista", slot, 1, 4, 5, 3, cool_down=4))
+                self.weapon_list.append(Weapon(name="Livewood Ballista", location=slot, min_range=1, max_range=4,
+                                               structure_points=5, damage=3, cool_down=4))
     
     def add_weapon(self, weapon, location, size):
         """

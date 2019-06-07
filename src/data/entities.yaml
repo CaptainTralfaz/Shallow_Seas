@@ -1,0 +1,71 @@
+enemies:
+
+  sea_turtle:
+    name: Sea Turtle
+    icon: sea_turtle
+    render_order: 3
+    ai: PeacefulMonster
+    size: 2
+    view: 5
+    fighter:
+      name: body
+      max_hps: 25
+    mobile:
+      max_momentum: 6
+      max_speed: 2
+    cargo:
+      max_volume: 25
+      max_weight: 25
+      manifest:
+        Turtle Meat: 2
+        Turtle Shell: 1
+
+  giant_bat:
+    name: Giant Bat
+      icon: giant_bat
+      render_order: 6
+      ai: MeleeMonster
+      size: 0
+      view: 3
+      fighter:
+        name: body
+        max_hps: 5
+      mobile:
+        max_momentum: 2
+        max_speed: 2
+      wings:
+        name: wings
+        wings: 2
+        max_wing_power: 2
+        wing_hp_max: 3
+      cargo:
+        max_volume: 5
+        max_weight: 5
+        manifest:
+          Bat Meat: 1
+          Bat Wing: 2
+
+  sea_serpent:
+    name: Sea Serpent
+    icon: sea_serpent
+    render_order: 3
+    ai: MeleeMonster
+    size: 1
+    view: 4
+    fighter:
+      name: body
+      max_hps: 15
+    mobile:
+      max_momentum: 4
+      max_speed: 2
+    cargo:
+      max_volume: 15
+      max_weight: 15
+      manifest:
+        Serpent Meat: 2
+        Serpent Scale: 2
+
+
+
+
+

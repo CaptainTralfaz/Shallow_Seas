@@ -84,7 +84,7 @@ class Cargo:
 
 
 class Item:
-    def __init__(self, name: str, icon: str, category, weight: float, volume: float, quantity: int = 0):
+    def __init__(self, name: str, icon: str, category, weight: float, volume: float, quantity: int = 1):
         """
         Object holding an Item
         :param name: str name of the object
@@ -97,10 +97,10 @@ class Item:
         self.name = name
         self.weight = weight * 1.0
         self.volume = volume * 1.0
-        self.quantity = quantity
         self.icon = icon
         self.category = category
-    
+        self.quantity = quantity
+
     def to_json(self):
         """
         Serialize Item object to json
