@@ -24,6 +24,16 @@ def handle_keys(event, game_state):
         return handle_keys_player_dead(event)
     elif game_state == GameStates.MAIN_MENU:
         return handle_keys_main_menu(event)
+    elif game_state == GameStates.PORT:
+        return handle_keys_port(event)
+    elif game_state == GameStates.REPAIR:
+        return handle_keys_repair(event)
+    # elif game_state == GameStates.TRADE:
+    #     return handle_keys_trade(event)
+    # elif game_state == GameStates.HIRE:
+    #     return handle_keys_hire(event)
+    # elif game_state == GameStates.UPGRADE:
+    #     return handle_keys_upgrade_menu(event)
 
 
 def handle_keys_current_turn(event):
@@ -154,7 +164,7 @@ def handle_keys_special(event):
             # mac option   mod L:256  R:512   key L:308 R:307
             # mac shift    mod L:1    R:2     key L:304 R:303
             if event.key == K_LEFT:
-                return {'special': 'crew'}  # Assign crew screen (repairs, weapons, rowing, sails, etc.)
+                return {'special': 'crew'}  # Crew Action (Put out fire?)
             elif event.key == K_RIGHT:
                 return {'special': 'crew'}  # Boarding ??  crew for now...
             elif event.key == K_UP:
@@ -190,15 +200,83 @@ def handle_keys_cargo(event):
             # mac option   mod L:256  R:512   key L:308 R:307
             # mac shift    mod L:1    R:2     key L:304 R:303
             if event.key == K_LEFT:
-                return {'inventory': 'left'}  # Assign crew screen (repairs, weapons, rowing, sails, etc.)
+                return {'inventory': 'left'}  # amount +
             elif event.key == K_RIGHT:
-                return {'inventory': 'right'}  # Boarding ??  crew for now...
+                return {'inventory': 'right'}  # amount -
             elif event.key == K_UP:
-                return {'inventory': 'up'}  # ramming speed! if player.x == entity.x & player.y == entity.y
+                return {'inventory': 'up'}  # move row selection up
             elif event.key == K_DOWN:
-                return {'inventory': 'down'}  # drop Mines
+                return {'inventory': 'down'}  # move row selection down
             elif event.key == K_SPACE:
                 return {'inventory_cancel': True}  # exit inventory
+    return {}
+
+
+def handle_keys_port(event):
+    """
+    Interaction translation for PORT screen events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
+    if event:
+        if event.type == KEYDOWN and event.key == K_ESCAPE:
+            # Exit Special Keys state
+            return {'port_cancel': True}  # exit port
+        
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button in [5]:
+                return {'scroll': 1}
+            elif event.button in [4]:
+                return {'scroll': -1}
+        
+        if event.type == KEYDOWN:
+            # mac command  mod L:1024 R:2048  key L:310 R:309
+            # mac option   mod L:256  R:512   key L:308 R:307
+            # mac shift    mod L:1    R:2     key L:304 R:303
+            if event.key == K_LEFT:
+                return {'port': 'repair'}  # repair menu
+            elif event.key == K_RIGHT:
+                return {'port': 'hire'}  # hire menu
+            elif event.key == K_UP:
+                return {'port': 'trade'}  # trade menu
+            elif event.key == K_DOWN:
+                return {'port': 'upgrade'}  # upgrade menu
+            elif event.key == K_SPACE:
+                return {'port_cancel': True}  # exit port
+    return {}
+
+
+def handle_keys_repair(event):
+    """
+    Interaction translation for REPAIR screen events
+    :param event: list of interactions
+    :return: translated command in dict form
+    """
+    if event:
+        if event.type == KEYDOWN and event.key == K_ESCAPE:
+            # Exit Special Keys state
+            return {'repair_cancel': True}  # exit repair
+        
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button in [5]:
+                return {'scroll': 1}
+            elif event.button in [4]:
+                return {'scroll': -1}
+        
+        if event.type == KEYDOWN:
+            # mac command  mod L:1024 R:2048  key L:310 R:309
+            # mac option   mod L:256  R:512   key L:308 R:307
+            # mac shift    mod L:1    R:2     key L:304 R:303
+            if event.key == K_LEFT:
+                return {'repair': 'hull'}  # repair menu
+            elif event.key == K_RIGHT:
+                return {'repair': 'weapon'}  # hire menu
+            elif event.key == K_UP:
+                return {'repair': 'sail'}  # trade menu
+            elif event.key == K_DOWN:
+                return {'repair': 'mast'}  # upgrade menu
+            elif event.key == K_SPACE:
+                return {'repair_cancel': True}  # exit repair
     return {}
 
 

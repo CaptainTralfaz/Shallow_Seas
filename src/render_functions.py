@@ -718,6 +718,62 @@ def render_control(game_map, player, entities, constants, game_state):
                                         color=constants['colors']['text'],
                                         bkg_color=constants['colors']['dark_gray'],
                                         vertical=vertical)
+    elif game_state == GameStates.PORT:
+        split = 58
+        arrow_keys = [{'rotation': 0, 'text': 'Trade'},
+                      {'rotation': 180, 'text': 'Upgrade'},
+                      {'rotation': 90, 'text': 'Repair'},
+                      {'rotation': 270, 'text': 'Hire Crew'}]
+        for key in arrow_keys:
+            vertical = make_arrow_button(panel=control_panel,
+                                         split=split,
+                                         margin=margin,
+                                         rotation=key['rotation'],
+                                         text=key['text'],
+                                         icon=constants['icons']['arrow'],
+                                         font=constants['font'],
+                                         color=constants['colors']['text'],
+                                         vertical=vertical)
+        text_keys = [{'name': 'Space', 'text': 'Quit'},
+                     {'name': 'Esc', 'text': 'Quit'}]
+        for key in text_keys:
+            vertical = make_text_button(panel=control_panel,
+                                        split=split,
+                                        margin=margin,
+                                        name=key['name'],
+                                        text=key['text'],
+                                        font=constants['font'],
+                                        color=constants['colors']['text'],
+                                        bkg_color=constants['colors']['dark_gray'],
+                                        vertical=vertical)
+    elif game_state == GameStates.REPAIR:
+        split = 58
+        arrow_keys = [{'rotation': 0, 'text': 'Repair Sail'},
+                      {'rotation': 180, 'text': 'Repair Mast'},
+                      {'rotation': 90, 'text': 'Repair Hull'},
+                      {'rotation': 270, 'text': 'Repair Weapon'}]
+        for key in arrow_keys:
+            vertical = make_arrow_button(panel=control_panel,
+                                         split=split,
+                                         margin=margin,
+                                         rotation=key['rotation'],
+                                         text=key['text'],
+                                         icon=constants['icons']['arrow'],
+                                         font=constants['font'],
+                                         color=constants['colors']['text'],
+                                         vertical=vertical)
+        text_keys = [{'name': 'Space', 'text': 'Quit'},
+                     {'name': 'Esc', 'text': 'Quit'}]
+        for key in text_keys:
+            vertical = make_text_button(panel=control_panel,
+                                        split=split,
+                                        margin=margin,
+                                        name=key['name'],
+                                        text=key['text'],
+                                        font=constants['font'],
+                                        color=constants['colors']['text'],
+                                        bkg_color=constants['colors']['dark_gray'],
+                                        vertical=vertical)
     elif game_state == GameStates.CARGO:
         split = 58
         # arrow_keys = [{'rotation': 0, 'text': 'Ram'},

@@ -150,6 +150,7 @@ def get_constants():
         'grain': pygame.image.load('icons/inventory/Grains.png'),
         'leather': pygame.image.load('icons/inventory/Leather.png'),
         'meat': pygame.image.load('icons/inventory/Meat.png'),
+        'tar': pygame.image.load('icons/inventory/Tar.png'),
         'obsidian': pygame.image.load('icons/inventory/Obsidian.png'),
         'pearl': pygame.image.load('icons/inventory/Pearl.png'),
         'rope': pygame.image.load('icons/inventory/Rope.png'),
@@ -218,6 +219,8 @@ def get_game_variables(constants):
                          weight=0, volume=0, quantity=30))
     manifest.append(Item(name='Rope', icon='rope', category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Tar', icon='tar', category=ItemCategory.GOODS,
+                         weight=2, volume=2, quantity=5))
     manifest.append(Item(name='Rum', icon='rum', category=ItemCategory.EXOTICS,
                          weight=0.1, volume=2, quantity=2))
     manifest.append(Item(name='Fish', icon='fish', category=ItemCategory.SUPPLIES,
@@ -227,12 +230,12 @@ def get_game_variables(constants):
     manifest.append(Item(name='Water', icon='water', category=ItemCategory.SUPPLIES,
                          weight=2, volume=2, quantity=2))
     manifest.append(Item(name='Wood', icon='wood', category=ItemCategory.GOODS,
-                         weight=2, volume=2, quantity=2))
+                         weight=2, volume=2, quantity=5))
     cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
                             max_weight=size_component.value * 10 + 5,
                             manifest=manifest)
     view_component = View(view=size_component.value + 3)
-    fighter_component = Fighter(name="hull", max_hps=size_component.value * 10 + 10)
+    fighter_component = Fighter(name="hull", max_hps=size_component.value * 10 + 10, repair_with=["Wood", "Tar"])
     weapons_component = WeaponList()
     weapons_component.add_all(size=str(size_component))  # Hacky for now
     mast_component = Masts(name="Mast", masts=size_component.value, size=size_component.value)

@@ -12,3 +12,8 @@ class GameStates(Enum):
     SAILS = 4
     SPECIAL = 5
     CARGO = 6
+    PORT = 7
+    REPAIR = 8
+    TRADE = 9
+    HIRE = 10
+    UPGRADE = 11
