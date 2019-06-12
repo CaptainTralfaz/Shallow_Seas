@@ -48,7 +48,8 @@ class WeaponList:
         for slot in max_weapons[size]:
             for w in range(max_weapons[size][slot]):
                 self.weapon_list.append(Weapon(name="Livewood Ballista", location=slot, min_range=1, max_range=4,
-                                               structure_points=5, damage=3, cool_down=4))
+                                               structure_points=5, damage=3, cool_down=4,
+                                               repair_with=["Wood", "Leather"]))
     
     def add_weapon(self, weapon, location, size):
         """
@@ -147,7 +148,7 @@ class WeaponList:
 
 class Weapon:
     def __init__(self, name: str, location: str, min_range: int, max_range: int, structure_points: int, damage: int,
-                 hps=None, cool_down=None, current_cd=0, can_hit_locations=None, effects=None):
+                 hps=None, cool_down=None, current_cd=0, can_hit_locations=None, effects=None, repair_with=None):
         """
         Object detailing Weapon components
         :param name: str name of Weapon
@@ -173,6 +174,7 @@ class Weapon:
         else:
             self.can_hit = ['body', 'hull', 'mast', 'sail', 'wings', 'crew', 'weapons', 'cargo']
         self.effects = effects
+        self.repair_with = repair_with
     
     def to_json(self):
         """
@@ -190,7 +192,8 @@ class Weapon:
             'cool_down': self.cool_down,
             'current_cd': self.current_cd,
             'can_hit': self.can_hit,
-            'effects': self.effects
+            'effects': self.effects,
+            'repair_with': self.repair_with
         }
     
     @staticmethod
@@ -211,10 +214,11 @@ class Weapon:
         current_cd = json_data.get('current_cd')
         can_hit = json_data.get('can_hit')
         effects = json_data.get('effects')
+        repair_with = json_data.get('repair_with')
         
         return Weapon(name=name, location=location, min_range=min_range, max_range=max_range, hps=hps,
                       structure_points=max_hps, damage=damage, cool_down=cool_down, current_cd=current_cd,
-                      can_hit_locations=can_hit, effects=effects)
+                      can_hit_locations=can_hit, effects=effects, repair_with=repair_with)
     
     def take_damage(self, amount):
         """

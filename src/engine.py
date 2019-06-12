@@ -8,7 +8,7 @@ from map_objects.game_map import change_wind, adjust_fog, roll_fog
 from render_functions import render_display, render_main_menu
 from weather import change_weather
 from loader_functions.json_loaders import load_game, save_game
-
+from components.cargo import adjust_quantity
 
 def play_game(player, entities, game_map, message_log, game_state, game_weather, game_time, display_surface, constants):
     
@@ -77,21 +77,36 @@ def play_game(player, entities, game_map, message_log, game_state, game_weather,
             rotate = action.get('rotate')
             other_action = action.get('other_action')
             scroll = action.get('scroll')
+            port = action.get('port')
+            increase = action.get('increase')
+            decrease = action.get('decrease')
+            row_up = action.get('row_up')
+            row_down = action.get('row_down')
+            repair = action.get('repair')
             
             sails = action.get('sails')
             sails_change = action.get('sails_change')
-            sails_cancel = action.get('sails_cancel')
             if sails_change and player.mast_sail.masts:
                 game_state = GameStates.SAILS
             
             attack = action.get('attack')
             targeting = action.get('targeting')
-            target_cancel = action.get('target_cancel')
             if targeting:
                 game_state = GameStates.TARGETING
             
             special = action.get('special')
+            
+            # TODO: track precious state ? or just mass "cancel"
+            sails_cancel = action.get('sails_cancel')
+            target_cancel = action.get('target_cancel')
             special_cancel = action.get('special_cancel')
+            inventory_cancel = action.get('inventory_cancel')
+            port_cancel = action.get('port_cancel')
+            repair_cancel = action.get('repair_cancel')
+            
+            if sails_cancel or special_cancel or target_cancel or inventory_cancel or port_cancel or repair_cancel:
+                game_state = GameStates.CURRENT_TURN
+
             if special:
                 game_state = GameStates.SPECIAL
                 if special == 'inventory':
@@ -105,13 +120,92 @@ def play_game(player, entities, game_map, message_log, game_state, game_weather,
                 elif special == 'mines':
                     print(special + " not yet implemented")
                     game_state = GameStates.CURRENT_TURN
-            inventory_cancel = action.get('inventory_cancel')
             
-            if sails_cancel or special_cancel or target_cancel or inventory_cancel:
+            if port == "repair":
+                game_state = game_state.REPAIR
+            elif port == "hire":
+                print(port + " not yet implemented")
                 game_state = GameStates.CURRENT_TURN
+                # game_state = game_state.HIRE
+            elif port == "trade":
+                print(port + " not yet implemented")
+                game_state = GameStates.CURRENT_TURN
+                # game_state = game_state.TRADE
+            elif port == "upgrade":
+                print(port + " not yet implemented")
+                game_state = GameStates.CURRENT_TURN
+                # game_state = game_state.UPGRADE
             
+            if other_action \
+                    and game_map.in_bounds(player.x, player.y) \
+                    and game_map.terrain[player.x][player.y].decoration \
+                    and game_map.terrain[player.x][player.y].decoration.name == 'Port':
+                game_state = GameStates.PORT
+                message_log.add_message(message='Ahoy! In this port, ye can: trade, repair, or hire crew... ',
+                                        color=constants['colors']['aqua'])
+
             # VERIFY PLAYER ACTION ------------------------------------------------------------------------------------
             
+            if repair == "hull":
+                # Verify hull is damaged and enough repair materials (wood and tar) exists in cargo
+                if player.fighter.hps < player.fighter.max_hps:
+                    cargo_name_list = [item.name for item in player.cargo.manifest]
+                    missing_items = []
+                    for item in player.fighter.repair_with:
+                        if item not in cargo_name_list:
+                            missing_items.append(item)
+                    if missing_items:
+                        for item in missing_items:
+                            message_log.add_message("Missing {} repair item {} in cargo".format(player.fighter.name,
+                                                                                                item))
+                        repair = None  # repair attempt failed
+                else:
+                    message_log.add_message("{} not damaged".format(player.fighter.name))
+                    repair = None  # repair attempt failed
+            elif repair == "sail":
+                # Verify sail exists, is damaged and enough repair materials (canvas and rope) exists in cargo
+                if player.mast_sail.max_sails > 0:
+                    if player.mast_sail.sail_hp < player.mast_sail.sail_hp_max:
+                        cargo_name_list = [item.name for item in player.cargo.manifest]
+                        missing_items = []
+                        for item in player.mast_sail.sail_repair_with:
+                            if item not in cargo_name_list:
+                                missing_items.append(item)
+                        if missing_items:
+                            for item in missing_items:
+                                message_log.add_message("Missing sail repair item {} in cargo".format(item))
+                            repair = None  # repair attempt failed
+                    else:
+                        message_log.add_message("Sails not damaged")
+                        repair = None  # repair attempt failed
+                else:
+                    message_log.add_message("No Sails")
+                    repair = None  # repair attempt failed
+            elif repair == "mast":
+                # Verify mast exists, is damaged and enough repair materials (wood and rope) exists in cargo
+                if player.mast_sail.masts > 0:
+                    if player.mast_sail.mast_hp < player.mast_sail.mast_hp_max:
+                        cargo_name_list = [item.name for item in player.cargo.manifest]
+                        missing_items = []
+                        for item in player.mast_sail.mast_repair_with:
+                            if item not in cargo_name_list:
+                                missing_items.append(item)
+                        if missing_items:
+                            for item in missing_items:
+                                message_log.add_message("Missing mast repair item {} in cargo".format(item))
+                            repair = None  # repair attempt failed
+                    else:
+                        message_log.add_message("Masts not damaged")
+                        repair = None  # repair attempt failed
+                else:
+                    message_log.add_message("No Masts")
+                    repair = None  # repair attempt failed
+            elif repair == "weapon":
+                # Verify weapon exists, is damaged and enough repair materials (wood and leather) exists in cargo
+                print(repair + " not yet implemented")
+                repair = None  # repair attempt failed
+                game_state = GameStates.CURRENT_TURN
+
             if attack:
                 target = False
                 # make sure there is a valid target
@@ -132,10 +226,10 @@ def play_game(player, entities, game_map, message_log, game_state, game_weather,
                 if (sails > 0 and player.mast_sail.current_sails == player.mast_sail.max_sails) \
                         or (sails < 0 and player.mast_sail.current_sails == 0):
                     sails = None
-            
+                    
             # PROCESS ACTION ------------------------------------------------------------------------------------------
-            if (rowing or slowing or sails or attack or rotate or other_action) \
-                    and not game_state == GameStates.PLAYER_DEAD:
+            if (rowing or slowing or sails or attack or rotate or other_action or repair) \
+                    and not game_state == (GameStates.PLAYER_DEAD and GameStates.PORT):
                 
                 # reset game state
                 game_state = GameStates.CURRENT_TURN
@@ -157,6 +251,49 @@ def play_game(player, entities, game_map, message_log, game_state, game_weather,
                             if weapon.current_cd > 0:
                                 weapon.current_cd -= 1
                 
+                if repair:
+                    if repair == "hull":
+                        results = player.fighter.heal_damage(1)
+                        for result in results:
+                            message_log.add_message(message=result, color=constants['colors']['aqua'])
+                        for item in player.cargo.manifest:
+                            if item.name in player.fighter.repair_with:
+                                adjust_quantity(cargo=player.cargo,
+                                                item=item,
+                                                amount=-1,
+                                                message_log=message_log)
+                    elif repair == "sail":
+                        results = player.mast_sail.repair_sails(1)
+                        for result in results:
+                            message_log.add_message(message=result, color=constants['colors']['aqua'])
+                        for item in player.cargo.manifest:
+                            if item.name in player.mast_sail.sail_repair_with:
+                                adjust_quantity(cargo=player.cargo,
+                                                item=item,
+                                                amount=-1,
+                                                message_log=message_log)
+                    elif repair == "sail":
+                        results = player.mast_sail.repair_masts(1)
+                        for result in results:
+                            message_log.add_message(message=result, color=constants['colors']['aqua'])
+                        for item in player.cargo.manifest:
+                            if item.name in player.mast_sail.mast_repair_with:
+                                adjust_quantity(cargo=player.cargo,
+                                                item=item,
+                                                amount=-1,
+                                                message_log=message_log)
+                    elif repair == "weapon":
+                        results = player.weapons.repair(1)
+                        for result in results:
+                            message_log.add_message(message=result, color=constants['colors']['aqua'])
+                        for item in player.cargo.manifest:
+                            if item.name in player.weapon.repair_with:
+                                adjust_quantity(cargo=player.cargo,
+                                                item=item,
+                                                amount=-1,
+                                                message_log=message_log)
+                    game_state = GameStates.CURRENT_TURN
+
                 # ATTACKS ---------------------------------------------------------------------------------------------
                 if attack == 'Arrows':
                     message_log.add_message(message='Player attacks with {}!'.format(attack),
@@ -192,14 +329,7 @@ def play_game(player, entities, game_map, message_log, game_state, game_weather,
                             entity.name = ''
                             entity.icon = None
                             entity.cargo = None
-                    
-                    if game_map.in_bounds(player.x, player.y) \
-                            and game_map.terrain[player.x][player.y].decoration \
-                            and game_map.terrain[player.x][player.y].decoration.name == 'Port':
-                        message_log.add_message(message='Ahoy! In this port, ye can: trade, repair, hire crew... '
-                                                        'or Plunder!',
-                                                color=constants['colors']['aqua'])
-                
+                            
                 # MOMENTUM CHANGES ------------------------------------------------------------------------------------
                 if slowing:
                     player.mobile.decrease_momentum(amount=slowing, reason='slowing')

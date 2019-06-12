@@ -24,7 +24,7 @@ def get_constants():
     :return: dict constants
     """
     frames_per_second = 60  # frames per second, the general speed of the program
-    tick = 2  # number of minutes of game time that pass each turn
+    tick = 5  # number of minutes of game time that pass each turn
     
     margin = 5
     tab = 75
@@ -54,11 +54,10 @@ def get_constants():
     
     board_width = 64
     board_height = board_width
-    island_size = board_height // 2
+    island_size = board_height // 8 * 5
     island_seeds = board_height
     
     font = pygame.font.Font('freesansbold.ttf', 16)
-    # font = pygame.font.Font('/Users/brianhaler/PycharmProjects/Shallow_Seas/data/fonts/joystix-monospace.ttf', 10)
     
     max_entities = board_width // 4
     
@@ -150,6 +149,7 @@ def get_constants():
         'grain': pygame.image.load('icons/inventory/Grains.png'),
         'leather': pygame.image.load('icons/inventory/Leather.png'),
         'meat': pygame.image.load('icons/inventory/Meat.png'),
+        'tar': pygame.image.load('icons/inventory/Tar.png'),
         'obsidian': pygame.image.load('icons/inventory/Obsidian.png'),
         'pearl': pygame.image.load('icons/inventory/Pearl.png'),
         'rope': pygame.image.load('icons/inventory/Rope.png'),
@@ -207,8 +207,8 @@ def get_game_variables(constants):
 
     message_log = MessageLog(height=constants['log_size'], panel_size=constants['message_panel_size'], view_pointer=0)
 
-    player_icon = 'ship_2_mast'
-    size_component = Size.MEDIUM
+    player_icon = 'ship_1_mast'
+    size_component = Size.SMALL
     manifest = []
     manifest.append(Item(name='Canvas', icon='canvas', category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))
@@ -218,6 +218,8 @@ def get_game_variables(constants):
                          weight=0, volume=0, quantity=30))
     manifest.append(Item(name='Rope', icon='rope', category=ItemCategory.GOODS,
                          weight=2, volume=2, quantity=2))
+    manifest.append(Item(name='Tar', icon='tar', category=ItemCategory.GOODS,
+                         weight=2, volume=2, quantity=5))
     manifest.append(Item(name='Rum', icon='rum', category=ItemCategory.EXOTICS,
                          weight=0.1, volume=2, quantity=2))
     manifest.append(Item(name='Fish', icon='fish', category=ItemCategory.SUPPLIES,
@@ -227,15 +229,16 @@ def get_game_variables(constants):
     manifest.append(Item(name='Water', icon='water', category=ItemCategory.SUPPLIES,
                          weight=2, volume=2, quantity=2))
     manifest.append(Item(name='Wood', icon='wood', category=ItemCategory.GOODS,
-                         weight=2, volume=2, quantity=2))
+                         weight=2, volume=2, quantity=5))
     cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
                             max_weight=size_component.value * 10 + 5,
                             manifest=manifest)
     view_component = View(view=size_component.value + 3)
-    fighter_component = Fighter(name="hull", max_hps=size_component.value * 10 + 10)
+    fighter_component = Fighter(name="hull", max_hps=size_component.value * 10 + 10, repair_with=["Wood", "Tar"])
     weapons_component = WeaponList()
     weapons_component.add_all(size=str(size_component))  # Hacky for now
-    mast_component = Masts(name="Mast", masts=size_component.value, size=size_component.value)
+    mast_component = Masts(name="Mast", masts=size_component.value, size=size_component.value,
+                           sail_repair_with=["Canvas", "Rope"], mast_repair_with=["Wood", "Rope"])
     mobile_component = Mobile(direction=0, max_momentum=int(size_component.value) * 2 + 2)
     crew_component = Crew(max_crew=size_component.value * 10 + 5, crew_count=50)
     player = Entity(name='player', x=randint(constants['board_width'] // 4, constants['board_width'] * 3 // 4),
