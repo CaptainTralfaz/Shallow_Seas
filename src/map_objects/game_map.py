@@ -387,25 +387,47 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, game_ti
                 placed = True
                 random_val = randint(0, 100)
                 if random_val < 5:
+                    print("chest")
                     manifest = []
                     manifest.append(Item(name='Pearls', icon='pearl', category=ItemCategory.EXOTICS, weight=.01,
                                          volume=.01, quantity=randint(10, 20) + randint(10, 20)))
-                    manifest.append(Item(name='Rope', icon='rope', category=ItemCategory.SUPPLIES, weight=1,
-                                         volume=2, quantity=randint(0, 2) + randint(0, 2) + 1))
-                    manifest.append(Item(name='Wood', icon='wood', category=ItemCategory.SUPPLIES, weight=2,
-                                         volume=2, quantity=randint(0, 2) + 1))
-                    manifest.append(Item(name='Canvas', icon='canvas', category=ItemCategory.SUPPLIES, weight=1,
-                                         volume=2, quantity=randint(0, 1) + 1))
+                    manifest.append(Item(name='Rum', icon='rum', category=ItemCategory.EXOTICS,
+                                         weight=0.1, volume=2, quantity=randint(0, 5) + 1))
+                    manifest.append(Item(name='Fish', icon='fish', category=ItemCategory.SUPPLIES,
+                                         weight=0.1, volume=2, quantity=randint(0, 5) + 1))
+                    manifest.append(Item(name='Fruit', icon='fruit', category=ItemCategory.SUPPLIES,
+                                         weight=0.1, volume=2, quantity=randint(0, 5) + 1))
+                    manifest.append(Item(name='Water', icon='water', category=ItemCategory.SUPPLIES,
+                                         weight=2, volume=2, quantity=randint(0, 5) + 1))
                     cargo_component = Cargo(max_volume=5, max_weight=10, manifest=manifest)
                     npc_icon = 'salvage'
                     npc = Entity(name='Chest', x=x, y=y,
                                  icon=npc_icon,
                                  render_order=RenderOrder.FLOATING,
                                  cargo=cargo_component)
+                elif random_val < 15:
+                    print("sunken ship")
+                    manifest = []
+                    manifest.append(Item(name='Pearls', icon='pearl', category=ItemCategory.EXOTICS, weight=.01,
+                                         volume=.01, quantity=randint(10, 20) + randint(10, 20)))
+                    manifest.append(Item(name='Rope', icon='rope', category=ItemCategory.SUPPLIES, weight=1,
+                                         volume=2, quantity=randint(0, 5) + 1))
+                    manifest.append(Item(name='Wood', icon='wood', category=ItemCategory.SUPPLIES, weight=2,
+                                         volume=2, quantity=randint(0, 5) + 1))
+                    manifest.append(Item(name='Canvas', icon='canvas', category=ItemCategory.SUPPLIES, weight=1,
+                                         volume=2, quantity=randint(0, 5) + 1))
+                    manifest.append(Item(name='Tar', icon='tar', category=ItemCategory.SUPPLIES, weight=1,
+                                         volume=2, quantity=randint(0, 5) + 1))
+                    cargo_component = Cargo(max_volume=5, max_weight=10, manifest=manifest)
+                    npc_icon = 'sunken_ship'
+                    npc = Entity(name='Sunken Ship', x=x, y=y,
+                                 icon=npc_icon,
+                                 render_order=RenderOrder.FLOATING,
+                                 cargo=cargo_component)
                 elif random_val < 40:
                     size_component = Size.MEDIUM
                     manifest = []
-                    manifest.append(Item(name='Turtle Meat', icon='meat', category=ItemCategory.SUPPLIES, weight=.5,
+                    manifest.append(Item(name='Meat', icon='meat', category=ItemCategory.SUPPLIES, weight=.5,
                                          volume=.5, quantity=size_component.value + 1))
                     manifest.append(Item(name='Turtle Shell', icon='turtle_shell', category=ItemCategory.SUPPLIES,
                                          weight=2 * size_component.value, volume=float(size_component.value),
@@ -430,10 +452,8 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, game_ti
                 elif random_val < 70:
                     size_component = Size.TINY
                     manifest = []
-                    manifest.append(Item(name='Bat Meat', icon='meat', category=ItemCategory.SUPPLIES, weight=.5,
+                    manifest.append(Item(name='Meat', icon='meat', category=ItemCategory.SUPPLIES, weight=.5,
                                          volume=.5, quantity=size_component.value + 1))
-                    manifest.append(Item(name='Bat Wing', icon='bat_wing', category=ItemCategory.EXOTICS, weight=.5,
-                                         volume=.5, quantity=(size_component.value + 1) * 2))
                     cargo_component = Cargo(max_volume=size_component.value * 10 + 5,
                                             max_weight=size_component.value * 10 + 5, manifest=manifest)
                     view_component = View(view=size_component.value + 3)
@@ -456,7 +476,7 @@ def place_entities(game_map: GameMap, entities: list, max_entities: int, game_ti
                 else:
                     size_component = Size.SMALL
                     manifest = []
-                    manifest.append(Item(name='Serpent Meat', icon='meat', category=ItemCategory.SUPPLIES, weight=.5,
+                    manifest.append(Item(name='Meat', icon='meat', category=ItemCategory.SUPPLIES, weight=.5,
                                          volume=.5, quantity=size_component.value + 1))
                     manifest.append(Item(name='Serpent Scale', icon='serpent_scale', category=ItemCategory.EXOTICS,
                                          weight=.5, volume=.5, quantity=size_component.value + 1))

@@ -10,7 +10,7 @@ class Cargo:
         TODO: make over-volume items can be washed overboard in storm, or hit in combat
         :param max_volume: int maximum volume available in ship's cargo hold
         :param max_weight: int maximum weight a ship can SAFELY carry
-        :param manifest: list of Items
+        :param manifest: list of Items TODO: change this to a dict
         """
         self.max_volume = max_volume
         self.max_weight = max_weight
@@ -64,10 +64,11 @@ class Cargo:
         if item.name not in manifest_names:
             message_log.add_message(message='{} {} added to cargo'.format(item.quantity, item.name))
             self.manifest.append(item)
+            item.owner = self
         else:
             for cargo in self.manifest:
                 if cargo.name == item.name:
-                    adjust_quantity(cargo=cargo, amount=item.quantity, message_log=message_log)
+                    adjust_quantity(self, item=cargo, amount=item.quantity, message_log=message_log)
     
     def remove_item_from_manifest(self, item, message_log):
         """
@@ -147,22 +148,23 @@ class Item:
         return self.volume * self.quantity
 
 
-def adjust_quantity(cargo, amount, message_log):
+def adjust_quantity(cargo, item, amount, message_log):
     """
     Add or subtract quantity of an Item
-    :param cargo: Item object
+    :param cargo: cargo object
+    :param item: name of Item object
     :param amount: amount to modify quantity by
     :param message_log: game message log
     :return: None - modify Item quantity directly
     """
-    cargo.quantity += amount
+    item.quantity += amount
     if amount > 0:
-        message_log.add_message('{} {} added to cargo'.format(amount, cargo.name))
-    elif amount < 0 < amount + cargo.quantity:
-        message_log.add_message('{} {} removed from cargo'.format(abs(amount), cargo.name))
-    elif amount < 0 and (amount + cargo.quantity == 0):
-        message_log.add_message('All {} {} removed from cargo'.format(abs(amount), cargo.name))
-        # cargo.remove_item_from_manifest(item=item, message_log=message_log)
+        message_log.add_message('{} {} added to cargo'.format(amount, item.name))
+    elif amount < 0 < amount + item.quantity:
+        message_log.add_message('{} {} removed from cargo'.format(abs(amount), item.name))
+    elif amount < 0 and (amount + item.quantity == 0):
+        message_log.add_message('All {} {} removed from cargo'.format(abs(amount), item.name))
+        cargo.remove_item_from_manifest(item=item, message_log=message_log)
 
 
 class ItemCategory(Enum):

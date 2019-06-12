@@ -3,11 +3,11 @@ from map_objects.map_utils import hex_directions
 
 class Masts:
     def __init__(self, name, masts, size=None, max_sails=None, current_sails=0, catching_wind=False, mast_hp_max=None,
-                 mast_hp=None, sail_hp_max=None, sail_hp=None):
+                 mast_hp=None, sail_hp_max=None, sail_hp=None, sail_repair_with=None, mast_repair_with=None):
         """
         Component detailing a ship's masts and sails
         TODO: methods for new mast / sail built in port
-        :param name: string name of component (was going to use this for wings too, but made seperate compnent)
+        :param name: string name of component (was going to use this for wings too, but made separate component)
         :param masts: int number of masts ship starts with
         :param size: int Size of the Entity (used to determine number of masts possible & mast/sail HPs)
         :param max_sails: int maximum number of sails
@@ -27,7 +27,9 @@ class Masts:
         self.mast_hp = mast_hp if mast_hp is not None else self.mast_hp_max
         self.sail_hp_max = sail_hp_max if sail_hp_max is not None else size * 2 + 2
         self.sail_hp = sail_hp if sail_hp is not None else size * 2 + 2
-    
+        self.sail_repair_with = sail_repair_with
+        self.mast_repair_with = mast_repair_with
+
     def to_json(self):
         """
         Serialize Masts component to json
@@ -42,7 +44,9 @@ class Masts:
             'mast_hp_max': self.mast_hp_max,
             'mast_hp': self.mast_hp,
             'sail_hp_max': self.sail_hp_max,
-            'sail_hp': self.sail_hp
+            'sail_hp': self.sail_hp,
+            'sail_repair_with': self.sail_repair_with,
+            'mast_repair_with': self.mast_repair_with
         }
     
     @staticmethod
@@ -61,10 +65,12 @@ class Masts:
         mast_hp = json_data.get('mast_hp')
         sail_hp_max = json_data.get('sail_hp_max')
         sail_hp = json_data.get('sail_hp')
-        
+        sail_repair_with = json_data.get('sail_repair_with')
+        mast_repair_with = json_data.get('mast_repair_with')
+
         return Masts(name=name, masts=masts, max_sails=max_sails, current_sails=current_sails,
                      catching_wind=catching_wind, mast_hp_max=mast_hp_max, mast_hp=mast_hp, sail_hp_max=sail_hp_max,
-                     sail_hp=sail_hp)
+                     sail_hp=sail_hp, sail_repair_with=sail_repair_with, mast_repair_with=mast_repair_with)
     
     def adjust_sails(self, amount: int):
         """
@@ -133,7 +139,8 @@ class Masts:
         else:
             self.sail_hp -= amount
             results.append('A mast took {} damage'.format(amount))
-    
+        return results
+
     def repair_sails(self, amount):
         """
         Repair sails
@@ -147,6 +154,7 @@ class Masts:
             message = "fully "
         self.sail_hp += amount
         results.append("Sail {}repaired for {}".format(message, amount))
+        return results
     
     def repair_masts(self, amount):
         """
@@ -161,7 +169,8 @@ class Masts:
             message = "fully "
         self.mast_hp += amount
         results.append("Mast {}repaired for {}".format(message, amount))
-    
+        return results
+
     def momentum_due_to_wind(self, wind_direction: int, message_log, color):
         """
         Adjust momentum due to wind: +2 per sail if traveling with wind,

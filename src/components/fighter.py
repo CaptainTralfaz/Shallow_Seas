@@ -66,5 +66,5 @@ class Fighter:
             amount = self.max_hps - self.hps
             message = "fully "
         self.hps += amount
-        results.append("{} {} {}healed for {}".format(self.owner.name, self.name, message, amount))
+        results.append("{} {} {}repaired for {}".format(self.owner.name, self.name, message, amount))
         return results
